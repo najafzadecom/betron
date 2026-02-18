@@ -1,0 +1,47 @@
+/* ------------------------------------------------------------------------------
+ *
+ *  # Custom CSS for List Pages
+ *
+ *  Common styles for all module list pages to avoid duplication
+ *
+ * ---------------------------------------------------------------------------- */
+
+/* Sortable header styles */
+.sortable-header {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.sortable-header:hover {
+    background-color: #f8f9fa !important;
+    transform: translateY(-1px);
+}
+
+.sortable-header:active {
+    transform: translateY(0);
+}
+
+.sortable-header i {
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+}
+
+.sortable-header:hover i {
+    transform: scale(1.1);
+}
+
+ .table-responsive {
+     overflow-x: auto;
+     overflow-y: visible !important;
+ }
+
+.table-responsive .dropdown {
+    position: static;
+}
+
+.table-responsive .dropdown-menu {
+    position: absolute;
+    right: 0;
+    left: auto;
+}

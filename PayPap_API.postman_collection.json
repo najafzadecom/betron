@@ -1,0 +1,286 @@
+{
+	"info": {
+		"name": "PayPap API",
+		"description": "PayPap Payment API Collection - Bank Deposits, Withdrawals and Card Deposits",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "paypap-api"
+	},
+	"item": [
+		{
+			"name": "Bank Deposits",
+			"item": [
+				{
+					"name": "Create Bank Deposit (Direct)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"direct\",\n    \"transaction_id\": \"7a0bd718-111c-4a02-af36-0be7b8fd387b\",\n    \"full_name\": \"John Doe\",\n    \"currency\": \"TRY\",\n    \"amount\": 5000,\n    \"user\": {\n        \"userId\": \"1234567890\",\n        \"username\": \"johndoe\",\n        \"fullName\": \"John Doe\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/paypap/bank-deposit/direct",
+							"host": ["{{base_url}}"],
+							"path": ["paypap", "bank-deposit", "direct"]
+						},
+						"description": "Creates a new bank deposit request with direct type (returns IBAN details)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Bank Deposit (Redirect)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"redirect\",\n    \"transaction_id\": \"7a0bd718-111c-4a02-af36-0be7b8fd387b\",\n    \"full_name\": \"John Doe\",\n    \"currency\": \"TRY\",\n    \"amount\": 5000,\n    \"user\": {\n        \"userId\": \"1234567890\",\n        \"username\": \"johndoe\",\n        \"fullName\": \"John Doe\"\n    },\n    \"redirect_urls\": {\n        \"success\": \"https://example.com/success\",\n        \"fail\": \"https://example.com/fail\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/paypap/bank-deposit/redirect",
+							"host": ["{{base_url}}"],
+							"path": ["paypap", "bank-deposit", "redirect"]
+						},
+						"description": "Creates a new bank deposit request with redirect type (returns hosted payment page URL)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Bank Deposit",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/paypap/bank-deposit/:depositId",
+							"host": ["{{base_url}}"],
+							"path": ["paypap", "bank-deposit", ":depositId"],
+							"variable": [
+								{
+									"key": "depositId",
+									"value": "bbeebd49-bd79-41a5-8f6b-0ad92c88d673",
+									"description": "Bank deposit ID"
+								}
+							]
+						},
+						"description": "Retrieves details of a specific bank deposit by its ID"
+					},
+					"response": []
+				}
+			],
+			"description": "Bank deposit operations"
+		},
+		{
+			"name": "Bank Withdrawals",
+			"item": [
+				{
+					"name": "Create Bank Withdrawal",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"transaction_id\": \"5d94f369-34eb-4f8c-882c-3a951e0f075d\",\n    \"full_name\": \"John Doe\",\n    \"iban\": \"TR000000000000000000000000\",\n    \"currency\": \"TRY\",\n    \"amount\": 5000,\n    \"user\": {\n        \"userId\": \"1234567890\",\n        \"username\": \"johndoe\",\n        \"fullName\": \"John Doe\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/paypap/bank-withdrawal",
+							"host": ["{{base_url}}"],
+							"path": ["paypap", "bank-withdrawal"]
+						},
+						"description": "Creates a new bank withdrawal request to send funds to a customer's IBAN"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Bank Withdrawal",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/paypap/bank-withdrawal/:withdrawalId",
+							"host": ["{{base_url}}"],
+							"path": ["paypap", "bank-withdrawal", ":withdrawalId"],
+							"variable": [
+								{
+									"key": "withdrawalId",
+									"value": "1b66d504-6486-4131-9b77-11a92f3559bf",
+									"description": "Bank withdrawal ID"
+								}
+							]
+						},
+						"description": "Retrieves details of a specific bank withdrawal by its ID"
+					},
+					"response": []
+				}
+			],
+			"description": "Bank withdrawal operations"
+		},
+		{
+			"name": "Card Deposits",
+			"item": [
+				{
+					"name": "Create Card Deposit (Direct)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"direct\",\n    \"transaction_id\": \"7a0bd718-111c-4a02-af36-0be7b8fd387b\",\n    \"currency\": \"TRY\",\n    \"amount\": 5000,\n    \"card\": {\n        \"holderName\": \"John Doe\",\n        \"cardNumber\": \"4111111111111111\",\n        \"expMonth\": \"01\",\n        \"expYear\": \"2030\",\n        \"cvv2\": \"123\"\n    },\n    \"billing\": {\n        \"email\": \"user@example.com\",\n        \"city\": \"Istanbul\",\n        \"country\": \"TR\"\n    },\n    \"user\": {\n        \"userId\": \"1234567890\",\n        \"username\": \"johndoe\",\n        \"fullName\": \"John Doe\"\n    },\n    \"redirect_urls\": {\n        \"success\": \"https://example.com/success\",\n        \"fail\": \"https://example.com/fail\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/paypap/card-deposit/direct",
+							"host": ["{{base_url}}"],
+							"path": ["paypap", "card-deposit", "direct"]
+						},
+						"description": "Creates a new card deposit with direct type (send card data via API)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Card Deposit (Redirect)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"redirect\",\n    \"transaction_id\": \"7a0bd718-111c-4a02-af36-0be7b8fd387b\",\n    \"currency\": \"TRY\",\n    \"amount\": 5000,\n    \"billing\": {\n        \"email\": \"user@example.com\"\n    },\n    \"user\": {\n        \"userId\": \"1234567890\",\n        \"username\": \"johndoe\",\n        \"fullName\": \"John Doe\"\n    },\n    \"redirect_urls\": {\n        \"success\": \"https://example.com/success\",\n        \"fail\": \"https://example.com/fail\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/paypap/card-deposit/redirect",
+							"host": ["{{base_url}}"],
+							"path": ["paypap", "card-deposit", "redirect"]
+						},
+						"description": "Creates a new card deposit with redirect type (returns hosted payment page URL)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Card Deposit",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/paypap/card-deposit/:depositId",
+							"host": ["{{base_url}}"],
+							"path": ["paypap", "card-deposit", ":depositId"],
+							"variable": [
+								{
+									"key": "depositId",
+									"value": "bbeebd49-bd79-41a5-8f6b-0ad92c88d673",
+									"description": "Card deposit ID"
+								}
+							]
+						},
+						"description": "Retrieves details of a specific card deposit by its ID"
+					},
+					"response": []
+				}
+			],
+			"description": "Card deposit operations"
+		},
+		{
+			"name": "Webhook",
+			"item": [
+				{
+					"name": "Callback (Webhook)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"bank\",\n    \"type\": \"deposit\",\n    \"clientId\": 100123456789,\n    \"depositId\": \"bbeebd49-bd79-41a5-8f6b-0ad92c88d673\",\n    \"transactionId\": \"7a0bd718-111c-4a02-af36-0be7b8fd387b\",\n    \"fullName\": \"Foo Bar\",\n    \"currency\": \"TRY\",\n    \"requestedAmount\": 5000,\n    \"amount\": 5000,\n    \"user\": {\n        \"userId\": \"1234567890\",\n        \"username\": \"foobar\",\n        \"fullName\": \"Foo Bar\"\n    },\n    \"status\": {\n        \"code\": 4001,\n        \"desc\": \"Completed\"\n    },\n    \"timestamp\": 1672531200,\n    \"checksum\": \"0c1c7dc308dfc8f586484a6eaebe3be07b099462\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/paypap/callback",
+							"host": ["{{base_url}}"],
+							"path": ["paypap", "callback"]
+						},
+						"description": "Webhook endpoint for receiving payment status notifications from PayPap"
+					},
+					"response": []
+				}
+			],
+			"description": "Webhook callback endpoint"
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		}
+	]
+}
+
+
+
+
+

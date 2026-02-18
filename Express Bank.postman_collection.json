@@ -1,0 +1,446 @@
+{
+	"info": {
+		"_postman_id": "3a6258b2-b919-4cc4-8d98-12aa8de1d907",
+		"name": "Express Bank",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1198390"
+	},
+	"item": [
+		{
+			"name": "Bank List",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{api_url}}bank",
+					"host": [
+						"{{api_url}}bank"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Bank List",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_url}}bank",
+							"host": [
+								"{{api_url}}bank"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "Server",
+							"value": "nginx/1.18.0 (Ubuntu)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Cache-Control",
+							"value": "no-cache, private"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 07 Aug 2025 00:01:57 GMT"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "X-Frame-Options",
+							"value": "SAMEORIGIN"
+						},
+						{
+							"key": "X-XSS-Protection",
+							"value": "1; mode=block"
+						},
+						{
+							"key": "X-Content-Type-Options",
+							"value": "nosniff"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"success\": true,\n    \"message\": \"Banks retrieved successfully\",\n    \"code\": 200,\n    \"total\": 25,\n    \"data\": [\n        {\n            \"id\": 1,\n            \"name\": \"Bank Express\",\n            \"image\": \"https://95.217.97.119/storage/uploads/banks/1754504765_68939e3d830df.png\"\n        },\n        {\n            \"id\": 3,\n            \"name\": \"Cremin, Stehr and Larson\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/0000aa?text=business+Bank+culpa\"\n        },\n        {\n            \"id\": 4,\n            \"name\": \"Mohr, Bruen and Schroeder\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/008800?text=business+Bank+placeat\"\n        },\n        {\n            \"id\": 7,\n            \"name\": \"Heaney Inc\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/009999?text=business+Bank+id\"\n        },\n        {\n            \"id\": 14,\n            \"name\": \"Wisoky, Botsford and Gibson\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/00cc55?text=business+Bank+molestiae\"\n        },\n        {\n            \"id\": 20,\n            \"name\": \"Eichmann, Bernier and Torp\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/008822?text=business+Bank+hic\"\n        },\n        {\n            \"id\": 26,\n            \"name\": \"Denesik, Altenwerth and Schimmel\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/0044dd?text=business+Bank+tempora\"\n        },\n        {\n            \"id\": 5,\n            \"name\": \"Dooley, Wintheiser and Gerhold\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/00ff99?text=business+Bank+laudantium\"\n        },\n        {\n            \"id\": 9,\n            \"name\": \"Hills-Kub\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/0011cc?text=business+Bank+quam\"\n        },\n        {\n            \"id\": 22,\n            \"name\": \"Windler and Sons\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/00ffcc?text=business+Bank+omnis\"\n        },\n        {\n            \"id\": 29,\n            \"name\": \"Kuvalis LLC\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/00ff55?text=business+Bank+nemo\"\n        },\n        {\n            \"id\": 2,\n            \"name\": \"Moen Inc\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/007788?text=business+Bank+adipisci\"\n        },\n        {\n            \"id\": 15,\n            \"name\": \"Harvey-Grimes\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/001155?text=business+Bank+porro\"\n        },\n        {\n            \"id\": 17,\n            \"name\": \"Hilpert-Homenick\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/0000cc?text=business+Bank+quis\"\n        },\n        {\n            \"id\": 6,\n            \"name\": \"Koelpin and Sons\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/0088dd?text=business+Bank+dolorum\"\n        },\n        {\n            \"id\": 11,\n            \"name\": \"Turner, White and Wintheiser\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/008855?text=business+Bank+fugiat\"\n        },\n        {\n            \"id\": 8,\n            \"name\": \"Farrell and Sons\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/006688?text=business+Bank+error\"\n        },\n        {\n            \"id\": 12,\n            \"name\": \"Jast, Schuster and Senger\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/00ee55?text=business+Bank+quasi\"\n        },\n        {\n            \"id\": 13,\n            \"name\": \"Hickle Inc\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/0011aa?text=business+Bank+odit\"\n        },\n        {\n            \"id\": 10,\n            \"name\": \"Bogan, Osinski and Hermann\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/00ff22?text=business+Bank+cum\"\n        },\n        {\n            \"id\": 24,\n            \"name\": \"Kunze, Waelchi and Zemlak\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/009977?text=business+Bank+inventore\"\n        },\n        {\n            \"id\": 25,\n            \"name\": \"Boyle, Russel and Sauer\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/007755?text=business+Bank+aspernatur\"\n        },\n        {\n            \"id\": 23,\n            \"name\": \"Bailey, Heathcote and Cole\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/001155?text=business+Bank+optio\"\n        },\n        {\n            \"id\": 30,\n            \"name\": \"Kirlin-Blanda\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/006688?text=business+Bank+et\"\n        },\n        {\n            \"id\": 21,\n            \"name\": \"Considine, Littel and Fadel\",\n            \"image\": \"https://95.217.97.119/storage/https://via.placeholder.com/640x480.png/0088ee?text=business+Bank+at\"\n        }\n    ]\n}"
+				}
+			]
+		},
+		{
+			"name": "Account",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{api_url}}wallet?amount=1000",
+					"host": [
+						"{{api_url}}wallet"
+					],
+					"query": [
+						{
+							"key": "amount",
+							"value": "1000"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Account List",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_url}}wallet?amount=1000",
+							"host": [
+								"{{api_url}}wallet"
+							],
+							"query": [
+								{
+									"key": "amount",
+									"value": "1000"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "Server",
+							"value": "nginx/1.18.0 (Ubuntu)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Cache-Control",
+							"value": "no-cache, private"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 07 Aug 2025 00:35:23 GMT"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "X-Frame-Options",
+							"value": "SAMEORIGIN"
+						},
+						{
+							"key": "X-XSS-Protection",
+							"value": "1; mode=block"
+						},
+						{
+							"key": "X-Content-Type-Options",
+							"value": "nosniff"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"success\": true,\n    \"code\": 200,\n    \"message\": \"Wallet retrieved successfully\",\n    \"data\": {\n        \"id\": 1,\n        \"name\": \"ACC-8000-9400\",\n        \"iban\": \"TR957905179U8BWXJA5F501MD8\"\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Transaction Create",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"user_id\": 1,\n    \"first_name\": \"Kamran\",\n    \"last_name\": \"Najafzade\",\n    \"phone\": \"+994501234567\",\n    \"amount\": 100.50,\n    \"bank_name\": \"Kapital Bank\",\n    \"bank_id\": 1,\n    \"iban\": \"AZ21NABZ00000000137010001944\",\n    \"wallet_id\": 2,\n    \"client_ip\": \"192.168.1.1\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api_url}}transaction",
+					"host": [
+						"{{api_url}}transaction"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Transaction Create",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": 1,\n    \"first_name\": \"Kamran\",\n    \"last_name\": \"Najafzade\",\n    \"phone\": \"+994501234567\",\n    \"amount\": 100.50,\n    \"bank_name\": \"Kapital Bank\",\n    \"bank_id\": 1,\n    \"iban\": \"AZ21NABZ00000000137010001944\",\n    \"wallet_id\": 2,\n    \"client_ip\": \"192.168.1.1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}transaction",
+							"host": [
+								"{{api_url}}transaction"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "Server",
+							"value": "nginx/1.18.0 (Ubuntu)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Cache-Control",
+							"value": "no-cache, private"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 07 Aug 2025 00:05:36 GMT"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "X-Frame-Options",
+							"value": "SAMEORIGIN"
+						},
+						{
+							"key": "X-XSS-Protection",
+							"value": "1; mode=block"
+						},
+						{
+							"key": "X-Content-Type-Options",
+							"value": "nosniff"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"success\": true,\n    \"code\": 201,\n    \"message\": \"Transaction created successfully\",\n    \"data\": {\n        \"first_name\": \"Kamran\",\n        \"last_name\": \"Najafzade\",\n        \"phone\": \"+994501234567\",\n        \"amount\": 100.5,\n        \"bank_name\": \"Kapital Bank\",\n        \"bank_id\": 1,\n        \"iban\": \"AZ21NABZ00000000137010001944\",\n        \"wallet_id\": 2,\n        \"client_ip\": \"192.168.1.1\",\n        \"site_id\": 1,\n        \"updated_at\": \"2025-08-07T00:05:36.000000Z\",\n        \"created_at\": \"2025-08-07T00:05:36.000000Z\",\n        \"id\": 11,\n        \"sender\": \"Kamran Najafzade\",\n        \"receiver\": \"ACC-0026-6557 (TR26441621NR68RLO79SWE15YD)\",\n        \"site_name\": \"1xBet\",\n        \"wallet\": {\n            \"id\": 2,\n            \"current_account\": \"ACC-0026-6557\",\n            \"iban\": \"TR26441621NR68RLO79SWE15YD\",\n            \"total_amount\": 89198.03,\n            \"blocked_amount\": 455.83,\n            \"last_sync_date\": \"2025-07-28T13:09:23.000000Z\",\n            \"bank\": \"Trantow-Wilderman Bank\",\n            \"description\": \"Nihil incidunt ea mollitia alias hic est fugit esse occaecati est aut hic.\",\n            \"status\": false,\n            \"currency\": \"TRY\",\n            \"created_at\": \"2025-08-05T21:00:29.000000Z\",\n            \"updated_at\": \"2025-08-05T21:00:29.000000Z\",\n            \"deleted_at\": null\n        }\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Withdraw create",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"user_id\": 1,\n    \"first_name\": \"Kamran\",\n    \"last_name\": \"Najafzade\",\n    \"amount\": 100.50,\n    \"bank_name\": \"Kapital Bank\",\n    \"iban\": \"AZ21NABZ00000000137010001944\",\n    \"order_id\": 2\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api_url}}withdrawal",
+					"host": [
+						"{{api_url}}withdrawal"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Withdraw request",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": 1,\n    \"first_name\": \"Kamran\",\n    \"last_name\": \"Najafzade\",\n    \"amount\": 100.50,\n    \"bank_name\": \"Kapital Bank\",\n    \"iban\": \"AZ21NABZ00000000137010001944\",\n    \"order_id\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api_url}}withdrawal",
+							"host": [
+								"{{api_url}}withdrawal"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "Server",
+							"value": "nginx/1.18.0 (Ubuntu)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Cache-Control",
+							"value": "no-cache, private"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 07 Aug 2025 00:23:32 GMT"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "X-Frame-Options",
+							"value": "SAMEORIGIN"
+						},
+						{
+							"key": "X-XSS-Protection",
+							"value": "1; mode=block"
+						},
+						{
+							"key": "X-Content-Type-Options",
+							"value": "nosniff"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"success\": true,\n    \"code\": 201,\n    \"message\": \"Withdrawal created successfully\",\n    \"data\": {\n        \"first_name\": \"Kamran\",\n        \"last_name\": \"Najafzade\",\n        \"amount\": 100.5,\n        \"bank_name\": \"Kapital Bank\",\n        \"iban\": \"AZ21NABZ00000000137010001944\",\n        \"order_id\": 2,\n        \"site_id\": 1,\n        \"user_id\": 1,\n        \"updated_at\": \"2025-08-07T00:23:32.000000Z\",\n        \"created_at\": \"2025-08-07T00:23:32.000000Z\",\n        \"id\": 5,\n        \"status_html\": \"<span class=\\\"badge bg-dark\\\"></span>\\n\",\n        \"receiver\": \"Kamran Najafzade\",\n        \"sender\": \" \",\n        \"wallet\": null\n    }\n}"
+				}
+			]
+		}
+	]
+}

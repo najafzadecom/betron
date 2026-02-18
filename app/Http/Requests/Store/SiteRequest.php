@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Http\Requests\Store;
+
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Foundation\Http\FormRequest;
+
+class SiteRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return auth()->check() && auth()->user()->can('sites-create');
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, ValidationRule|array|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'name' => 'required|string|max:255|unique:sites,name',
+            'url' => 'nullable|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
+            'description' => 'nullable|string',
+            'token' => 'nullable|string|max:255',
+            'transaction_fee' => 'required|numeric|min:0|max:100',
+            'withdrawal_fee' => 'required|numeric|min:0|max:100',
+            'settlement_fee' => 'required|numeric|min:0|max:100',
+            'status' => 'boolean'
+        ];
+    }
+}
