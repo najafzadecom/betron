@@ -8,7 +8,7 @@
 
         <div class="navbar-brand flex-1 flex-lg-0">
             <a href="{{ route('vendor.dashboard') }}" class="d-inline-flex align-items-center">
-                <img src="{{ asset('admin/assets/images/expressbank.png') }}" alt="">
+                <img src="{{ asset('admin/assets/images/betron.png') }}" alt="">
                 <span class="text-white ms-2 fw-bold">{{ __('Vendor Portal') }}</span>
             </a>
         </div>

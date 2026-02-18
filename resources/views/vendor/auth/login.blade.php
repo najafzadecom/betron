@@ -28,7 +28,7 @@
     <div class="container-fluid">
         <div class="navbar-brand">
             <a href="{{ route('vendor.dashboard') }}" class="d-inline-flex align-items-center">
-                <img src="{{ asset('admin/assets/images/expressbank.png') }}" alt="">
+                <img src="{{ asset('admin/assets/images/betron.png') }}" alt="">
             </a>
         </div>
     </div>
@@ -45,7 +45,7 @@
                         <div class="card-body">
                             <div class="text-center mb-3">
                                 <div class="d-inline-flex align-items-center justify-content-center mb-4 mt-2">
-                                    <img src="{{ asset('admin/assets/images/expressbank.png') }}" class="h-48px" alt="">
+                                    <img src="{{ asset('admin/assets/images/betron.png') }}" class="h-48px" alt="">
                                 </div>
                                 <h5 class="mb-0">{{ __('Vendor Portal') }}</h5>
                                 <span class="d-block text-muted">{{ __('Enter your credentials below') }}</span>
