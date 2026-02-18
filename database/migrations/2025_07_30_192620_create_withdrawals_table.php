@@ -32,6 +32,7 @@ return new class () extends Migration {
             $table->boolean('paid_status')->default(false);
             $table->boolean('manual')->default(true);
             $table->unsignedBigInteger('vendor_id')->default(0);
+            $table->dateTime('accepted_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

@@ -31,6 +31,7 @@ return new class () extends Migration {
             $table->string('site_name')->nullable()->comment('Name of the site associated with the transaction');
             $table->tinyInteger('status')->default(0);
             $table->boolean('paid_status')->default(false);
+            $table->dateTime('accepted_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
