@@ -9,6 +9,10 @@
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             margin: 0;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -39,7 +43,8 @@
             position: sticky;
             top: 0;
             align-self: flex-start;
-            height: 100vh;
+            max-height: 100vh;
+            overflow-y: auto;
         }
 
         .brand {
@@ -329,7 +334,7 @@
             </div>
 
             <div class="nav-group-title">Introduction</div>
-            <a href="#introduction" class="nav-link active">Overview</a>
+            <a href="#introduction" class="nav-link">Overview</a>
             <a href="#quickstart" class="nav-link">Quickstart</a>
             <a href="#authentication" class="nav-link">Authentication</a>
 
@@ -930,6 +935,43 @@ if (!hash_equals($expected, $received)) {
             </section>
         </main>
     </div>
+<script>
+    // Simple active-state handling for sidebar navigation
+    document.addEventListener('DOMContentLoaded', function () {
+        var links = Array.prototype.slice.call(document.querySelectorAll('.sidebar .nav-link'));
+
+        function setActiveByHash(hash) {
+            if (!hash) {
+                hash = window.location.hash || '#introduction';
+            }
+            links.forEach(function (link) {
+                link.classList.remove('active');
+            });
+            var target = links.find(function (link) {
+                return link.getAttribute('href') === hash;
+            });
+            if (target) {
+                target.classList.add('active');
+            }
+        }
+
+        // Initial state
+        setActiveByHash(window.location.hash);
+
+        // On click
+        links.forEach(function (link) {
+            link.addEventListener('click', function () {
+                var hash = this.getAttribute('href');
+                setActiveByHash(hash);
+            });
+        });
+
+        // If hash changes via browser controls
+        window.addEventListener('hashchange', function () {
+            setActiveByHash(window.location.hash);
+        });
+    });
+</script>
 </body>
 </html>
 
