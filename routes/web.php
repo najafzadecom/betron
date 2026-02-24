@@ -8,13 +8,13 @@ use App\Http\Controllers\PaypapController;
 use App\Http\Controllers\PratikController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [HomeController::class, 'index'])->name('index');
-
 Route::domain('docs.betron.org')->group(function () {
     Route::get('/', function () {
         return view('docs.api');
     })->name('docs.api');
 });
+
+Route::get('/', [HomeController::class, 'index'])->name('index');
 
 Route::prefix('paraqr/')->as('paraqr.')->group(function () {
     Route::get('/', [ParaQrController::class, 'index'])->name('index');
