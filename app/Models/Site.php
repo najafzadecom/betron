@@ -33,6 +33,9 @@ class Site extends Model
 
     protected $casts = [
         'status' => 'boolean',
+        'transaction_fee' => 'float',
+        'withdrawal_fee' => 'float',
+        'settlement_fee' => 'float',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
