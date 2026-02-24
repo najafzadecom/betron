@@ -407,23 +407,29 @@
 
             <section id="authentication">
                 <h2>Authentication</h2>
-                <p>All requests to the Betron API must be made over HTTPS and include your API key in the headers.</p>
+                <p>All requests to the Betron API must be made over HTTPS and include a bearer token in the
+                    <code>Authorization</code> header.</p>
 
-                <h3>API Key</h3>
+                <h3>Bearer token</h3>
                 <p class="small">Example headers:</p>
                 <div class="code-block">
                     <div class="code-label">Headers</div>
 <pre>GET /api/v1/bank HTTP/1.1
 Host: betron.org
-X-Api-Key: YOUR_API_KEY_HERE
+Authorization: Bearer YOUR_API_TOKEN
 Accept: application/json</pre>
                 </div>
+
+                <p class="small">
+                    The token value is provided by the Betron team and must match the configured API token on the server.
+                    If the header is missing, empty, or invalid, the API returns a <code>401 Unauthorized</code> response.
+                </p>
 
                 <h3>Optional HMAC Signature</h3>
                 <p>For additional security, requests and callbacks can be signed using an HMAC built from your API Secret and the payload.</p>
                 <div class="code-block">
                     <div class="code-label">Headers (example)</div>
-<pre>X-Api-Key: YOUR_API_KEY_HERE
+<pre>Authorization: Bearer YOUR_API_TOKEN
 X-Signature: HMAC_SIGNATURE_HERE</pre>
                 </div>
                 <p class="small">The exact signing algorithm and string-to-sign format will be provided during integration.</p>
@@ -447,15 +453,18 @@ X-Signature: HMAC_SIGNATURE_HERE</pre>
                 <div class="code-block">
                     <div class="code-label">Response · 200 OK</div>
 <pre>{
+  "success": true,
+  "message": "Banks retrieved successfully",
+  "code": 200,
+  "total": 1,
   "data": [
     {
       "id": 1,
       "name": "Bank A",
-      "code": "BANKA",
-      "min_limit": 10.0,
-      "max_limit": 10000.0,
-      "currency": "TRY",
-      "status": "active"
+      "image": "https://example.com/bank-a.png",
+      "transaction_status": 1,
+      "withdrawal_status": 1,
+      "status": 1
     }
   ]
 }</pre>
@@ -470,15 +479,18 @@ X-Signature: HMAC_SIGNATURE_HERE</pre>
                 <div class="code-block">
                     <div class="code-label">Response · 200 OK</div>
 <pre>{
+  "success": true,
+  "message": "Banks retrieved successfully",
+  "code": 200,
+  "total": 1,
   "data": [
     {
       "id": 5,
       "name": "Bank W",
-      "code": "BANKW",
-      "min_limit": 50.0,
-      "max_limit": 5000.0,
-      "currency": "TRY",
-      "status": "active"
+      "image": "https://example.com/bank-w.png",
+      "transaction_status": 1,
+      "withdrawal_status": 1,
+      "status": 1
     }
   ]
 }</pre>
@@ -506,10 +518,22 @@ X-Signature: HMAC_SIGNATURE_HERE</pre>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><code>external_id</code></td>
+                            <td><code>first_name</code></td>
                             <td>string</td>
                             <td>yes</td>
-                            <td>Your internal order or transaction reference.</td>
+                            <td>Customer first name.</td>
+                        </tr>
+                        <tr>
+                            <td><code>last_name</code></td>
+                            <td>string</td>
+                            <td>yes</td>
+                            <td>Customer last name.</td>
+                        </tr>
+                        <tr>
+                            <td><code>phone</code></td>
+                            <td>string</td>
+                            <td>yes</td>
+                            <td>Customer phone number.</td>
                         </tr>
                         <tr>
                             <td><code>amount</code></td>
@@ -518,34 +542,34 @@ X-Signature: HMAC_SIGNATURE_HERE</pre>
                             <td>Payment amount.</td>
                         </tr>
                         <tr>
-                            <td><code>currency</code></td>
-                            <td>string</td>
-                            <td>yes</td>
-                            <td>Currency code, e.g. <code>TRY</code>.</td>
-                        </tr>
-                        <tr>
-                            <td><code>customer_name</code></td>
-                            <td>string</td>
-                            <td>optional</td>
-                            <td>Customer full name.</td>
-                        </tr>
-                        <tr>
-                            <td><code>customer_email</code></td>
-                            <td>string</td>
-                            <td>optional</td>
-                            <td>Customer email address.</td>
-                        </tr>
-                        <tr>
                             <td><code>bank_id</code></td>
                             <td>integer</td>
                             <td>yes</td>
                             <td>Bank identifier obtained from the banks endpoint.</td>
                         </tr>
                         <tr>
-                            <td><code>callback_url</code></td>
+                            <td><code>client_ip</code></td>
                             <td>string</td>
-                            <td>recommended</td>
-                            <td>URL to receive transaction status updates.</td>
+                            <td>yes</td>
+                            <td>Client IP address of the user initiating the payment.</td>
+                        </tr>
+                        <tr>
+                            <td><code>order_id</code></td>
+                            <td>integer</td>
+                            <td>yes</td>
+                            <td>Your internal order reference.</td>
+                        </tr>
+                        <tr>
+                            <td><code>user_id</code></td>
+                            <td>integer</td>
+                            <td>yes</td>
+                            <td>Your internal user identifier.</td>
+                        </tr>
+                        <tr>
+                            <td><code>site_id</code>, <code>site_name</code>, <code>transaction_fee</code></td>
+                            <td>mixed</td>
+                            <td>set by Betron</td>
+                            <td>These values are injected by Betron based on your API token; you do not need to send them.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -553,25 +577,28 @@ X-Signature: HMAC_SIGNATURE_HERE</pre>
                 <div class="code-block">
                     <div class="code-label">Request body · JSON</div>
 <pre>{
-  "external_id": "ORDER-12345",
+  "first_name": "John",
+  "last_name": "Doe",
+  "phone": "+905551112233",
   "amount": 250.0,
-  "currency": "TRY",
-  "customer_name": "John Doe",
-  "customer_email": "john@example.com",
   "bank_id": 1,
-  "callback_url": "https://merchant.example.com/betron/transaction-callback"
+  "client_ip": "203.0.113.10",
+  "order_id": 12345,
+  "user_id": 42
 }</pre>
                 </div>
 
                 <div class="code-block">
                     <div class="code-label">Response · 201 Created</div>
 <pre>{
-  "uuid": "d3a6b9f0-1234-5678-9abc-def012345678",
-  "external_id": "ORDER-12345",
-  "amount": 250.0,
-  "currency": "TRY",
-  "status": "pending",
-  "checkout_url": "https://pay.betron.org/checkout/d3a6b9f0-1234-5678-9abc-def012345678"
+  "success": true,
+  "code": 200,
+  "message": "Transaction created",
+  "data": {
+    "transaction_uuid": "d3a6b9f0-1234-5678-9abc-def012345678",
+    "receiver_iban": "TR000000000000000000000000",
+    "receiver_name": "Betron Payment Account"
+  }
 }</pre>
                 </div>
 
@@ -601,12 +628,31 @@ X-Signature: HMAC_SIGNATURE_HERE</pre>
                 <div class="code-block">
                     <div class="code-label">Response · 200 OK</div>
 <pre>{
-  "uuid": "d3a6b9f0-1234-5678-9abc-def012345678",
-  "external_id": "ORDER-12345",
-  "amount": 250.0,
-  "currency": "TRY",
-  "status": "success",
-  "paid_at": "2026-02-24T12:34:56Z"
+  "success": true,
+  "code": 201,
+  "message": "Transaction details",
+  "data": {
+    "id": 1,
+    "uuid": "d3a6b9f0-1234-5678-9abc-def012345678",
+    "user_id": 42,
+    "first_name": "John",
+    "last_name": "Doe",
+    "sender": "John Doe",
+    "phone": "+905551112233",
+    "amount": 250.0,
+    "currency": "TRY",
+    "order_id": 12345,
+    "receiver_iban": "TR000000000000000000000000",
+    "receiver_name": "Betron Payment Account",
+    "receiver": "Betron Payment Account",
+    "bank_id": 1,
+    "bank_name": "Bank A",
+    "status": "success",
+    "paid_status": true,
+    "client_ip": "203.0.113.10",
+    "created_at": "2026-02-24T12:34:56Z",
+    "updated_at": "2026-02-24T12:35:56Z"
+  }
 }</pre>
                 </div>
             </section>
@@ -624,24 +670,42 @@ X-Signature: HMAC_SIGNATURE_HERE</pre>
                 <div class="code-block">
                     <div class="code-label">Request body · JSON</div>
 <pre>{
-  "external_id": "WITHDRAW-98765",
-  "amount": 1000.0,
-  "currency": "TRY",
-  "bank_id": 5,
-  "account_name": "John Doe",
+  "user_id": 42,
+  "first_name": "John",
+  "last_name": "Doe",
   "iban": "TR000000000000000000000000",
-  "callback_url": "https://merchant.example.com/betron/withdrawal-callback"
+  "bank_id": 5,
+  "amount": 1000.0,
+  "order_id": "WITHDRAW-98765"
 }</pre>
                 </div>
 
                 <div class="code-block">
                     <div class="code-label">Response · 201 Created</div>
 <pre>{
-  "uuid": "a1b2c3d4-5678-90ab-cdef-1234567890ab",
-  "external_id": "WITHDRAW-98765",
-  "amount": 1000.0,
-  "currency": "TRY",
-  "status": "processing"
+  "success": true,
+  "code": 201,
+  "message": "Withdrawal created successfully",
+  "data": {
+    "id": 10,
+    "uuid": "a1b2c3d4-5678-90ab-cdef-1234567890ab",
+    "first_name": "John",
+    "last_name": "Doe",
+    "receiver": "John Doe",
+    "iban": "TR000000000000000000000000",
+    "bank_id": 5,
+    "bank_name": "Bank W",
+    "amount": 1000.0,
+    "order_id": "WITHDRAW-98765",
+    "site_id": 1,
+    "site_name": "Betron",
+    "sender_name": null,
+    "sender_iban": null,
+    "status": 0,
+    "paid_status": false,
+    "created_at": "2026-02-24T13:40:00Z",
+    "updated_at": "2026-02-24T13:40:00Z"
+  }
 }</pre>
                 </div>
 
@@ -654,12 +718,29 @@ X-Signature: HMAC_SIGNATURE_HERE</pre>
                 <div class="code-block">
                     <div class="code-label">Response · 200 OK</div>
 <pre>{
-  "uuid": "a1b2c3d4-5678-90ab-cdef-1234567890ab",
-  "external_id": "WITHDRAW-98765",
-  "amount": 1000.0,
-  "currency": "TRY",
-  "status": "completed",
-  "completed_at": "2026-02-24T13:45:00Z"
+  "success": true,
+  "code": 201,
+  "message": "Withdrawal created successfully",
+  "data": {
+    "id": 10,
+    "uuid": "a1b2c3d4-5678-90ab-cdef-1234567890ab",
+    "first_name": "John",
+    "last_name": "Doe",
+    "receiver": "John Doe",
+    "iban": "TR000000000000000000000000",
+    "bank_id": 5,
+    "bank_name": "Bank W",
+    "amount": 1000.0,
+    "order_id": "WITHDRAW-98765",
+    "site_id": 1,
+    "site_name": "Betron",
+    "sender_name": "Betron",
+    "sender_iban": "TR000000000000000000000000",
+    "status": 1,
+    "paid_status": true,
+    "created_at": "2026-02-24T13:40:00Z",
+    "updated_at": "2026-02-24T13:45:00Z"
+  }
 }</pre>
                 </div>
             </section>
@@ -668,7 +749,7 @@ X-Signature: HMAC_SIGNATURE_HERE</pre>
                 <h2>Wallets</h2>
                 <p>Wallet endpoints allow you to view your Betron balances.</p>
 
-                <h3>List wallets</h3>
+                <h3>Get wallet</h3>
                 <div class="endpoint">
                     <span class="method method-get">GET</span>
                     <span class="path">/api/v1/wallet</span>
@@ -677,55 +758,120 @@ X-Signature: HMAC_SIGNATURE_HERE</pre>
                 <div class="code-block">
                     <div class="code-label">Response · 200 OK</div>
 <pre>{
-  "data": [
-    {
-      "id": 1,
-      "currency": "TRY",
-      "balance": 50000.0,
-      "available_balance": 48000.0
-    },
-    {
-      "id": 2,
-      "currency": "USD",
-      "balance": 10000.0,
-      "available_balance": 9500.0
-    }
-  ]
+  "success": true,
+  "message": "Account retrieved successfully",
+  "code": 200,
+  "data": {
+    "id": 1,
+    "name": "Main Wallet",
+    "iban": "TR000000000000000000000000"
+  }
 }</pre>
                 </div>
             </section>
 
             <section id="callbacks">
                 <h2>Callbacks</h2>
-                <p>Betron sends webhook callbacks to notify you when a transaction or withdrawal status changes.</p>
+                <p>Betron sends webhook callbacks when a transaction’s <code>paid_status</code> becomes <code>true</code>.
+                    Callbacks are sent to one or more URLs configured on your side.</p>
 
-                <h3>Example callback URLs</h3>
+                <h3>Configuring webhook URLs & secret</h3>
+                <p>In your Betron environment, the following variables control webhook delivery:</p>
                 <ul>
-                    <li><code>https://merchant.example.com/betron/transaction-callback</code></li>
-                    <li><code>https://merchant.example.com/betron/withdrawal-callback</code></li>
+                    <li><code>TRANSACTION_WEBHOOK_URL</code> – single callback URL (backwards compatible)</li>
+                    <li><code>TRANSACTION_WEBHOOK_URLS</code> – comma‑separated list of URLs (e.g. <code>https://a.com/hook,https://b.com/hook</code>)</li>
+                    <li><code>TRANSACTION_WEBHOOK_SECRET_KEY</code> – shared HMAC secret used to sign payloads</li>
+                    <li><code>TRANSACTION_WEBHOOK_ENABLED</code> – enable / disable callbacks (default: <code>true</code>)</li>
                 </ul>
 
-                <h3>Example transaction callback payload</h3>
+                <h3>HTTP request</h3>
+                <p>For each successful transaction update, Betron will perform an HTTP <strong>POST</strong> request to every configured URL.</p>
+
+                <div class="code-block">
+                    <div class="code-label">Headers</div>
+<pre>POST /your/webhook/endpoint HTTP/1.1
+Host: merchant.example.com
+Content-Type: application/json
+X-Signature: &lt;HMAC_SHA256_SIGNATURE&gt;
+X-Timestamp: 1737654321</pre>
+                </div>
+
+                <h3>Transaction webhook payload</h3>
                 <div class="code-block">
                     <div class="code-label">Body · JSON</div>
 <pre>{
-  "event": "transaction.success",
+  "transaction_id": 1,
   "uuid": "d3a6b9f0-1234-5678-9abc-def012345678",
-  "external_id": "ORDER-12345",
+  "user_id": 42,
   "amount": 250.0,
   "currency": "TRY",
   "status": "success",
-  "signature": "HMAC_SIGNATURE_HERE"
+  "paid_status": true,
+  "first_name": "John",
+  "last_name": "Doe",
+  "phone": "+905551112233",
+  "receiver_iban": "TR000000000000000000000000",
+  "receiver_name": "Betron Payment Account",
+  "bank_id": 1,
+  "bank_name": "Bank A",
+  "wallet_id": 10,
+  "site_id": 1,
+  "site_name": "Betron",
+  "order_id": 12345,
+  "payment_method": "manual",
+  "created_at": "2026-02-24T12:34:56Z",
+  "updated_at": "2026-02-24T12:35:10Z",
+  "accepted_at": "2026-02-24T12:35:00Z",
+  "timestamp": 1737654321
 }</pre>
                 </div>
 
-                <h3>Verifying callbacks</h3>
-                <ul>
-                    <li>Read the <code>signature</code> value from the header or payload.</li>
-                    <li>Recompute the HMAC using your callback secret key and the received body.</li>
-                    <li>Compare your computed signature with the one sent by Betron.</li>
-                    <li>Process the callback only if the signatures match.</li>
-                </ul>
+                <h3>How the HMAC signature is generated</h3>
+                <p>Betron signs each callback using HMAC‑SHA256 with your secret key.</p>
+                <ol>
+                    <li>Sort the JSON payload by keys (ascending).</li>
+                    <li>Build the <em>signature string</em>:
+                        <code>signature_string = timestamp + json_encode(sorted_payload) + secret_key</code>
+                    </li>
+                    <li>Compute the signature:
+                        <code>signature = HMAC_SHA256(signature_string, secret_key)</code>.
+                    </li>
+                    <li>Send this value in the <code>X-Signature</code> header and the Unix timestamp in <code>X-Timestamp</code>.</li>
+                </ol>
+
+                <div class="code-block">
+                    <div class="code-label">Example (pseudo-code)</div>
+<pre>// payload is the JSON body as an object/array
+sortedPayload = sortKeysAscending(payload)
+jsonPayload   = jsonEncode(sortedPayload, withoutEscapingSlashes)
+signatureStr  = payload["timestamp"] + jsonPayload + SECRET_KEY
+
+signature = HMAC_SHA256(signatureStr, SECRET_KEY)</pre>
+                </div>
+
+                <h3>Verifying the webhook on your server</h3>
+                <p>On your side you should recompute the signature and compare it to the <code>X-Signature</code> header.</p>
+
+                <div class="code-block">
+                    <div class="code-label">PHP verification example</div>
+<pre>$secret   = 'YOUR_TRANSACTION_WEBHOOK_SECRET_KEY';
+$body     = file_get_contents('php://input');        // raw JSON
+$payload  = json_decode($body, true);               // associative array
+$timestamp = $_SERVER['HTTP_X_TIMESTAMP'] ?? null;
+$received  = $_SERVER['HTTP_X_SIGNATURE'] ?? null;
+
+ksort($payload);
+$jsonPayload  = json_encode($payload, JSON_UNESCAPED_SLASHES);
+$signatureStr = $timestamp . $jsonPayload . $secret;
+$expected     = hash_hmac('sha256', $signatureStr, $secret);
+
+if (!hash_equals($expected, $received)) {
+    http_response_code(401);
+    exit('Invalid signature');
+}
+
+// Signature is valid – process the webhook safely.</pre>
+                </div>
             </section>
 
             <section id="errors">
@@ -750,7 +896,7 @@ X-Signature: HMAC_SIGNATURE_HERE</pre>
                         </tr>
                         <tr>
                             <td><code>401</code></td>
-                            <td>Unauthorized (missing or invalid API key).</td>
+                            <td>Unauthorized (missing or invalid bearer token).</td>
                         </tr>
                         <tr>
                             <td><code>403</code></td>
@@ -773,12 +919,12 @@ X-Signature: HMAC_SIGNATURE_HERE</pre>
 
                 <h3>Error response format</h3>
                 <div class="code-block">
-                    <div class="code-label">Body · JSON</div>
+                    <div class="code-label">Body · JSON (domain / business errors)</div>
 <pre>{
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "The amount field is required."
-  }
+  "success": false,
+  "code": 400,
+  "message": "Minimum amount is 2000",
+  "data": []
 }</pre>
                 </div>
             </section>
