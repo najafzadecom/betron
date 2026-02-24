@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <title>Betron API Documentation</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Lucide icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
     <style>
         * {
             box-sizing: border-box;
@@ -73,7 +76,9 @@
         }
 
         .nav-link {
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             padding: 6px 8px;
             border-radius: 6px;
             font-size: 13px;
@@ -87,6 +92,19 @@
         .nav-link.active {
             background: #eef2ff;
             color: #3730a3;
+        }
+
+        .nav-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            color: #9ca3af;
+        }
+
+        .nav-link.active .nav-icon {
+            color: #4f46e5;
         }
 
         .nav-version {
@@ -334,19 +352,46 @@
             </div>
 
             <div class="nav-group-title">Introduction</div>
-            <a href="#introduction" class="nav-link">Overview</a>
-            <a href="#quickstart" class="nav-link">Quickstart</a>
-            <a href="#authentication" class="nav-link">Authentication</a>
+            <a href="#introduction" class="nav-link">
+                <span class="nav-icon" data-lucide="compass"></span>
+                <span>Overview</span>
+            </a>
+            <a href="#quickstart" class="nav-link">
+                <span class="nav-icon" data-lucide="zap"></span>
+                <span>Quickstart</span>
+            </a>
+            <a href="#authentication" class="nav-link">
+                <span class="nav-icon" data-lucide="shield-check"></span>
+                <span>Authentication</span>
+            </a>
 
             <div class="nav-group-title">Resources</div>
-            <a href="#banks" class="nav-link">Banks</a>
-            <a href="#transactions" class="nav-link">Transactions (Deposit)</a>
-            <a href="#withdrawals" class="nav-link">Withdrawals</a>
-            <a href="#wallets" class="nav-link">Wallets</a>
+            <a href="#banks" class="nav-link">
+                <span class="nav-icon" data-lucide="banknote"></span>
+                <span>Banks</span>
+            </a>
+            <a href="#transactions" class="nav-link">
+                <span class="nav-icon" data-lucide="arrow-up-right"></span>
+                <span>Transactions (Deposit)</span>
+            </a>
+            <a href="#withdrawals" class="nav-link">
+                <span class="nav-icon" data-lucide="arrow-down-left"></span>
+                <span>Withdrawals</span>
+            </a>
+            <a href="#wallets" class="nav-link">
+                <span class="nav-icon" data-lucide="wallet-cards"></span>
+                <span>Wallets</span>
+            </a>
 
             <div class="nav-group-title">Lifecycle</div>
-            <a href="#callbacks" class="nav-link">Callbacks</a>
-            <a href="#errors" class="nav-link">Errors</a>
+            <a href="#callbacks" class="nav-link">
+                <span class="nav-icon" data-lucide="webhook"></span>
+                <span>Callbacks</span>
+            </a>
+            <a href="#errors" class="nav-link">
+                <span class="nav-icon" data-lucide="triangle-alert"></span>
+                <span>Errors</span>
+            </a>
 
             <div class="nav-version">
                 API Version: <strong>v1.0.0</strong><br>
@@ -957,6 +1002,11 @@ if (!hash_equals($expected, $received)) {
 
         // Initial state
         setActiveByHash(window.location.hash);
+
+        // Render lucide icons if available
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+            window.lucide.createIcons();
+        }
 
         // On click
         links.forEach(function (link) {
