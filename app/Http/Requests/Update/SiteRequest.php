@@ -24,7 +24,6 @@ class SiteRequest extends FormRequest
             'url' => 'nullable|string|max:255',
             'logo' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
             'description' => 'nullable|string',
-            'token' => 'nullable|string|max:255',
             'transaction_fee' => 'required|numeric|min:0|max:100',
             'withdrawal_fee' => 'required|numeric|min:0|max:100',
             'settlement_fee' => 'required|numeric|min:0|max:100',

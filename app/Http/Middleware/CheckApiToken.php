@@ -34,19 +34,15 @@ class CheckApiToken
             ], 401);
         }
 
-        $validToken = config('api.token');
+        // Find site by API token (multi-site support)
+        $site = Site::query()->where('token', $token)->first();
 
-        if ($token !== $validToken) {
+        if (!$site) {
             return response()->json([
                 'error' => 'Unauthorized',
                 'message' => __('Invalid token. Please check your token and try again.'),
             ], 401);
         }
-
-        // Token is valid, proceed with the request
-        // Todo: Multi site support
-
-        $site = Site::query()->findOrFail(1);
 
         $request->merge(['site_id' => $site->id]);
         $request->merge(['site_name' => $site->name]);

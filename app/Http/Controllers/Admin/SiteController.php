@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\Store\SiteRequest as StoreRequest;
 use App\Http\Requests\Update\SiteRequest as UpdateRequest;
+use App\Models\Site;
 use App\Services\SiteService as Service;
 use App\Services\TransactionService;
 use App\Services\WithdrawalService;
@@ -11,6 +12,7 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class SiteController extends BaseController
 {
@@ -66,7 +68,18 @@ class SiteController extends BaseController
             $validatedData['logo'] = $this->handleImageUpload($request->file('logo'));
         }
 
+        // Create site without token first
         $item = $this->service->create($validatedData);
+
+        // Generate a unique API token for this site
+        if (!$item->token) {
+            do {
+                $token = Str::random(64);
+            } while (Site::where('token', $token)->exists());
+
+            $item->token = $token;
+            $item->save();
+        }
 
         return $this->redirectSuccess('admin.sites.index');
     }
