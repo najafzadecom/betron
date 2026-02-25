@@ -111,12 +111,13 @@
                                         placeholder="{{ $item->token ? '' : __('No token yet') }}"
                                         readonly
                                     />
-                                    <form action="{{ route('admin.sites.regenerate-token', $item->id) }}" method="POST">
-                                        @csrf
-                                        <button type="submit" class="btn btn-outline-secondary">
-                                            {{ $item->token ? __('Regenerate') : __('Generate') }}
-                                        </button>
-                                    </form>
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-secondary"
+                                        onclick="regenerateSiteToken('{{ route('admin.sites.regenerate-token', $item->id) }}')"
+                                    >
+                                        {{ $item->token ? __('Regenerate') : __('Generate') }}
+                                    </button>
                                 </div>
                                 <div class="form-text">
                                     {{ __('Use this value as the Bearer token for this site\'s API requests. Generating or regenerating will invalidate any previous token immediately.') }}
@@ -229,6 +230,40 @@
                         </button>
                     </div>
                 </form>
+
+                @if(isset($item))
+                    <script>
+                        function regenerateSiteToken(url) {
+                            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                            if (!token) {
+                                alert('CSRF token not found.');
+                                return;
+                            }
+
+                            fetch(url, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': token,
+                                    'Accept': 'application/json',
+                                },
+                            })
+                                .then(function (response) {
+                                    if (!response.ok) {
+                                        throw new Error('Request failed');
+                                    }
+                                    return response.json().catch(function () {
+                                        return {};
+                                    });
+                                })
+                                .then(function () {
+                                    window.location.reload();
+                                })
+                                .catch(function () {
+                                    alert('Token regeneration failed. Please try again.');
+                                });
+                        }
+                    </script>
+                @endif
             </div>
         </div>
     </div>

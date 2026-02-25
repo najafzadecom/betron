@@ -130,7 +130,7 @@ class SiteController extends BaseController
     /**
      * Regenerate API token for a site (admin only).
      */
-    public function regenerateToken(string $id): RedirectResponse
+    public function regenerateToken(string $id)
     {
         $site = $this->service->getById($id);
 
@@ -140,6 +140,13 @@ class SiteController extends BaseController
 
         $site->token = $token;
         $site->save();
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('API token regenerated successfully.'),
+            ]);
+        }
 
         return redirect()
             ->route('admin.sites.edit', $id)

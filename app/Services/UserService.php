@@ -20,7 +20,7 @@ class UserService extends BaseService
         $permissionIds = $data['permissions'] ?? [];
         unset($data['permissions']);
 
-        $roles = $data['roles'];
+        $roles = $data['roles'] ?? [];
         unset($data['roles']);
 
         $item = $this->repository->create($data);
