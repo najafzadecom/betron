@@ -90,6 +90,7 @@ Route::middleware('auth')
         Route::post('banks/update-priorities', [BankController::class, 'updatePriorities'])->name('banks.update-priorities');
         Route::post('banks/bulk-update-status', [BankController::class, 'bulkUpdateStatus'])->name('banks.bulk-update-status');
         Route::resource('sites', SiteController::class);
+        Route::post('sites/{site}/regenerate-token', [SiteController::class, 'regenerateToken'])->name('sites.regenerate-token');
         Route::resource('blacklists', BlacklistController::class);
         Route::resource('settings', SettingController::class)->only(['index']);
 

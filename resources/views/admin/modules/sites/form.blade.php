@@ -103,18 +103,26 @@
                         <label class="col-lg-3 col-form-label">{{ __('Site Token') }}:</label>
                         <div class="col-lg-9">
                             @if(isset($item) && $item->token)
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    value="{{ $item->token }}"
-                                    readonly
-                                />
+                                <div class="input-group">
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ $item->token }}"
+                                        readonly
+                                    />
+                                    <form action="{{ route('admin.sites.regenerate-token', $item->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn btn-outline-secondary">
+                                            {{ __('Regenerate') }}
+                                        </button>
+                                    </form>
+                                </div>
                                 <div class="form-text">
-                                    {{ __('Use this value as the Bearer token for this site\'s API requests.') }}
+                                    {{ __('Use this value as the Bearer token for this site\'s API requests. Regenerating will invalidate the old token immediately.') }}
                                 </div>
                             @else
                                 <p class="form-control-plaintext text-muted mb-0">
-                                    {{ __('Token will be generated automatically after creating the site.') }}
+                                    {{ __('Token will be generated automatically after creating the site. You can regenerate it later from the edit screen.') }}
                                 </p>
                             @endif
                         </div>

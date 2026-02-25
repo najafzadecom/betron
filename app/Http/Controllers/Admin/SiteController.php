@@ -127,6 +127,25 @@ class SiteController extends BaseController
         return $this->redirectSuccess('admin.sites.index');
     }
 
+    /**
+     * Regenerate API token for a site (admin only).
+     */
+    public function regenerateToken(string $id): RedirectResponse
+    {
+        $site = $this->service->getById($id);
+
+        do {
+            $token = Str::random(64);
+        } while (Site::where('token', $token)->exists());
+
+        $site->token = $token;
+        $site->save();
+
+        return redirect()
+            ->route('admin.sites.edit', $id)
+            ->with('success', __('API token regenerated successfully.'));
+    }
+
     public function destroy(string $id): JsonResponse
     {
         // Check if delete confirmation was received
