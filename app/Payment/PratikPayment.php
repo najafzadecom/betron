@@ -25,7 +25,7 @@ class PratikPayment
         $this->branchCode = config('pratik.branch_code');
         $this->channelID = config('pratik.channel_id');
 
-        $this->accessToken = Cache::get('pratik-token');
+        // $this->accessToken = Cache::get('pratik-token');
     }
 
     /**
