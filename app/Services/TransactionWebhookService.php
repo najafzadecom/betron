@@ -132,7 +132,7 @@ class TransactionWebhookService
         return [
             'transaction_id' => $transaction->id,
             'uuid' => $transaction->uuid,
-            'user_id' => $transaction->user_id,
+            'user_id' => $transaction->user_id !== null ? (string) $transaction->user_id : null,
             'amount' => $transaction->amount,
             'currency' => $transaction->currency->value ?? $transaction->currency,
             'status' => $transaction->status->value ?? $transaction->status,

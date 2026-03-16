@@ -133,7 +133,7 @@ class WithdrawalWebhookService
         $payload = [
             'withdrawal_id' => $withdrawal->id,
             'uuid' => $withdrawal->uuid,
-            'user_id' => $withdrawal->user_id,
+            'user_id' => $withdrawal->user_id !== null ? (string) $withdrawal->user_id : null,
             'first_name' => $withdrawal->first_name,
             'last_name' => $withdrawal->last_name,
             'bank_id' => $withdrawal->bank_id,
