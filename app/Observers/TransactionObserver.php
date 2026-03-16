@@ -9,6 +9,7 @@ use App\Models\Transaction as Model;
 use App\Models\Wallet;
 use App\Services\VendorService;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class TransactionObserver
 {
@@ -78,7 +79,8 @@ class TransactionObserver
 
         // Check if paid_status changed to true and send webhook via queue
         if ($data->wasChanged('paid_status') && $data->paid_status) {
-            // Dispatch webhook job to queue (only when paid_status becomes true)
+            Log::info('paid_status: ', ['data' => $data->paid_status]);
+            // afterCommit() default true: job transaction commit sonrası push edilir;
             SendTransactionWebhookJob::dispatch($data->id);
         }
 
@@ -145,3 +147,4 @@ class TransactionObserver
         Cache::forget($this->prefix . $data->id);
     }
 }
+

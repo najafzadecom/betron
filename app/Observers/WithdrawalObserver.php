@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Enums\WithdrawalStatus;
+use App\Jobs\SendWithdrawalWebhookJob;
 use App\Models\Withdrawal as Model;
 use App\Services\VendorService;
 use Illuminate\Support\Facades\Cache;
@@ -24,6 +25,10 @@ class WithdrawalObserver
     public function updated(Model $data): void
     {
         Cache::rememberForever($this->prefix . $data->id, fn () => $data);
+
+        if ($data->wasChanged('paid_status') && $data->paid_status) {
+            SendWithdrawalWebhookJob::dispatch($data->id);
+        }
 
         // Check if withdrawal status changed to confirmed
         if ($data->wasChanged('status')) {
