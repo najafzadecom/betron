@@ -31,11 +31,18 @@ class TransactionWebhookService
      */
     public function sendPaidStatusChange(Transaction $transaction): bool
     {
-        if (!$this->enabled || empty($this->webhookUrls) || empty($this->secretKey)) {
+        // Determine URLs: prefer site-specific callback, otherwise global config
+        $urls = $this->webhookUrls;
+        $site = $transaction->site ?? null;
+        if ($site && !empty($site->transaction_callback_url)) {
+            $urls = [$site->transaction_callback_url];
+        }
+
+        if (!$this->enabled || empty($urls) || empty($this->secretKey)) {
             Log::channel('transaction_webhook')->warning('Webhook skipped (disabled or missing config)', [
                 'transaction_id' => $transaction->id,
                 'enabled' => $this->enabled,
-                'has_urls' => !empty($this->webhookUrls),
+                'has_urls' => !empty($urls),
                 'has_secret' => !empty($this->secretKey),
             ]);
             return false;
@@ -51,7 +58,7 @@ class TransactionWebhookService
 
         $allSuccess = true;
 
-        foreach ($this->webhookUrls as $index => $webhookUrl) {
+        foreach ($urls as $index => $webhookUrl) {
             try {
                 $response = Http::timeout($this->timeout)
                     ->withHeaders($headers)

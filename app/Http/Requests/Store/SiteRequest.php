@@ -27,6 +27,8 @@ class SiteRequest extends FormRequest
             'transaction_fee' => 'required|numeric|min:0|max:100',
             'withdrawal_fee' => 'required|numeric|min:0|max:100',
             'settlement_fee' => 'required|numeric|min:0|max:100',
+            'transaction_callback_url' => 'nullable|url|max:255',
+            'withdrawal_callback_url' => 'nullable|url|max:255',
             'status' => 'boolean'
         ];
     }

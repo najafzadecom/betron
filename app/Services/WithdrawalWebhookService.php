@@ -30,11 +30,18 @@ class WithdrawalWebhookService
      */
     public function sendPaidStatusChange(Withdrawal $withdrawal): bool
     {
-        if (!$this->enabled || empty($this->webhookUrls) || empty($this->secretKey)) {
+        // Determine URLs: prefer site-specific callback, otherwise global config
+        $urls = $this->webhookUrls;
+        $site = $withdrawal->site ?? null;
+        if ($site && !empty($site->withdrawal_callback_url)) {
+            $urls = [$site->withdrawal_callback_url];
+        }
+
+        if (!$this->enabled || empty($urls) || empty($this->secretKey)) {
             Log::channel('withdrawal_webhook')->warning('Withdrawal webhook skipped (disabled or missing config)', [
                 'withdrawal_id' => $withdrawal->id,
                 'enabled' => $this->enabled,
-                'has_urls' => !empty($this->webhookUrls),
+                'has_urls' => !empty($urls),
                 'has_secret' => !empty($this->secretKey),
             ]);
             return false;
@@ -50,7 +57,7 @@ class WithdrawalWebhookService
 
         $allSuccess = true;
 
-        foreach ($this->webhookUrls as $index => $webhookUrl) {
+        foreach ($urls as $index => $webhookUrl) {
             try {
                 $response = Http::timeout($this->timeout)
                     ->withHeaders($headers)

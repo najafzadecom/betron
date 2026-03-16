@@ -210,7 +210,11 @@
                     </div>
                     <div class="row mb-2">
                         <div class="col-12 col-sm-5 fw-semibold text-muted">{{ __('Token') }}:</div>
-                        <div class="col-12 col-sm-7 text-sm-end" id="token">-</div>
+                        <div class="col-12 col-sm-7 text-sm-end">
+                            <code id="token" class="d-inline-block text-truncate" style="max-width: 100%;">
+                                -
+                            </code>
+                        </div>
                     </div>
                     <div class="row mb-2">
                         <div class="col-12 col-sm-5 fw-semibold text-muted">{{ __('Status') }}:</div>

@@ -194,6 +194,42 @@
                     </div>
 
                     <div class="row mb-3">
+                        <label class="col-lg-3 col-form-label">{{ __('Transaction Callback URL') }}:</label>
+                        <div class="col-lg-9">
+                            <input
+                                type="url"
+                                name="transaction_callback_url"
+                                class="form-control @error('transaction_callback_url') is-invalid @enderror"
+                                placeholder="{{ __('Optional. If set, overrides global transaction webhook URL(s).') }}"
+                                value="{{ old('transaction_callback_url', $item->transaction_callback_url ?? '') }}"
+                            />
+                            @error('transaction_callback_url')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-lg-3 col-form-label">{{ __('Withdrawal Callback URL') }}:</label>
+                        <div class="col-lg-9">
+                            <input
+                                type="url"
+                                name="withdrawal_callback_url"
+                                class="form-control @error('withdrawal_callback_url') is-invalid @enderror"
+                                placeholder="{{ __('Optional. If set, overrides global withdrawal webhook URL(s).') }}"
+                                value="{{ old('withdrawal_callback_url', $item->withdrawal_callback_url ?? '') }}"
+                            />
+                            @error('withdrawal_callback_url')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
                         <label class="col-lg-3 col-form-label">{{ __('Status') }}:</label>
                         <div class="col-lg-9">
                             <div class="form-check form-switch">
