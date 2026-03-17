@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Betron API Documentation</title>
+    <title>{{ config('app.name', 'Betron') }} API Documentation</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Lucide icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -347,7 +347,7 @@
     <div class="page">
         <nav class="sidebar">
             <div class="brand">
-                <div class="brand-name">Betron</div>
+                <div class="brand-name">{{ config('app.name', 'Betron') }}</div>
                 <div class="brand-sub">API Documentation</div>
             </div>
 
@@ -395,16 +395,16 @@
 
             <div class="nav-version">
                 API Version: <strong>v1.0.0</strong><br>
-                Base URL: <code>https://betron.org/api/v1</code>
+                Base URL: <code>{{ rtrim(config('app.url', 'https://betron.org'), '/') }}/api/v1</code>
             </div>
         </nav>
 
         <main class="content">
             <header class="header" id="introduction">
                 <div>
-                    <h1 class="header-title">Betron API Documentation</h1>
+                    <h1 class="header-title">{{ config('app.name', 'Betron') }} API Documentation</h1>
                     <p class="header-subtitle">
-                        Welcome to the Betron API documentation. This guide explains how to integrate Betron’s payment
+                        Welcome to the {{ config('app.name', 'Betron') }} API documentation. This guide explains how to integrate {{ config('app.name', 'Betron') }}’s payment
                         services into your application using simple, REST-style endpoints.
                     </p>
                 </div>
@@ -415,21 +415,21 @@
                     </div>
                     <div class="badge">
                         <span class="badge-strong">Base URL</span>
-                        <span>https://betron.org/api/v1</span>
+                        <span>{{ rtrim(config('app.url', 'https://betron.org'), '/') }}/api/v1</span>
                     </div>
                 </div>
             </header>
 
             <section id="quickstart">
                 <h2>Quickstart</h2>
-                <p><strong>Before you begin:</strong> contact the Betron team to obtain your API Key and API Secret, configure
+                <p><strong>Before you begin:</strong> contact the {{ config('app.name', 'Betron') }} team to obtain your API Key and API Secret, configure
                     your callback URLs, and whitelist your server IP addresses.</p>
 
                 <div class="card-grid">
                     <div class="card">
                         <div class="card-title">1. Get your credentials</div>
                         <div class="card-text">
-                            - API Key and API Secret from Betron<br>
+                            - API Key and API Secret from {{ config('app.name', 'Betron') }}<br>
                             - Callback URLs for transactions and withdrawals
                         </div>
                     </div>
@@ -457,7 +457,7 @@
 
             <section id="authentication">
                 <h2>Authentication</h2>
-                <p>All requests to the Betron API must be made over HTTPS and include a bearer token in the
+                <p>All requests to the {{ config('app.name', 'Betron') }} API must be made over HTTPS and include a bearer token in the
                     <code>Authorization</code> header. Each site has its own unique API token, generated and managed
                     by the Betron admin panel.</p>
 
@@ -466,13 +466,13 @@
                 <div class="code-block">
                     <div class="code-label">Headers</div>
 <pre>GET /api/v1/bank HTTP/1.1
-Host: betron.org
+Host: {{ parse_url(config('app.url', 'https://betron.org'), PHP_URL_HOST) }}
 Authorization: Bearer YOUR_API_TOKEN
 Accept: application/json</pre>
                 </div>
 
-                <p class="small">
-                    The token value is provided by the Betron team and must match the configured API token on the server.
+                    <p class="small">
+                    The token value is provided by the {{ config('app.name', 'Betron') }} team and must match the configured API token on the server.
                     If the header is missing, empty, or invalid, the API returns a <code>401 Unauthorized</code> response.
                 </p>
 
@@ -619,8 +619,8 @@ X-Signature: HMAC_SIGNATURE_HERE</pre>
                         <tr>
                             <td><code>site_id</code>, <code>site_name</code>, <code>transaction_fee</code></td>
                             <td>mixed</td>
-                            <td>set by Betron</td>
-                            <td>These values are injected by Betron based on your API token; you do not need to send them.</td>
+                            <td>set by {{ config('app.name', 'Betron') }}</td>
+                            <td>These values are injected by {{ config('app.name', 'Betron') }} based on your API token; you do not need to send them.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -648,7 +648,7 @@ X-Signature: HMAC_SIGNATURE_HERE</pre>
   "data": {
     "transaction_uuid": "d3a6b9f0-1234-5678-9abc-def012345678",
     "receiver_iban": "TR000000000000000000000000",
-    "receiver_name": "Betron Payment Account"
+    "receiver_name": "{{ config('app.name', 'Betron') }} Payment Account"
   }
 }</pre>
                 </div>
@@ -694,8 +694,8 @@ X-Signature: HMAC_SIGNATURE_HERE</pre>
     "currency": "TRY",
     "order_id": 12345,
     "receiver_iban": "TR000000000000000000000000",
-    "receiver_name": "Betron Payment Account",
-    "receiver": "Betron Payment Account",
+    "receiver_name": "{{ config('app.name', 'Betron') }} Payment Account",
+    "receiver": "{{ config('app.name', 'Betron') }} Payment Account",
     "bank_id": 1,
     "bank_name": "Bank A",
     "status": "success",
@@ -749,7 +749,7 @@ X-Signature: HMAC_SIGNATURE_HERE</pre>
     "amount": 1000.0,
     "order_id": "WITHDRAW-98765",
     "site_id": 1,
-    "site_name": "Betron",
+    "site_name": "{{ config('app.name', 'Betron') }}",
     "sender_name": null,
     "sender_iban": null,
     "status": 0,
@@ -784,8 +784,8 @@ X-Signature: HMAC_SIGNATURE_HERE</pre>
     "amount": 1000.0,
     "order_id": "WITHDRAW-98765",
     "site_id": 1,
-    "site_name": "Betron",
-    "sender_name": "Betron",
+    "site_name": "{{ config('app.name', 'Betron') }}",
+    "sender_name": "{{ config('app.name', 'Betron') }}",
     "sender_iban": "TR000000000000000000000000",
     "status": 1,
     "paid_status": true,
@@ -798,7 +798,7 @@ X-Signature: HMAC_SIGNATURE_HERE</pre>
 
             <section id="wallets">
                 <h2>Wallets</h2>
-                <p>Wallet endpoints allow you to view your Betron balances.</p>
+                <p>Wallet endpoints allow you to view your {{ config('app.name', 'Betron') }} balances.</p>
 
                 <h3>Get wallet</h3>
                 <div class="endpoint">
@@ -823,11 +823,11 @@ X-Signature: HMAC_SIGNATURE_HERE</pre>
 
             <section id="callbacks">
                 <h2>Callbacks</h2>
-                <p>Betron sends webhook callbacks when a transaction’s <code>paid_status</code> becomes <code>true</code>.
+                <p>{{ config('app.name', 'Betron') }} sends webhook callbacks when a transaction’s <code>paid_status</code> becomes <code>true</code>.
                     Callbacks are sent to one or more URLs configured on your side.</p>
 
                 <h3>Configuring webhook URLs & secret</h3>
-                <p>In your Betron environment, the following variables control webhook delivery:</p>
+                <p>In your {{ config('app.name', 'Betron') }} environment, the following variables control webhook delivery:</p>
                 <ul>
                     <li><code>TRANSACTION_WEBHOOK_URL</code> – single callback URL (backwards compatible)</li>
                     <li><code>TRANSACTION_WEBHOOK_URLS</code> – comma‑separated list of URLs (e.g. <code>https://a.com/hook,https://b.com/hook</code>)</li>
@@ -836,7 +836,7 @@ X-Signature: HMAC_SIGNATURE_HERE</pre>
                 </ul>
 
                 <h3>HTTP request</h3>
-                <p>For each successful transaction update, Betron will perform an HTTP <strong>POST</strong> request to every configured URL.</p>
+                <p>For each successful transaction update, {{ config('app.name', 'Betron') }} will perform an HTTP <strong>POST</strong> request to every configured URL.</p>
 
                 <div class="code-block">
                     <div class="code-label">Headers</div>
@@ -862,12 +862,12 @@ X-Timestamp: 1737654321</pre>
   "last_name": "Doe",
   "phone": "+905551112233",
   "receiver_iban": "TR000000000000000000000000",
-  "receiver_name": "Betron Payment Account",
+  "receiver_name": "{{ config('app.name', 'Betron') }} Payment Account",
   "bank_id": 1,
   "bank_name": "Bank A",
   "wallet_id": 10,
   "site_id": 1,
-  "site_name": "Betron",
+  "site_name": "{{ config('app.name', 'Betron') }}",
   "order_id": 12345,
   "payment_method": "manual",
   "created_at": "2026-02-24T12:34:56Z",
@@ -878,7 +878,7 @@ X-Timestamp: 1737654321</pre>
                 </div>
 
                 <h3>How the HMAC signature is generated</h3>
-                <p>Betron signs each callback using HMAC‑SHA256 with your secret key.</p>
+                <p>{{ config('app.name', 'Betron') }} signs each callback using HMAC‑SHA256 with your secret key.</p>
                 <ol>
                     <li>Sort the JSON payload by keys (ascending).</li>
                     <li>Build the <em>signature string</em>:
@@ -927,7 +927,7 @@ if (!hash_equals($expected, $received)) {
 
             <section id="errors">
                 <h2>Errors</h2>
-                <p>Betron uses standard HTTP status codes and a consistent JSON structure for error responses.</p>
+                <p>{{ config('app.name', 'Betron') }} uses standard HTTP status codes and a consistent JSON structure for error responses.</p>
 
                 <table class="table">
                     <thead>
