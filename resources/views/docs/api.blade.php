@@ -459,7 +459,7 @@
                 <h2>Authentication</h2>
                 <p>All requests to the {{ config('app.name', 'Betron') }} API must be made over HTTPS and include a bearer token in the
                     <code>Authorization</code> header. Each site has its own unique API token, generated and managed
-                    by the Betron admin panel.</p>
+                    by the {{ config('app.name', 'Betron') }} admin panel.</p>
 
                 <h3>Bearer token</h3>
                 <p class="small">Example headers:</p>
