@@ -113,6 +113,7 @@
                             <input
                                 type="number"
                                 name="transaction_fee"
+step="0.01"
                                 class="form-control @error('transaction_fee') is-invalid @enderror"
                                 placeholder="{{ __('Transaction Fee') }}"
                                 value="{{ old('transaction_fee', $item->transaction_fee ?? '') }}"
@@ -131,6 +132,7 @@
                             <input
                                 type="number"
                                 name="withdrawal_fee"
+step="0.01"
                                 class="form-control @error('withdrawal_fee') is-invalid @enderror"
                                 placeholder="{{ __('Withdrawal Fee') }}"
                                 value="{{ old('withdrawal_fee', $item->withdrawal_fee ?? '') }}"
@@ -149,6 +151,7 @@
                             <input
                                 type="number"
                                 name="settlement_fee"
+step="0.01"
                                 class="form-control @error('settlement_fee') is-invalid @enderror"
                                 placeholder="{{ __('Settlement Fee') }}"
                                 value="{{ old('settlement_fee', $item->settlement_fee ?? '') }}"
