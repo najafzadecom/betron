@@ -42,6 +42,8 @@ class Transaction extends Model
         'currency' => Currency::class,
         'payment_method' => PaymentProvider::class,
         'accepted_at' => 'datetime',
+        'user_id' => 'string',
+        'order_id' => 'string',
     ];
 
     protected $with = ['wallet', 'site', 'bank', 'vendor'];
