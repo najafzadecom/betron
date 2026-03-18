@@ -26,11 +26,11 @@ class TransactionRequest extends FormRequest
             'amount' => 'required|numeric|min:0.01',
             'bank_id' => 'required|integer|exists:banks,id',
             'client_ip' => 'required|ip',
-            'order_id' => 'required|integer',
+            'order_id' => 'required|string',
             'site_id' => 'required|integer|exists:sites,id',
             'site_name' => 'required|string|max:255',
             'transaction_fee' => 'required|numeric|min:0.01',
-            'user_id' => 'required|integer',
+            'user_id' => 'required|string',
         ];
     }
 }
