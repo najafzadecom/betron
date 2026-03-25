@@ -61,6 +61,8 @@ class WithdrawalController extends BaseController
         if (!isset($data['payment_method'])) {
             $data['payment_method'] = \App\Enums\PaymentProvider::Manual->value;
         }
+        
+        unset($data['payment_method']);
 
         $withdrawal = $this->withdrawalService->create($data);
 
