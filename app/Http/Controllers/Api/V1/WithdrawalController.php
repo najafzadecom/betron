@@ -53,7 +53,7 @@ class WithdrawalController extends BaseController
 
         $data['bank_name'] = $bank->name;
         $data['fee'] = $data['withdrawal_fee'];
-        $data['fee_amount'] = ($data['amount'] * $data['withdrawal_fee']) / 100;
+        $data['fee_amount'] = ($data['amount'] * 0.01) / 100;
 
         unset($data['withdrawal_fee']);
 
