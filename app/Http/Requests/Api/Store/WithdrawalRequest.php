@@ -29,7 +29,7 @@ class WithdrawalRequest extends FormRequest
             'amount' => 'required|numeric|min:0.01',
             'order_id' => 'nullable|string|max:255',
             'site_id' => 'required|integer|min:1',
-            'withdrawal_fee' => 'required|numeric|min:0.01',
+            'withdrawal_fee' => 'required|numeric',
             'vendor_id' => 'nullable|exists:vendors,id',
         ];
     }
