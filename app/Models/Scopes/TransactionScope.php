@@ -68,10 +68,8 @@ class TransactionScope implements Scope
 
         if ($request->filled('user_id')) {
             $userId = $request->get('user_id');
-            // Only apply filter if user_id is numeric (bigint column)
-            if (is_numeric($userId)) {
-                $builder->where('user_id', (int)$userId);
-            }
+            $userId = trim((string) $userId);
+            $builder->where('user_id', $userId);
         }
 
         if ($request->filled('currency')) {

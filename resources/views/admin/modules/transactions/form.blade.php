@@ -51,7 +51,7 @@
                         <label class="col-lg-3 col-form-label">{{ __('User ID') }}:</label>
                         <div class="col-lg-9">
                             <input
-                                type="number"
+                                type="text"
                                 name="user_id"
                                 class="form-control @error('user_id') is-invalid @enderror"
                                 placeholder="{{ __('User ID') }}"
@@ -68,7 +68,7 @@
                         <label class="col-lg-3 col-form-label">{{ __('Order ID') }}:</label>
                         <div class="col-lg-9">
                             <input
-                                type="number"
+                                type="text"
                                 name="order_id"
                                 class="form-control @error('order_id') is-invalid @enderror"
                                 placeholder="{{ __('Order ID') }}"

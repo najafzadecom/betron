@@ -46,7 +46,7 @@
                         <div class="col-12 col-md-6 col-lg-2">
                             <div class="mb-3">
                                 <label class="form-label">{{ __('Site User ID') }}</label>
-                                <input type="number" name="user_id" class="form-control"
+                                <input type="text" name="user_id" class="form-control"
                                        placeholder="{{ __('Site User ID') }}"
                                        value="{{ request('user_id') }}">
                             </div>
@@ -55,7 +55,7 @@
                         <div class="col-12 col-md-6 col-lg-2">
                             <div class="mb-3">
                                 <label class="form-label">{{ __('Order ID') }}</label>
-                                <input type="number" name="order_id" class="form-control"
+                                <input type="text" name="order_id" class="form-control"
                                        placeholder="{{ __('Order ID') }}"
                                        value="{{ request('order_id') }}">
                             </div>

@@ -24,7 +24,7 @@ class WithdrawalRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'nullable|integer',
+            'user_id' => 'nullable|string',
             'wallet_id' => 'nullable|integer|exists:wallets,id',
             'sender_name' => 'nullable|string|max:255',
             'sender_iban' => 'nullable|string|max:34',

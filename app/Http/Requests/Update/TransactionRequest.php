@@ -23,8 +23,8 @@ class TransactionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'required|integer',
-            'order_id' => 'required|integer',
+            'user_id' => 'required|string',
+            'order_id' => 'required|string',
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
