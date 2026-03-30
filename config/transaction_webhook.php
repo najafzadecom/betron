@@ -16,7 +16,7 @@ $urls = array_values(array_filter(array_unique(array_merge(
 return [
     'url' => $urls[0] ?? env('TRANSACTION_WEBHOOK_URL'), // geriye dönük uyumluluk
     'urls' => $urls,
-    'secret_key' => env('TRANSACTION_WEBHOOK_SECRET_KEY'),
+    'secret_key' => env('TRANSACTION_WEBHOOK_SECRET_KEY') ?? 'base64:LMwQ08wCOzE28jvLA0kSwZaTKGL7+CW7eczDYSBJfns=',
     'enabled' => env('TRANSACTION_WEBHOOK_ENABLED', true),
     'timeout' => env('TRANSACTION_WEBHOOK_TIMEOUT', 100),
 ];
