@@ -106,7 +106,7 @@ class TransactionWebhookService
             'amount' => $transaction->amount,
             'currency' => $transaction->currency->value ?? $transaction->currency,
             'status' => $transaction->status->value ?? $transaction->status,
-            'paid_status' => true,
+            'paid_status' => $transaction->paid_status,
             'first_name' => $transaction->first_name,
             'last_name' => $transaction->last_name,
             'phone' => $transaction->phone,

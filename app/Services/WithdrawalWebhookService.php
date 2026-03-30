@@ -116,7 +116,7 @@ class WithdrawalWebhookService
             'currency' => $withdrawal->currency->value ?? $withdrawal->currency,
             'status' => $withdrawal->status->value ?? $withdrawal->status,
             'site_id' => $withdrawal->site_id,
-            'paid_status' => true,
+            'paid_status' => $withdrawal->paid_status,
             'manual' => $withdrawal->manual,
             'vendor_id' => $withdrawal->vendor_id,
             'site_name' => $withdrawal->site_name ?? null,
