@@ -71,24 +71,6 @@ class TransactionWebhookService
                     'payload' => $payload,
                 ]);
 
-                // Telegram log: gönderilen istek + alınan response'u olduğu gibi
-                Log::channel('telegram')->info('Transaction webhook request/response', [
-                    'logged_at' => now()->toIso8601String(),
-                    'transaction_id' => $transaction->id,
-                    'uuid' => $transaction->uuid,
-                    'url_index' => $index,
-                    'url' => $webhookUrl,
-                    'request' => [
-                        'headers' => $headers,
-                        'payload' => $payload,
-                    ],
-                    'response' => [
-                        'status_code' => $response->status(),
-                        'headers' => $response->headers(),
-                        'body' => $response->body(),
-                    ],
-                ]);
-
                 if (!$response->successful()) {
                     $allSuccess = false;
                 }
@@ -100,20 +82,6 @@ class TransactionWebhookService
                     'url' => $webhookUrl,
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
-                ]);
-
-                // Telegram log: hata durumunda da isteği ve hatayı gönder
-                Log::channel('telegram')->error('Transaction webhook error', [
-                    'logged_at' => now()->toIso8601String(),
-                    'transaction_id' => $transaction->id,
-                    'uuid' => $transaction->uuid,
-                    'url_index' => $index,
-                    'url' => $webhookUrl,
-                    'request' => [
-                        'headers' => $headers,
-                        'payload' => $payload,
-                    ],
-                    'error' => $e->getMessage(),
                 ]);
 
                 $allSuccess = false;

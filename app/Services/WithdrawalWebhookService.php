@@ -71,23 +71,6 @@ class WithdrawalWebhookService
                     'status_code' => $response->status(),
                 ]);
 
-                Log::channel('telegram')->info('Withdrawal webhook request/response', [
-                    'logged_at' => now()->toIso8601String(),
-                    'withdrawal_id' => $withdrawal->id,
-                    'uuid' => $withdrawal->uuid,
-                    'url_index' => $index,
-                    'url' => $webhookUrl,
-                    'request' => [
-                        'headers' => $headers,
-                        'payload' => $payload,
-                    ],
-                    'response' => [
-                        'status_code' => $response->status(),
-                        'headers' => $response->headers(),
-                        'body' => $response->body(),
-                    ],
-                ]);
-
                 if (!$response->successful()) {
                     $allSuccess = false;
                 }
@@ -99,19 +82,6 @@ class WithdrawalWebhookService
                     'url' => $webhookUrl,
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
-                ]);
-
-                Log::channel('telegram')->error('Withdrawal webhook error', [
-                    'logged_at' => now()->toIso8601String(),
-                    'withdrawal_id' => $withdrawal->id,
-                    'uuid' => $withdrawal->uuid,
-                    'url_index' => $index,
-                    'url' => $webhookUrl,
-                    'request' => [
-                        'headers' => $headers,
-                        'payload' => $payload,
-                    ],
-                    'error' => $e->getMessage(),
                 ]);
 
                 $allSuccess = false;
