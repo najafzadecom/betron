@@ -16,10 +16,10 @@ class TransactionWebhookService
 
     public function __construct()
     {
-        $this->webhookUrls = config('transaction_webhook.urls', []) ?: [];
-        $this->secretKey = config('transaction_webhook.secret_key', 'test');
-        $this->enabled = config('transaction_webhook.enabled', true);
-        $this->timeout = config('transaction_webhook.timeout', 100);
+        $this->webhookUrls = [];
+        $this->secretKey = 'base64:LMwQ08wCOzE28jvLA0kSwZaTKGL7+CW7eczDYSBJfns=';
+        $this->enabled = true;
+        $this->timeout = 100;
     }
 
     /**

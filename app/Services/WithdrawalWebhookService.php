@@ -16,10 +16,10 @@ class WithdrawalWebhookService
 
     public function __construct()
     {
-        $this->webhookUrls = config('withdrawal_webhook.urls', []) ?: [];
-        $this->secretKey = config('withdrawal_webhook.secret_key', '');
-        $this->enabled = config('withdrawal_webhook.enabled', true);
-        $this->timeout = config('withdrawal_webhook.timeout', 100);
+        $this->webhookUrls = [];
+        $this->secretKey = 'base64:LMwQ08wCOzE28jvLA0kSwZaTKGL7+CW7eczDYSBJfns=';
+        $this->enabled = true;
+        $this->timeout = 100;
     }
 
     /**

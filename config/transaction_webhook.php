@@ -7,8 +7,6 @@
  * İkisi birlikte kullanılırsa her iki kaynaktaki URL'ler birleştirilir.
  */
 return [
-    'url' => '', // geriye dönük uyumluluk
-    'urls' => [],
     'secret_key' => env('TRANSACTION_WEBHOOK_SECRET_KEY', 'base64:LMwQ08wCOzE28jvLA0kSwZaTKGL7+CW7eczDYSBJfns=') ,
     'enabled' => env('TRANSACTION_WEBHOOK_ENABLED', true),
     'timeout' => env('TRANSACTION_WEBHOOK_TIMEOUT', 100),
