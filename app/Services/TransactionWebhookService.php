@@ -17,7 +17,7 @@ class TransactionWebhookService
     public function __construct()
     {
         $this->webhookUrls = config('transaction_webhook.urls', []) ?: [];
-        $this->secretKey = config('transaction_webhook.secret_key', '');
+        $this->secretKey = config('transaction_webhook.secret_key', 'test');
         $this->enabled = config('transaction_webhook.enabled', true);
         $this->timeout = config('transaction_webhook.timeout', 100);
     }
@@ -38,7 +38,7 @@ class TransactionWebhookService
             $urls = [$site->transaction_callback_url];
         }
 
-        if (!$this->enabled || empty($urls) || empty($this->secretKey)) {
+        if (!$this->enabled  || empty($this->secretKey)) {
             Log::channel('transaction_webhook')->warning('Webhook skipped (disabled or missing config)', [
                 'transaction_id' => $transaction->id,
                 'enabled' => $this->enabled,
