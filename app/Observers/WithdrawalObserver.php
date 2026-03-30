@@ -26,9 +26,7 @@ class WithdrawalObserver
     {
         Cache::rememberForever($this->prefix . $data->id, fn () => $data);
 
-        if ($data->wasChanged('paid_status') && $data->paid_status) {
             SendWithdrawalWebhookJob::dispatch($data->id);
-        }
 
         // Check if withdrawal status changed to confirmed
         if ($data->wasChanged('status')) {

@@ -78,11 +78,8 @@ class TransactionObserver
         Cache::rememberForever($this->prefix . $data->id, fn () => $data);
 
         // Check if paid_status changed to true and send webhook via queue
-        if ($data->wasChanged('paid_status') && $data->paid_status) {
-            Log::info('paid_status: ', ['data' => $data->paid_status]);
             // afterCommit() default true: job transaction commit sonrası push edilir;
             SendTransactionWebhookJob::dispatch($data->id);
-        }
 
         // Check if transaction status changed to confirmed
         if ($data->wasChanged('status')) {
