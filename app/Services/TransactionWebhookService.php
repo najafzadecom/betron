@@ -64,6 +64,8 @@ class TransactionWebhookService
                     ->withHeaders($headers)
                     ->post($webhookUrl, $payload);
 
+                    Log::info($response->body());
+
                 // File log (mevcut)
                 Log::channel('transaction_webhook')->info('Transaction webhook sent', [
                     'payload' => $payload,
