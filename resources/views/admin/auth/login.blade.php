@@ -28,7 +28,7 @@
     <div class="container-fluid">
         <div class="navbar-brand">
             <a href="{{ route('admin.dashboard') }}" class="d-inline-flex align-items-center">
-                <img src="{{ asset('admin/assets/images/betron.png') }}" alt="">
+                <span class="text-white fw-semibold fs-4 lh-1">{{ config('app.name', 'Betron') }}</span>
             </a>
         </div>
     </div>
@@ -45,7 +45,7 @@
                         <div class="card-body">
                             <div class="text-center mb-3">
                                 <div class="d-inline-flex align-items-center justify-content-center mb-4 mt-2">
-                                    <img src="{{ asset('admin/assets/images/betron.png') }}" class="h-48px" alt="">
+                                    <span class="fw-semibold text-primary fs-3">{{ config('app.name', 'Betron') }}</span>
                                 </div>
                                 <h5 class="mb-0">{{ __('Login to your account') }}</h5>
                                 <span class="d-block text-muted">{{ __('Enter your credentials below') }}</span>

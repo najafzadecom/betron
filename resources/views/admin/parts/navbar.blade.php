@@ -8,7 +8,7 @@
 
         <div class="navbar-brand flex-1 flex-lg-0">
             <a href="{{ route('admin.dashboard') }}" class="d-inline-flex align-items-center">
-                <img src="{{ asset('admin/assets/images/betron.png') }}" alt="">
+                <span class="text-white fw-semibold fs-5 lh-1">{{ config('app.name', 'Betron') }}</span>
             </a>
         </div>
 
