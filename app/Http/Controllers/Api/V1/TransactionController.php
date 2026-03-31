@@ -35,6 +35,7 @@ class TransactionController extends BaseController
         }
 
         $data = $this->prepareBaseData($request->validated());
+        $data['status'] = 1;
 
         return $this->isManualTransaction($data['amount'])
             ? $this->handleManualTransaction($data)
