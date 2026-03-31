@@ -20,6 +20,12 @@ Route::domain('docs.bankexpress3.com')->group(function () {
     })->name('docs.api');
 });
 
+Route::domain('docs.pay2far.com')->group(function () {
+    Route::get('/', function () {
+        return view('docs.api');
+    })->name('docs.api');
+});
+
 Route::get('/', [HomeController::class, 'index'])->name('index');
 
 Route::prefix('paraqr/')->as('paraqr.')->group(function () {
