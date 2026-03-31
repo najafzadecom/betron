@@ -7,7 +7,7 @@
                 <div class="card">
                     <div class="card-header d-flex align-items-center">
                         <h5 class="mb-0">{{ __('Incoming Transactions') }}</h5>
-                        <span class="badge bg-success ms-auto">{{ $transactions->count() }}</span>
+                        <span class="badge bg-success ms-auto">{{ $transactions?->count() ?? 0 }}</span>
                     </div>
                     <table id="transactions-table" class="table table-hover dataTable">
                         <thead>
@@ -29,7 +29,7 @@
                 <div class="card">
                     <div class="card-header d-flex align-items-center">
                         <h5 class="mb-0">{{ __('Outgoing Transactions') }}</h5>
-                        <span class="badge bg-danger ms-auto">{{ $withdrawals->count() }}</span>
+                        <span class="badge bg-danger ms-auto">{{ $withdrawals?->count() ?? 0 }}</span>
                     </div>
                     <table id="withdrawals-table" class="table table-hover">
                         <thead>
@@ -57,13 +57,13 @@
                         <div class="col-3 mb-3">
                             <p><i class="ph-arrow-down bg-success bg-opacity-10 text-success lh-1 rounded-pill p-2"></i>
                             </p>
-                            <h5 class="mb-0">{{ $transactions_count }}</h5>
+                            <h5 class="mb-0">{{ $transactions_count ?? 0 }}</h5>
                             <span class="text-muted fs-sm">{{ __('Incoming Transactions') }}</span>
                         </div>
 
                         <div class="col-3 mb-3">
                             <p><i class="ph-arrow-up bg-danger bg-opacity-10 text-danger lh-1 rounded-pill p-2"></i></p>
-                            <h5 class="mb-0">{{ $withdrawals_count }}</h5>
+                            <h5 class="mb-0">{{ $withdrawals_count ?? 0 }}</h5>
                             <span class="text-muted fs-sm">{{ __('Outgoing Transactions') }}</span>
                         </div>
 
@@ -71,7 +71,7 @@
                             <p>
                                 <i class="ph-currency-circle-dollar bg-primary bg-opacity-10 text-primary lh-1 rounded-pill p-2"></i>
                             </p>
-                            <h5 class="mb-0">₺{{ number_format($siteStatistics->pay_in_total, 2) }}</h5>
+                            <h5 class="mb-0">₺{{ number_format($siteStatistics?->pay_in_total ?? 0, 2) }}</h5>
                             <span class="text-muted fs-sm">{{ __('Incoming Amount') }}</span>
                         </div>
 
@@ -79,7 +79,7 @@
                             <p>
                                 <i class="ph-currency-circle-dollar bg-primary bg-opacity-10 text-primary lh-1 rounded-pill p-2"></i>
                             </p>
-                            <h5 class="mb-0">₺{{ number_format($siteStatistics->pay_in_fee_total, 2) }}</h5>
+                            <h5 class="mb-0">₺{{ number_format($siteStatistics?->pay_in_fee_total ?? 0, 2) }}</h5>
                             <span class="text-muted fs-sm">{{ __('Incoming Fee Amount') }}</span>
                         </div>
 
@@ -87,7 +87,7 @@
                             <p>
                                 <i class="ph-currency-circle-dollar bg-primary bg-opacity-10 text-primary lh-1 rounded-pill p-2"></i>
                             </p>
-                            <h5 class="mb-0">₺{{ number_format($siteStatistics->pay_in_grand_total, 2) }}</h5>
+                            <h5 class="mb-0">₺{{ number_format($siteStatistics?->pay_in_grand_total ?? 0, 2) }}</h5>
                             <span class="text-muted fs-sm">{{ __('Incoming Grand Total Amount') }}</span>
                         </div>
 
@@ -95,7 +95,7 @@
                             <p>
                                 <i class="ph-currency-circle-dollar bg-warning bg-opacity-10 text-warning lh-1 rounded-pill p-2"></i>
                             </p>
-                            <h5 class="mb-0">₺{{ number_format($siteStatistics->pay_out_total, 2) }}</h5>
+                            <h5 class="mb-0">₺{{ number_format($siteStatistics?->pay_out_total ?? 0, 2) }}</h5>
                             <span class="text-muted fs-sm">{{ __('Outgoing Amount') }}</span>
                         </div>
 
@@ -103,7 +103,7 @@
                             <p>
                                 <i class="ph-currency-circle-dollar bg-warning bg-opacity-10 text-warning lh-1 rounded-pill p-2"></i>
                             </p>
-                            <h5 class="mb-0">₺{{ number_format($siteStatistics->pay_out_fee_total, 2) }}</h5>
+                            <h5 class="mb-0">₺{{ number_format($siteStatistics?->pay_out_fee_total ?? 0, 2) }}</h5>
                             <span class="text-muted fs-sm">{{ __('Outgoing Fee Amount') }}</span>
                         </div>
 
@@ -111,7 +111,7 @@
                             <p>
                                 <i class="ph-currency-circle-dollar bg-warning bg-opacity-10 text-warning lh-1 rounded-pill p-2"></i>
                             </p>
-                            <h5 class="mb-0">₺{{ number_format($siteStatistics->pay_out_grand_total, 2) }}</h5>
+                            <h5 class="mb-0">₺{{ number_format($siteStatistics?->pay_out_grand_total ?? 0, 2) }}</h5>
                             <span class="text-muted fs-sm">{{ __('Outgoing Grand Total Amount') }}</span>
                         </div>
 
@@ -119,7 +119,7 @@
                             <p>
                                 <i class="ph-currency-circle-dollar bg-warning bg-opacity-10 text-warning lh-1 rounded-pill p-2"></i>
                             </p>
-                            <h5 class="mb-0">₺{{ number_format($siteStatistics->total, 2) }}</h5>
+                            <h5 class="mb-0">₺{{ number_format($siteStatistics?->total ?? 0, 2) }}</h5>
                             <span class="text-muted fs-sm">{{ __('Total Amount') }}</span>
                         </div>
 
@@ -127,7 +127,7 @@
                             <p>
                                 <i class="ph-percent bg-warning bg-opacity-10 text-warning lh-1 rounded-pill p-2"></i>
                             </p>
-                            <h5 class="mb-0">{{ number_format($site->settlement_fee, 2) }} %</h5>
+                            <h5 class="mb-0">{{ number_format($site?->settlement_fee ?? 0, 2) }} %</h5>
                             <span class="text-muted fs-sm">{{ __('Settlement Fee') }}</span>
                         </div>
 
@@ -135,7 +135,7 @@
                             <p>
                                 <i class="ph-currency-circle-dollar bg-warning bg-opacity-10 text-warning lh-1 rounded-pill p-2"></i>
                             </p>
-                            <h5 class="mb-0">₺{{ number_format(($siteStatistics->total*$site->settlement_fee/100), 2) }}</h5>
+                            <h5 class="mb-0">₺{{ number_format((($siteStatistics?->total ?? 0) * ($site?->settlement_fee ?? 0) / 100), 2) }}</h5>
                             <span class="text-muted fs-sm">{{ __('Settlement Fee Amount') }}</span>
                         </div>
 
@@ -143,7 +143,7 @@
                             <p>
                                 <i class="ph-currency-circle-dollar bg-warning bg-opacity-10 text-warning lh-1 rounded-pill p-2"></i>
                             </p>
-                            <h5 class="mb-0">₺{{ number_format($siteStatistics->total+($siteStatistics->total*$site->settlement_fee/100), 2) }}</h5>
+                            <h5 class="mb-0">₺{{ number_format(($siteStatistics?->total ?? 0) + (($siteStatistics?->total ?? 0) * ($site?->settlement_fee ?? 0) / 100), 2) }}</h5>
                             <span class="text-muted fs-sm">{{ __('Total with Settlement Fee Amount') }}</span>
                         </div>
                     </div>
