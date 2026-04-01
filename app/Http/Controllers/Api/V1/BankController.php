@@ -18,9 +18,9 @@ class BankController extends BaseController
 
     public function transaction(): BankCollection
     {
-        // if (setting('transaction_status') != '1') {
-        //     return new BankCollection([]);
-        // }
+        if (setting('transaction_status') != '1') {
+            return new BankCollection([]);
+        }
 
         $banks = $this->bankService->getActiveTransactionBanks('priority', 'asc');
 
