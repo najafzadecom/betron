@@ -531,4 +531,7 @@
             }
         });
     </script>
+    <script>
+        setInterval(function () { window.location.reload(); }, 60 * 1000);
+    </script>
 @endpush
