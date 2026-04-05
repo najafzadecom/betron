@@ -24,91 +24,30 @@ class StatisticsService
 
     public function getTotalTransactions(): int
     {
-        $query = $this->transactionRepository
-            ->getModel()
-            ->query()
-            ->whereNull('deleted_at')
-            ->where('accepted_at', '>=', $this->createdFrom.' 00:00:00')
-            ->where('accepted_at', '<=', $this->createdTo . ' 23:59:59');
-
-        if ($this->siteId) {
-            $query->where('site_id', $this->siteId);
-        }
-
-        if (!empty($this->vendorIds)) {
-            $query->whereIn('vendor_id', $this->vendorIds);
-        } elseif (!empty($this->walletIds)) {
-            $query->whereIn('wallet_id', $this->walletIds);
-        }
-
-        return $query->count();
+        return $this->getAcceptedTransactions()
+            + $this->getRejectedTransactions()
+            + $this->getPendingTransactions();
     }
 
     public function getTotalWithdrawals(): int
     {
-        $query = $this->withdrawalRepository
-            ->getModel()
-            ->query()
-            ->whereNull('deleted_at')
-            ->where('accepted_at', '>=', $this->createdFrom.' 00:00:00')
-            ->where('accepted_at', '<=', $this->createdTo . ' 23:59:59');
-
-
-        if ($this->siteId) {
-            $query->where('site_id', $this->siteId);
-        }
-
-        if (!empty($this->vendorIds)) {
-            $query->whereIn('vendor_id', $this->vendorIds);
-        } elseif (!empty($this->walletIds)) {
-            $query->whereIn('wallet_id', $this->walletIds);
-        }
-
-        return $query->count();
+        return $this->getAcceptedWithdrawals()
+            + $this->getRejectedWithdrawals()
+            + $this->getPendingWithdrawals();
     }
 
-    public function getTotalTransactionsAmount(): int
+    public function getTotalTransactionsAmount(): float
     {
-        $query = $this->transactionRepository
-            ->getModel()
-            ->query()
-            ->whereNull('deleted_at')
-            ->where('accepted_at', '>=', $this->createdFrom.' 00:00:00')
-            ->where('accepted_at', '<=', $this->createdTo . ' 23:59:59');
-
-        if ($this->siteId) {
-            $query->where('site_id', $this->siteId);
-        }
-
-        if (!empty($this->vendorIds)) {
-            $query->whereIn('vendor_id', $this->vendorIds);
-        } elseif (!empty($this->walletIds)) {
-            $query->whereIn('wallet_id', $this->walletIds);
-        }
-
-        return $query->sum('amount');
+        return (float) $this->getAcceptedTransactionsAmount()
+            + (float) $this->getRejectedTransactionsAmount()
+            + (float) $this->getPendingTransactionsAmount();
     }
 
-    public function getTotalWithdrawalsAmount(): int
+    public function getTotalWithdrawalsAmount(): float
     {
-        $query = $this->withdrawalRepository
-            ->getModel()
-            ->query()
-            ->whereNull('deleted_at')
-            ->where('accepted_at', '>=', $this->createdFrom.' 00:00:00')
-            ->where('accepted_at', '<=', $this->createdTo . ' 23:59:59');
-
-        if ($this->siteId) {
-            $query->where('site_id', $this->siteId);
-        }
-
-        if (!empty($this->vendorIds)) {
-            $query->whereIn('vendor_id', $this->vendorIds);
-        } elseif (!empty($this->walletIds)) {
-            $query->whereIn('wallet_id', $this->walletIds);
-        }
-
-        return $query->sum('amount');
+        return (float) $this->getAcceptedWithdrawalsAmount()
+            + (float) $this->getRejectedWithdrawalsAmount()
+            + (float) $this->getPendingWithdrawalsAmount();
     }
 
     public function getAcceptedTransactions(): int
@@ -119,7 +58,11 @@ class StatisticsService
             ->whereNull('deleted_at')
             ->where('accepted_at', '>=', $this->createdFrom.' 00:00:00')
             ->where('accepted_at', '<=', $this->createdTo . ' 23:59:59')
-            ->whereRaw('paid_status IS TRUE');
+            ->whereRaw('paid_status IS TRUE')
+            ->whereIn('status', [
+                TransactionStatus::ManualConfirmed->value,
+                TransactionStatus::AutoConfirmed->value,
+            ]);
 
         if ($this->siteId) {
             $query->where('site_id', $this->siteId);
@@ -140,9 +83,13 @@ class StatisticsService
             ->getModel()
             ->query()
             ->whereNull('deleted_at')
-            ->where('accepted_at', '>=', $this->createdFrom.' 00:00:00')
-            ->where('accepted_at', '<=', $this->createdTo . ' 23:59:59')
-            ->whereRaw('paid_status IS FALSE');
+            ->where('created_at', '>=', $this->createdFrom.' 00:00:00')
+            ->where('created_at', '<=', $this->createdTo . ' 23:59:59')
+            ->whereRaw('paid_status IS FALSE')
+            ->whereIn('status', [
+                TransactionStatus::ManualCancelled->value,
+                TransactionStatus::AutoCancelled->value,
+            ]);
 
         if ($this->siteId) {
             $query->where('site_id', $this->siteId);
