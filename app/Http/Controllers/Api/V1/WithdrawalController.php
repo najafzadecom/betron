@@ -70,8 +70,6 @@ class WithdrawalController extends BaseController
 
         $withdrawal = $this->withdrawalService->create($data);
 
-        Log::info($withdrawal->status);
-
         $result = [
             'id' => $withdrawal->id,
             'uuid' => $withdrawal->uuid,
