@@ -87,7 +87,7 @@ class WithdrawalController extends BaseController
             'site_name' => $withdrawal->site_name,
             'sender_name' => $withdrawal->sender_name ?? null,
             'sender_iban' => $withdrawal->sender_iban ?? null,
-            'status' => (int)$withdrawal->status,
+            'status' => (int)$withdrawal->status->value,
             'paid_status' => (bool)$withdrawal->paid_status,
             'created_at' => $withdrawal->created_at,
             'updated_at' => $withdrawal->updated_at
