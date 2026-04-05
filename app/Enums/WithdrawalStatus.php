@@ -4,8 +4,8 @@ namespace App\Enums;
 
 enum WithdrawalStatus: int
 {
-    case Pending = 0;
     case Processing = 1;
+    case Pending = 0;
     case Cancelled = 2;
     case AutoConfirmed = 3;
     case AutoCancelled = 4;

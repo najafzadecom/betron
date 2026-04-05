@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Enums\WithdrawalStatus;
 use App\Http\Requests\Api\Store\WithdrawalRequest;
 use App\Models\Bank;
 use App\Services\WithdrawalService;
@@ -56,6 +57,8 @@ class WithdrawalController extends BaseController
         $data['fee_amount'] = ($data['amount'] * 0.01) / 100;
 
         unset($data['withdrawal_fee']);
+
+        $data['status'] = WithdrawalStatus::Processing->value;
 
         // Set default payment_method to manual if not provided
         if (!isset($data['payment_method'])) {
