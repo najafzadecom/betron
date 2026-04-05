@@ -7,6 +7,7 @@ use App\Http\Requests\Api\Store\WithdrawalRequest;
 use App\Models\Bank;
 use App\Services\WithdrawalService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class WithdrawalController extends BaseController
 {
@@ -68,6 +69,8 @@ class WithdrawalController extends BaseController
         unset($data['payment_method']);
 
         $withdrawal = $this->withdrawalService->create($data);
+
+        Log::info($withdrawal->status);
 
         $result = [
             'id' => $withdrawal->id,
