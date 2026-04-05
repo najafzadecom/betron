@@ -110,7 +110,7 @@ class StatisticsController extends BaseController
         $rejectedTransactionsAmount = $this->statisticsService->getRejectedTransactionsAmount();
         $pendingTransactionsAmount = $this->statisticsService->getPendingTransactionsAmount();
 
-        $totalWithdrawalsAmount = $this->statisticsService->getTotalWithdrawals();
+        $totalWithdrawalsAmount = $this->statisticsService->getTotalWithdrawalsAmount();
         $acceptedWithdrawalsAmount = $this->statisticsService->getAcceptedWithdrawalsAmount();
         $rejectedWithdrawalsAmount = $this->statisticsService->getRejectedWithdrawalsAmount();
         $pendingWithdrawalsAmount = $this->statisticsService->getPendingWithdrawalsAmount();

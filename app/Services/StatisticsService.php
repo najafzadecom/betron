@@ -60,6 +60,8 @@ class StatisticsService
 
         if (!empty($this->vendorIds)) {
             $query->whereIn('vendor_id', $this->vendorIds);
+        } elseif (!empty($this->walletIds)) {
+            $query->whereIn('wallet_id', $this->walletIds);
         }
 
         return $query->count();
@@ -277,7 +279,8 @@ class StatisticsService
             ->whereIn('status', [
                 WithdrawalStatus::ManualConfirmed->value,
                 WithdrawalStatus::AutoConfirmed->value,
-            ]);
+            ])
+            ->whereRaw('paid_status IS TRUE');
 
         if ($this->siteId) {
             $query->where('site_id', $this->siteId);
@@ -285,6 +288,8 @@ class StatisticsService
 
         if (!empty($this->vendorIds)) {
             $query->whereIn('vendor_id', $this->vendorIds);
+        } elseif (!empty($this->walletIds)) {
+            $query->whereIn('wallet_id', $this->walletIds);
         }
 
         return $query->count();
@@ -310,6 +315,8 @@ class StatisticsService
 
         if (!empty($this->vendorIds)) {
             $query->whereIn('vendor_id', $this->vendorIds);
+        } elseif (!empty($this->walletIds)) {
+            $query->whereIn('wallet_id', $this->walletIds);
         }
 
         return $query->count();
@@ -336,6 +343,8 @@ class StatisticsService
 
         if (!empty($this->vendorIds)) {
             $query->whereIn('vendor_id', $this->vendorIds);
+        } elseif (!empty($this->walletIds)) {
+            $query->whereIn('wallet_id', $this->walletIds);
         }
 
         return $query->sum('amount');
@@ -361,6 +370,8 @@ class StatisticsService
 
         if (!empty($this->vendorIds)) {
             $query->whereIn('vendor_id', $this->vendorIds);
+        } elseif (!empty($this->walletIds)) {
+            $query->whereIn('wallet_id', $this->walletIds);
         }
 
         return $query->sum('amount');
@@ -386,6 +397,8 @@ class StatisticsService
 
         if (!empty($this->vendorIds)) {
             $query->whereIn('vendor_id', $this->vendorIds);
+        } elseif (!empty($this->walletIds)) {
+            $query->whereIn('wallet_id', $this->walletIds);
         }
 
         return $query->count();
@@ -411,6 +424,8 @@ class StatisticsService
 
         if (!empty($this->vendorIds)) {
             $query->whereIn('vendor_id', $this->vendorIds);
+        } elseif (!empty($this->walletIds)) {
+            $query->whereIn('wallet_id', $this->walletIds);
         }
 
         return $query->sum('amount');
