@@ -14,6 +14,12 @@ Route::domain('docs.betron.org')->group(function () {
     })->name('docs.api');
 });
 
+Route::domain('docs.payzzone.com')->group(function () {
+    Route::get('/', function () {
+        return view('docs.api');
+    })->name('docs.api');
+});
+
 Route::domain('docs.bankexpress3.com')->group(function () {
     Route::get('/', function () {
         return view('docs.api');
