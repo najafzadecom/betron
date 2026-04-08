@@ -77,7 +77,6 @@ class WithdrawalController extends BaseController
 
             $withdrawal = $this->withdrawalService->create($data);
 
-            DB::commit();
 
             $result = [
                 'id' => $withdrawal->id,
@@ -99,6 +98,8 @@ class WithdrawalController extends BaseController
                 'created_at' => $withdrawal->created_at,
                 'updated_at' => $withdrawal->updated_at
             ];
+
+            DB::commit();
 
             return $this->response(
                 $result,
