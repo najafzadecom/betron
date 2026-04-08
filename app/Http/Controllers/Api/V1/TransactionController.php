@@ -10,6 +10,10 @@ use App\Services\TransactionService;
 use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use RuntimeException;
+use Throwable;
 
 class TransactionController extends BaseController
 {
@@ -34,12 +38,29 @@ class TransactionController extends BaseController
             return $this->response([], false, 403, 'Transaction not enabled');
         }
 
-        $data = $this->prepareBaseData($request->validated());
-        $data['status'] = 1;
+        DB::beginTransaction();
 
-        return $this->isManualTransaction($data['amount'])
-            ? $this->handleManualTransaction($data)
-            : $this->handlePaypapTransaction($data, $request);
+        try {
+            $data = $this->prepareBaseData($request->validated());
+            $data['status'] = 1;
+
+            $response = $this->isManualTransaction($data['amount'])
+                ? $this->handleManualTransaction($data)
+                : $this->handlePaypapTransaction($data, $request);
+
+            DB::commit();
+
+            return $response;
+        } catch (Throwable $e) {
+            DB::rollBack();
+
+            Log::error('Transaction create failed', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return $this->response([], false, 500, $e->getMessage() ?: 'Transaction create failed');
+        }
     }
 
     private function isTransactionEnabled(): bool
@@ -137,7 +158,7 @@ class TransactionController extends BaseController
             return $this->response($result, true, 200, 'Transaction created');
         }
 
-        return $this->response([], false, 500, $paypapResult['message']);
+        throw new RuntimeException($paypapResult['message'] ?? 'PayPap transaction failed');
     }
 
     public function update($uuid): JsonResponse
