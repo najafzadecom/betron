@@ -74,6 +74,13 @@ return [
             'days' => 30,
             'replace_placeholders' => true,
         ],
+        'withdrawal_webhook' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/withdrawal_webhook.log'),
+            'level' => 'debug',
+            'days' => 30,
+            'replace_placeholders' => true,
+        ],
         'stack' => [
             'driver' => 'stack',
             'channels' => explode(',', env('LOG_STACK', 'single')),
