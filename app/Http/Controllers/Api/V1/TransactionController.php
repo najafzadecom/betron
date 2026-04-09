@@ -47,10 +47,7 @@ class TransactionController extends BaseController
                     throw new RuntimeException($cashevoResult['message'] ?? 'Cashevo transaction failed');
                 }
 
-                $banka = $cashevoResult['data']['data'];
-
-                var_dump($banka);
-                die();
+                $banka = $cashevoResult['data']['data'][0];
 
                 $transaction->update([
                     'receiver_iban' => $banka['iban'],
