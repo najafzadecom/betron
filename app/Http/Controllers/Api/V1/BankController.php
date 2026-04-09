@@ -49,6 +49,8 @@ class BankController extends BaseController
                 ], 502);
             }
 
+            return $result;
+
             $recipient = $this->cashevoService->extractRecipient($result['data'] ?? []);
 
             return response()->json([
