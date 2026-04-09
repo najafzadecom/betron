@@ -26,7 +26,7 @@ class BankController extends BaseController
      * Cashevo açıkken: Cashevo POST /deposit-bank (tutara göre havale hesabı).
      * Kapalıyken: yerel aktif banka listesi (eski davranış).
      */
-    public function transaction(Request $request): JsonResponse|BankCollection
+    public function transaction(Request $request)
     {
         if (setting('transaction_status') != '1') {
             return new BankCollection([]);
