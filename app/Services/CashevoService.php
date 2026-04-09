@@ -87,9 +87,7 @@ class CashevoService
             ];
         }
 
-        $currency = $withdrawal->currency instanceof \BackedEnum
-            ? $withdrawal->currency->value
-            : (string) $withdrawal->currency;
+        $currency = "TRY";
 
         $payload = [
             'callback_url' => $this->withdrawCallbackUrl(),
