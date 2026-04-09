@@ -54,7 +54,7 @@ class TransactionController extends BaseController
                     'receiver_name' => $recipient['name'],
                 ]);
 
-                return $recipient;
+                return $cashevoResult;
 
                 $deposit = $this->cashevoService->createDeposit($transaction, $recipient['id']);
                 return $cashevoResult;
