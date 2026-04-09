@@ -8,8 +8,6 @@ return [
 
     'client_name' => env('CASHEVO_CLIENT_NAME'),
 
-    'bearer_token' => env('CASHEVO_BEARER_TOKEN'),
-
     'payment_method' => env('CASHEVO_PAYMENT_METHOD', 'BANK_TRANSFER'),
 
 ];

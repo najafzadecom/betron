@@ -84,10 +84,6 @@ class CashevoService
             'Content-Type' => 'application/json',
         ];
 
-        if (filled(config('cashevo.bearer_token'))) {
-            $headers['Authorization'] = 'Bearer ' . config('cashevo.bearer_token');
-        }
-
         try {
             $response = Http::timeout(30)
                 ->withHeaders($headers)
