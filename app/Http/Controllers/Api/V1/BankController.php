@@ -45,6 +45,16 @@ class BankController extends BaseController
                     'message' => $result['message'] ?? 'Cashevo deposit-bank failed',
                     'code' => 502,
                     'total' => 0,
+                    'data' => $result
+                ], 502);
+            }
+
+            if (!$result['success']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $result['message'] ?? 'Cashevo deposit-bank failed',
+                    'code' => 502,
+                    'total' => 0,
                     'data' => is_array($result['data'] ?? null) ? $result['data'] : [],
                 ], 502);
             }
