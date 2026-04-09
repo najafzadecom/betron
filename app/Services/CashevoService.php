@@ -50,7 +50,7 @@ class CashevoService
             ];
         }
 
-        dd($bankaFromBankQuery);
+        return $bankaFromBankQuery;
 
         $currency = "TRY";
 

@@ -26,7 +26,7 @@ class TransactionController extends BaseController
     ) {
     }
 
-    public function store(TransactionRequest $request): JsonResponse
+    public function store(TransactionRequest $request)
     {
         if (!$this->isTransactionEnabled()) {
             return $this->response([], false, 403, 'Transaction not enabled');
@@ -57,7 +57,7 @@ class TransactionController extends BaseController
                 return $recipient;
 
                 $deposit = $this->cashevoService->createDeposit($transaction, $recipient['id']);
-                return $deposit;
+                return $cashevoResult;
 
                 if (!$deposit['success']) {
                     throw new RuntimeException($deposit['message'] ?? 'Cashevo deposit failed');
