@@ -10,7 +10,7 @@ use App\Http\Controllers\PratikController;
 use Illuminate\Support\Facades\Route;
 
 Route::domain('docs.{domain}')
-    ->where('domain', '[a-z0-9][a-z0-9.-]+\.[a-z]{2,63}')
+    ->where(['domain' => '[a-z0-9][a-z0-9.-]+\.[a-z]{2,63}'])
     ->group(function () {
         Route::get('/', function () {
             return view('docs.api');
