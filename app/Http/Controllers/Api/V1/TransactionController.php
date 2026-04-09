@@ -64,7 +64,7 @@ class TransactionController extends BaseController
                 $response = $this->response([
                     'transaction_uuid' => $transaction->uuid,
                     'receiver_iban' => $banka['iban'],
-                    'receiver_name' => $banka['name'],
+                    'receiver_name' => $banka['account_name'],
                 ], true, 200, 'Transaction created');
             } else {
                 $response = $this->isManualTransaction($data['amount'])
