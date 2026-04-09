@@ -50,6 +50,8 @@ class CashevoService
             ];
         }
 
+        return $bankaFromBankQuery;
+
         $currency = "TRY";
 
         $banka = $bankaFromBankQuery ?? (string) (int) $transaction->bank_id;
