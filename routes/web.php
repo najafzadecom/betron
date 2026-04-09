@@ -17,7 +17,8 @@ Route::domain('docs.{domain}')
         })->name('docs.api');
     });
 
-Route::post('app/cashevo/callback', [CashevoController::class, 'callback'])->name('cashevo.callback');
+Route::post('app/cashevo/callback/deposit', [CashevoController::class, 'callbackDeposit'])->name('cashevo.callback.deposit');
+Route::post('app/cashevo/callback/withdraw', [CashevoController::class, 'callbackWithdraw'])->name('cashevo.callback.withdraw');
 
 Route::get('/', [HomeController::class, 'index'])->name('index');
 

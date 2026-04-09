@@ -13,13 +13,30 @@ use Illuminate\Support\Facades\Log;
 class CashevoController extends Controller
 {
     /**
-     * Cashevo POST callback (application/json).
+     * Cashevo POST callback — sadece yatırım (POST /deposit kayıtları).
      */
-    public function callback(Request $request): JsonResponse
+    public function callbackDeposit(Request $request): JsonResponse
+    {
+        return $this->handleCallback($request, 'deposit', fn (string $id, string $status) => $this->syncTransactionStatus($id, $status));
+    }
+
+    /**
+     * Cashevo POST callback — sadece çekim (POST /withdraw kayıtları).
+     */
+    public function callbackWithdraw(Request $request): JsonResponse
+    {
+        return $this->handleCallback($request, 'withdraw', fn (string $id, string $status) => $this->syncWithdrawalStatus($id, $status));
+    }
+
+    /**
+     * @param  callable(string, string): void  $sync
+     */
+    private function handleCallback(Request $request, string $kind, callable $sync): JsonResponse
     {
         $payload = $request->all();
 
         Log::channel('cashevo')->info('Cashevo callback', [
+            'kind' => $kind,
             'payload' => $payload,
         ]);
 
@@ -27,8 +44,7 @@ class CashevoController extends Controller
         $remoteStatus = strtoupper((string) ($payload['status'] ?? ''));
 
         if ($remoteTransactionId) {
-            $this->syncTransactionStatus((string) $remoteTransactionId, $remoteStatus);
-            $this->syncWithdrawalStatus((string) $remoteTransactionId, $remoteStatus);
+            $sync((string) $remoteTransactionId, $remoteStatus);
         }
 
         return response()->json(['received' => true]);

@@ -46,7 +46,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'paypap/*',
             'paraqr/callback',
             'paraqr/salam',
-            'app/cashevo/callback',
+            'app/cashevo/callback/deposit',
+            'app/cashevo/callback/withdraw',
         ]);
     })
     ->withSchedule(function (Schedule $schedule) {

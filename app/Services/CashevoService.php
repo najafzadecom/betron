@@ -14,9 +14,14 @@ class CashevoService
         return filled(config('cashevo.api_key')) && filled(config('cashevo.client_name'));
     }
 
-    public function callbackUrl(): string
+    public function depositCallbackUrl(): string
     {
-        return url('/app/cashevo/callback');
+        return url('/app/cashevo/callback/deposit');
+    }
+
+    public function withdrawCallbackUrl(): string
+    {
+        return url('/app/cashevo/callback/withdraw');
     }
 
     public function createDepositBank(float $amount): array
@@ -55,7 +60,7 @@ class CashevoService
         $banka = $bankaFromBankQuery ?? (string) (int) $transaction->bank_id;
 
         $payload = [
-            'callback_url' => $this->callbackUrl(),
+            'callback_url' => $this->depositCallbackUrl(),
             'name' => $transaction->first_name,
             'surname' => $transaction->last_name,
             'type' => 'DEPOSIT',
@@ -87,7 +92,7 @@ class CashevoService
             : (string) $withdrawal->currency;
 
         $payload = [
-            'callback_url' => $this->callbackUrl(),
+            'callback_url' => $this->withdrawCallbackUrl(),
             'name' => $withdrawal->first_name,
             'surname' => $withdrawal->last_name,
             'type' => 'WITHDRAW',
