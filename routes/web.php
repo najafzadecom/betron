@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CashevoController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\IqWalletController;
 use App\Http\Controllers\ParaQrController;
@@ -15,6 +16,8 @@ Route::domain('docs.{domain}')
             return view('docs.api');
         })->name('docs.api');
     });
+
+Route::post('app/cashevo/callback', [CashevoController::class, 'callback'])->name('cashevo.callback');
 
 Route::get('/', [HomeController::class, 'index'])->name('index');
 

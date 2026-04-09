@@ -45,7 +45,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'paypap/*',
             'paraqr/callback',
-            'paraqr/salam'
+            'paraqr/salam',
+            'app/cashevo/callback',
         ]);
     })
     ->withSchedule(function (Schedule $schedule) {

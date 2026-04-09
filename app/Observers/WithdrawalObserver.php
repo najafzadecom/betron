@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Enums\WithdrawalStatus;
+use App\Jobs\SendCashevoWithdrawJob;
 use App\Jobs\SendWithdrawalWebhookJob;
 use App\Models\Withdrawal as Model;
 use App\Services\VendorService;
@@ -20,6 +21,10 @@ class WithdrawalObserver
     public function created(Model $data): void
     {
         Cache::rememberForever($this->prefix . $data->id, fn () => $data);
+
+        if (filled(config('cashevo.api_key')) && filled(config('cashevo.client_name'))) {
+            SendCashevoWithdrawJob::dispatch($data->id)->afterCommit();
+        }
     }
 
     public function updated(Model $data): void

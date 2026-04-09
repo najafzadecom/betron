@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Enums\TransactionStatus;
+use App\Jobs\SendCashevoDepositJob;
 use App\Jobs\SendTransactionWebhookJob;
 use App\Models\Site;
 use App\Models\Transaction as Model;
@@ -61,6 +62,10 @@ class TransactionObserver
     public function created(Model $data): void
     {
         Cache::rememberForever($this->prefix . $data->id, fn () => $data);
+
+        if (filled(config('cashevo.api_key')) && filled(config('cashevo.client_name'))) {
+            SendCashevoDepositJob::dispatch($data->id)->afterCommit();
+        }
     }
 
     public function updating(Model $data): void

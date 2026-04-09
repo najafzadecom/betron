@@ -67,6 +67,13 @@ return [
             'path' => storage_path('logs/paypap.log'),
             'level' => 'debug',
         ],
+        'cashevo' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/cashevo.log'),
+            'level' => 'debug',
+            'days' => 30,
+            'replace_placeholders' => true,
+        ],
         'transaction_webhook' => [
             'driver' => 'daily',
             'path' => storage_path('logs/transaction_webhook.log'),
