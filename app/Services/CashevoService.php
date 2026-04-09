@@ -40,7 +40,7 @@ class CashevoService
     /**
      * Para yatırma kaydı (callback için) — POST /deposit
      */
-    public function createDeposit(Transaction $transaction, ?string $bankaFromBankQuery = null): array
+    public function createDeposit(Transaction $transaction, ?string $bankaFromBankQuery = null)
     {
         if (!$this->enabled()) {
             return [
