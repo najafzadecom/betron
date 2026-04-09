@@ -32,42 +32,6 @@ class BankController extends BaseController
             return new BankCollection([]);
         }
 
-        if ($this->cashevoService->enabled()) {
-            $request->validate([
-                'amount' => 'required|numeric|min:0.01',
-            ]);
-
-            $result = $this->cashevoService->createDepositBank((float) $request->query('amount'));
-
-            if (!$result['success']) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $result['message'] ?? 'Cashevo deposit-bank failed',
-                    'code' => 502,
-                    'total' => 0,
-                    'data' => is_array($result['data'] ?? null) ? $result['data'] : [],
-                ], 502);
-            }
-
-            return $result;
-
-            $recipient = $this->cashevoService->extractRecipient($result['data'] ?? []);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Deposit bank retrieved successfully',
-                'code' => 200,
-                'total' => 1,
-                'data' => [
-                    [
-                        'receiver_iban' => $recipient['iban'],
-                        'receiver_name' => $recipient['name'],
-                        'cashevo' => $result['data'] ?? [],
-                    ],
-                ],
-            ]);
-        }
-
         $banks = $this->bankService->getActiveTransactionBanks('priority', 'asc');
 
         return new BankCollection($banks);
