@@ -48,14 +48,14 @@ class TransactionController extends BaseController
                 }
 
                 $recipient = $this->cashevoService->extractRecipient($cashevoResult['data'] ?? []);
-                $banka = $this->cashevoService->extractBanka($cashevoResult['data'] ?? []);
 
                 $transaction->update([
                     'receiver_iban' => $recipient['iban'],
                     'receiver_name' => $recipient['name'],
                 ]);
 
-                $deposit = $this->cashevoService->createDeposit($transaction, $banka);
+                $deposit = $this->cashevoService->createDeposit($transaction, $recipient['id']);
+                return $deposit;
 
                 if (!$deposit['success']) {
                     throw new RuntimeException($deposit['message'] ?? 'Cashevo deposit failed');
