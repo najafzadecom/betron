@@ -8,29 +8,13 @@ use App\Http\Controllers\PaypapController;
 use App\Http\Controllers\PratikController;
 use Illuminate\Support\Facades\Route;
 
-Route::domain('docs.betron.org')->group(function () {
-    Route::get('/', function () {
-        return view('docs.api');
-    })->name('docs.api');
-});
-
-Route::domain('docs.payzzone.com')->group(function () {
-    Route::get('/', function () {
-        return view('docs.api');
-    })->name('docs.api');
-});
-
-Route::domain('docs.bankexpress3.com')->group(function () {
-    Route::get('/', function () {
-        return view('docs.api');
-    })->name('docs.api');
-});
-
-Route::domain('docs.pay2far.com')->group(function () {
-    Route::get('/', function () {
-        return view('docs.api');
-    })->name('docs.api');
-});
+Route::domain('docs.{domain}')
+    ->where('domain', '[a-z0-9][a-z0-9.-]+\.[a-z]{2,63}')
+    ->group(function () {
+        Route::get('/', function () {
+            return view('docs.api');
+        })->name('docs.api');
+    });
 
 Route::get('/', [HomeController::class, 'index'])->name('index');
 
