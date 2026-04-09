@@ -17,7 +17,11 @@ class CashevoController extends Controller
      */
     public function callbackDeposit(Request $request): JsonResponse
     {
-        return $this->handleCallback($request, 'deposit', fn (string $id, string $status) => $this->syncTransactionStatus($id, $status));
+        return $this->handleCallback(
+            $request,
+            'deposit',
+            fn (string $id, string $status, array $payload) => $this->syncTransactionStatus($id, $status, $payload)
+        );
     }
 
     /**
@@ -25,11 +29,15 @@ class CashevoController extends Controller
      */
     public function callbackWithdraw(Request $request): JsonResponse
     {
-        return $this->handleCallback($request, 'withdraw', fn (string $id, string $status) => $this->syncWithdrawalStatus($id, $status));
+        return $this->handleCallback(
+            $request,
+            'withdraw',
+            fn (string $id, string $status, array $payload) => $this->syncWithdrawalStatus($id, $status, $payload)
+        );
     }
 
     /**
-     * @param  callable(string, string): void  $sync
+     * @param  callable(string, string, array): void  $sync
      */
     private function handleCallback(Request $request, string $kind, callable $sync): JsonResponse
     {
@@ -44,13 +52,13 @@ class CashevoController extends Controller
         $remoteStatus = strtoupper((string) ($payload['status'] ?? ''));
 
         if ($remoteTransactionId) {
-            $sync((string) $remoteTransactionId, $remoteStatus);
+            $sync((string) $remoteTransactionId, $remoteStatus, $payload);
         }
 
         return response()->json(['received' => true]);
     }
 
-    private function syncTransactionStatus(string $uuid, string $status): void
+    private function syncTransactionStatus(string $uuid, string $status, array $payload): void
     {
         $transaction = Transaction::query()->where('uuid', $uuid)->first();
 
@@ -58,24 +66,29 @@ class CashevoController extends Controller
             return;
         }
 
-        if (in_array($status, ['SUCCESSFUL', 'SUCCESS', 'COMPLETED'], true)) {
-            $transaction->update([
-                'status' => TransactionStatus::AutoConfirmed->value,
-                'paid_status' => true,
-            ]);
+        $updates = [];
 
-            return;
+        $amount = $this->extractCallbackAmount($payload);
+        if ($amount !== null) {
+            $updates['amount'] = $amount;
+            $fee = (int) ($transaction->fee ?? 0);
+            $updates['fee_amount'] = ($amount * $fee) / 100;
         }
 
-        if (in_array($status, ['FAILED', 'REJECTED', 'CANCELLED', 'CANCELED'], true)) {
-            $transaction->update([
-                'status' => TransactionStatus::AutoCancelled->value,
-                'paid_status' => false,
-            ]);
+        if (in_array($status, ['SUCCESSFUL', 'SUCCESS', 'COMPLETED'], true)) {
+            $updates['status'] = TransactionStatus::AutoConfirmed->value;
+            $updates['paid_status'] = true;
+        } elseif (in_array($status, ['FAILED', 'REJECTED', 'CANCELLED', 'CANCELED'], true)) {
+            $updates['status'] = TransactionStatus::AutoCancelled->value;
+            $updates['paid_status'] = false;
+        }
+
+        if ($updates !== []) {
+            $transaction->update($updates);
         }
     }
 
-    private function syncWithdrawalStatus(string $uuid, string $status): void
+    private function syncWithdrawalStatus(string $uuid, string $status, array $payload): void
     {
         $withdrawal = Withdrawal::withoutGlobalScopes()->where('uuid', $uuid)->first();
 
@@ -83,20 +96,38 @@ class CashevoController extends Controller
             return;
         }
 
+        $updates = [];
+
+        $amount = $this->extractCallbackAmount($payload);
+        if ($amount !== null) {
+            $updates['amount'] = $amount;
+            $fee = (int) ($withdrawal->fee ?? 0);
+            $updates['fee_amount'] = ($amount * $fee) / 100;
+        }
+
         if (in_array($status, ['SUCCESSFUL', 'SUCCESS', 'COMPLETED'], true)) {
-            $withdrawal->update([
-                'status' => WithdrawalStatus::AutoConfirmed->value,
-                'paid_status' => true,
-            ]);
-
-            return;
+            $updates['status'] = WithdrawalStatus::AutoConfirmed->value;
+            $updates['paid_status'] = true;
+        } elseif (in_array($status, ['FAILED', 'REJECTED', 'CANCELLED', 'CANCELED'], true)) {
+            $updates['status'] = WithdrawalStatus::AutoCancelled->value;
+            $updates['paid_status'] = false;
         }
 
-        if (in_array($status, ['FAILED', 'REJECTED', 'CANCELLED', 'CANCELED'], true)) {
-            $withdrawal->update([
-                'status' => WithdrawalStatus::AutoCancelled->value,
-                'paid_status' => false,
-            ]);
+        if ($updates !== []) {
+            $withdrawal->update($updates);
         }
+    }
+
+    private function extractCallbackAmount(array $payload): ?float
+    {
+        $raw = $payload['amount'] ?? null;
+        if ($raw === null || $raw === '') {
+            return null;
+        }
+        if (!is_numeric($raw)) {
+            return null;
+        }
+
+        return (float) $raw;
     }
 }
