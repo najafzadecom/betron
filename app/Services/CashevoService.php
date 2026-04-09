@@ -134,7 +134,7 @@ class CashevoService
     {
         $nested = $responseData['data'] ?? null;
         if (is_array($nested)) {
-            foreach (['banka', 'bank_id', 'bankCode', 'bank'] as $key) {
+            foreach (['banka', 'bank_id', 'bankCode', 'bank', 'id'] as $key) {
                 if (isset($nested[$key]) && $nested[$key] !== '' && $nested[$key] !== null) {
                     return (string) $nested[$key];
                 }
