@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Transaction;
 use App\Models\Withdrawal;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -19,38 +18,32 @@ class CashevoService
         return url('/app/cashevo/callback');
     }
 
-    public function notifyDeposit(Transaction $transaction): bool
+    public function createDepositBank(float $amount): array
     {
         if (!$this->enabled()) {
-            return true;
+            return [
+                'success' => false,
+                'message' => 'Cashevo integration is not configured',
+                'data' => null,
+            ];
         }
 
-        $currency = $transaction->currency instanceof \BackedEnum
-            ? $transaction->currency->value
-            : (string) $transaction->currency;
-
         $payload = [
-            'callback_url' => $this->callbackUrl(),
-            'name' => $transaction->first_name,
-            'surname' => $transaction->last_name,
-            'type' => 'DEPOSIT',
-            'amount' => $this->formatAmount((float) $transaction->amount),
-            'banka' => (string) (int) $transaction->bank_id,
-            'userId' => (string) $transaction->user_id,
-            'currency' => $currency,
-            'username' => $this->usernameForUser($transaction->user_id, $transaction->order_id),
-            'paymentSource' => (string) config('cashevo.client_name'),
-            'transactionId' => (string) $transaction->uuid,
-            'paymentMethod' => (string) config('cashevo.payment_method'),
+            'client_name' => (string) config('cashevo.client_name'),
+            'amount' => (float) $amount,
         ];
 
-        return $this->post('/deposit', $payload, $transaction->id, 'deposit');
+        return $this->request('/deposit-bank', $payload, 'deposit-bank', useXApiKey: true);
     }
 
-    public function notifyWithdraw(Withdrawal $withdrawal): bool
+    public function createWithdraw(Withdrawal $withdrawal): array
     {
         if (!$this->enabled()) {
-            return true;
+            return [
+                'success' => false,
+                'message' => 'Cashevo integration is not configured',
+                'data' => null,
+            ];
         }
 
         $currency = $withdrawal->currency instanceof \BackedEnum
@@ -72,49 +65,84 @@ class CashevoService
             'paymentMethod' => (string) config('cashevo.payment_method'),
         ];
 
-        return $this->post('/withdraw', $payload, $withdrawal->id, 'withdraw');
+        return $this->request('/withdraw', $payload, 'withdraw', useXApiKey: false);
     }
 
-    private function post(string $path, array $payload, int $localId, string $kind): bool
+    public function extractRecipient(array $responseData): array
+    {
+        $recipient = $responseData['recipient'] ?? $responseData['data']['recipient'] ?? $responseData;
+
+        $iban = $recipient['iban']
+            ?? $recipient['IBAN']
+            ?? $responseData['iban']
+            ?? $responseData['IBAN']
+            ?? null;
+
+        $name = $recipient['fullName']
+            ?? $recipient['name']
+            ?? $recipient['accountName']
+            ?? $responseData['fullName']
+            ?? $responseData['name']
+            ?? null;
+
+        return [
+            'iban' => $iban,
+            'name' => $name,
+        ];
+    }
+
+    private function request(string $path, array $payload, string $kind, bool $useXApiKey = false): array
     {
         $url = config('cashevo.base_url') . $path;
         $headers = [
-            'api-key' => (string) config('cashevo.api_key'),
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
         ];
+            $headers['x-api-key'] = (string) config('cashevo.api_key');
+            $headers['api-key'] = (string) config('cashevo.api_key');
 
         try {
             $response = Http::timeout(30)
                 ->withHeaders($headers)
                 ->post($url, $payload);
+            $decoded = $response->json();
 
             if ($response->successful()) {
                 Log::channel('cashevo')->info('Cashevo request ok', [
                     'kind' => $kind,
-                    'local_id' => $localId,
                     'status' => $response->status(),
+                    'response' => $decoded,
                 ]);
 
-                return true;
+                return [
+                    'success' => true,
+                    'message' => 'OK',
+                    'data' => is_array($decoded) ? $decoded : [],
+                ];
             }
 
             Log::channel('cashevo')->warning('Cashevo request failed', [
                 'kind' => $kind,
-                'local_id' => $localId,
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);
 
-            return false;
+            return [
+                'success' => false,
+                'message' => (string) ($decoded['message'] ?? $response->body() ?? 'Cashevo request failed'),
+                'data' => is_array($decoded) ? $decoded : [],
+            ];
         } catch (\Throwable $e) {
             Log::channel('cashevo')->error('Cashevo request exception', [
                 'kind' => $kind,
-                'local_id' => $localId,
                 'error' => $e->getMessage(),
             ]);
 
-            return false;
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => null,
+            ];
         }
     }
 
@@ -128,13 +156,13 @@ class CashevoService
         return strtoupper(preg_replace('/\s+/', '', (string) $iban));
     }
 
-    private function usernameForUser(mixed $userId, string $orderId): string
+    private function usernameForUser(mixed $userId, ?string $orderId): string
     {
         $raw = (string) $userId;
         if ($raw !== '' && $raw !== '0') {
             return 'user_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $raw);
         }
 
-        return 'order_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $orderId);
+        return 'order_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) $orderId);
     }
 }

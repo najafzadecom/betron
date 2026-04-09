@@ -5,20 +5,25 @@ namespace App\Http\Controllers\Api\V1;
 use App\Enums\WithdrawalStatus;
 use App\Http\Requests\Api\Store\WithdrawalRequest;
 use App\Models\Bank;
+use App\Services\CashevoService;
 use App\Services\WithdrawalService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use RuntimeException;
 use Throwable;
 
 class WithdrawalController extends BaseController
 {
     private WithdrawalService $withdrawalService;
+    private CashevoService $cashevoService;
 
     public function __construct(
-        WithdrawalService $withdrawalService
+        WithdrawalService $withdrawalService,
+        CashevoService $cashevoService
     ) {
         $this->withdrawalService = $withdrawalService;
+        $this->cashevoService = $cashevoService;
     }
 
     public function store(WithdrawalRequest $request): JsonResponse
@@ -39,6 +44,9 @@ class WithdrawalController extends BaseController
                 401,
                 'Withdrawal service is disabled.'
             );
+        }
+        if (!$this->cashevoService->enabled()) {
+            return $this->response([], false, 503, 'Cashevo integration is not configured', 503);
         }
 
 
@@ -76,27 +84,15 @@ class WithdrawalController extends BaseController
             unset($data['payment_method']);
 
             $withdrawal = $this->withdrawalService->create($data);
+            $cashevoResult = $this->cashevoService->createWithdraw($withdrawal);
 
+            if (!$cashevoResult['success']) {
+                throw new RuntimeException($cashevoResult['message'] ?? 'Cashevo withdraw failed');
+            }
 
             $result = [
-                'id' => $withdrawal->id,
-                'uuid' => $withdrawal->uuid,
-                'first_name' => $withdrawal->first_name,
-                'last_name' => $withdrawal->last_name,
-                'receiver' => $withdrawal->receiver,
-                'iban' => $withdrawal->iban,
-                'bank_id' => $withdrawal->bank_id,
-                'bank_name' => $withdrawal->bank_name,
-                'amount' => $withdrawal->amount,
-                'order_id' => $withdrawal->order_id,
-                'site_id' => $withdrawal->site_id,
-                'site_name' => $withdrawal->site_name,
-                'sender_name' => $withdrawal->sender_name ?? null,
-                'sender_iban' => $withdrawal->sender_iban ?? null,
-                'status' => (int)$withdrawal->status->value,
-                'paid_status' => (bool)$withdrawal->paid_status,
-                'created_at' => $withdrawal->created_at,
-                'updated_at' => $withdrawal->updated_at
+                'withdrawal_uuid' => $withdrawal->uuid,
+                'cashevo' => $cashevoResult['data'] ?? [],
             ];
 
             DB::commit();
