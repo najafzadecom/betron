@@ -109,7 +109,7 @@ class WithdrawalController extends BaseController
                     throw new RuntimeException($cashevoResult['message'] ?? 'Cashevo withdraw failed');
                 }
 
-                $result['cashevo'] = $cashevoResult['data'] ?? [];
+                // $result['cashevo'] = $cashevoResult['data'] ?? [];
             }
 
             DB::commit();
