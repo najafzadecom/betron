@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Transaction;
 use App\Models\Withdrawal;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -34,6 +35,41 @@ class CashevoService
         ];
 
         return $this->request('/deposit-bank', $payload, 'deposit-bank', useXApiKey: true);
+    }
+
+    /**
+     * Para yatırma kaydı (callback için) — POST /deposit
+     */
+    public function createDeposit(Transaction $transaction, ?string $bankaFromBankQuery = null): array
+    {
+        if (!$this->enabled()) {
+            return [
+                'success' => false,
+                'message' => 'Cashevo integration is not configured',
+                'data' => null,
+            ];
+        }
+
+        $currency = "TRY";
+
+        $banka = $bankaFromBankQuery ?? (string) (int) $transaction->bank_id;
+
+        $payload = [
+            'callback_url' => $this->callbackUrl(),
+            'name' => $transaction->first_name,
+            'surname' => $transaction->last_name,
+            'type' => 'DEPOSIT',
+            'amount' => $this->formatAmount((float) $transaction->amount),
+            'banka' => $banka,
+            'userId' => (string) $transaction->user_id,
+            'currency' => $currency,
+            'username' => $this->usernameForUser($transaction->user_id, $transaction->order_id),
+            'paymentSource' => (string) config('cashevo.client_name'),
+            'transactionId' => (string) $transaction->uuid,
+            'paymentMethod' => (string) config('cashevo.payment_method'),
+        ];
+
+        return $this->request('/deposit', $payload, 'deposit', useXApiKey: false);
     }
 
     public function createWithdraw(Withdrawal $withdrawal): array
@@ -91,6 +127,29 @@ class CashevoService
         ];
     }
 
+    /**
+     * deposit-bank cevabından banka kodu (POST /deposit body banka alanı).
+     */
+    public function extractBanka(array $responseData): ?string
+    {
+        $nested = $responseData['data'] ?? null;
+        if (is_array($nested)) {
+            foreach (['banka', 'bank_id', 'bankCode', 'bank'] as $key) {
+                if (isset($nested[$key]) && $nested[$key] !== '' && $nested[$key] !== null) {
+                    return (string) $nested[$key];
+                }
+            }
+        }
+
+        foreach (['banka', 'bank_id', 'bankCode', 'bank'] as $key) {
+            if (isset($responseData[$key]) && $responseData[$key] !== '' && $responseData[$key] !== null) {
+                return (string) $responseData[$key];
+            }
+        }
+
+        return null;
+    }
+
     private function request(string $path, array $payload, string $kind, bool $useXApiKey = false): array
     {
         $url = config('cashevo.base_url') . $path;
@@ -98,8 +157,11 @@ class CashevoService
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
         ];
+        if ($useXApiKey) {
             $headers['x-api-key'] = (string) config('cashevo.api_key');
+        } else {
             $headers['api-key'] = (string) config('cashevo.api_key');
+        }
 
         try {
             $response = Http::timeout(30)
