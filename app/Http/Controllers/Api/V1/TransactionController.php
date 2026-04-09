@@ -47,7 +47,7 @@ class TransactionController extends BaseController
                     throw new RuntimeException($cashevoResult['message'] ?? 'Cashevo transaction failed');
                 }
 
-                $banka = $cashevoResult['data'][0];
+                $banka = $cashevoResult;
 
                 var_dump($banka);
                 die();
