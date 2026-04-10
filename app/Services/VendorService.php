@@ -320,6 +320,7 @@ class VendorService extends BaseService
         $vendor->save();
 
         // Create transaction record
+        // TODO: transaction_fee to transaction_id
         $this->depositTransactionRepository->create([
             'vendor_id' => $vendorId,
             'type' => VendorDepositTransactionType::TRANSACTION->value,
