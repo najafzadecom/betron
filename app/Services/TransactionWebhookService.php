@@ -69,6 +69,7 @@ class TransactionWebhookService
                 // File log (mevcut)
                 Log::channel('transaction_webhook')->info('Transaction webhook sent', [
                     'payload' => $payload,
+                    'response' => $response->body(),
                 ]);
 
                 if (!$response->successful()) {
