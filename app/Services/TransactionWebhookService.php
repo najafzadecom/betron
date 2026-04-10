@@ -67,7 +67,6 @@ class TransactionWebhookService
                     // requestin errorsa errrounu success se ssuccess bodysini loglamak istiyorum ne cevap aldigimizi 
                     Log::info('Response body: ' . $response->body());
                     Log::info('Response status: ' . $response->status());
-                    Log::info('Response error: ' . $response->error());
 
                 // File log (mevcut)
                 Log::channel('transaction_webhook')->info('Transaction webhook sent', [
