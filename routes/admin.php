@@ -70,6 +70,7 @@ Route::middleware('auth')
         Route::resource('transactions', TransactionController::class);
         Route::post('transactions/{id}/approve', [TransactionController::class, 'approve'])->name('transactions.approve');
         Route::post('transactions/{id}/cancel', [TransactionController::class, 'cancel'])->name('transactions.cancel');
+        Route::post('transactions/{id}/resend-callback', [TransactionController::class, 'resendCallback'])->name('transactions.resend-callback');
         Route::get('transactions/{id}/activity-logs', [TransactionController::class, 'activityLogs'])->name('transactions.activity-logs');
         Route::get('transactions/{id}/paypap-status', [TransactionController::class, 'paypapStatus'])->name('transactions.paypap-status');
         

@@ -15,6 +15,7 @@ use App\Services\ActivityLogService;
 use App\Services\BankService;
 use App\Services\SiteService;
 use App\Services\TransactionService as Service;
+use App\Services\TransactionWebhookService;
 use App\Services\VendorService;
 use App\Services\WalletService;
 use Illuminate\Contracts\Support\Renderable;
@@ -39,6 +40,8 @@ class TransactionController extends BaseController
 
     private ActivityLogService $activityLogService;
 
+    private TransactionWebhookService $transactionWebhookService;
+
     public function __construct(
         Service            $service,
         WalletService      $walletService,
@@ -46,11 +49,12 @@ class TransactionController extends BaseController
         SiteService        $siteService,
         VendorService      $vendorService,
         Paypap             $paypap,
-        ActivityLogService $activityLogService
+        ActivityLogService $activityLogService,
+        TransactionWebhookService $transactionWebhookService
     ) {
         $this->middleware('permission:transactions-index|transactions-create|transactions-edit', ['only' => ['index']]);
         $this->middleware('permission:transactions-create', ['only' => ['create', 'store']]);
-        $this->middleware('permission:transactions-edit', ['only' => ['edit', 'update']]);
+        $this->middleware('permission:transactions-edit', ['only' => ['edit', 'update', 'resendCallback']]);
         $this->middleware('permission:transactions-delete', ['only' => ['destroy']]);
 
         $this->service = $service;
@@ -60,6 +64,7 @@ class TransactionController extends BaseController
         $this->vendorService = $vendorService;
         $this->paypap = $paypap;
         $this->activityLogService = $activityLogService;
+        $this->transactionWebhookService = $transactionWebhookService;
         $this->module = 'transactions';
     }
 
@@ -318,6 +323,33 @@ class TransactionController extends BaseController
         ];
 
         return $this->json($this->data, $code);
+    }
+
+    public function resendCallback(string $id): JsonResponse
+    {
+        $transaction = $this->service->getById($id);
+
+        if (!$transaction) {
+            return $this->json(['message' => __('Transaction not found')], 404);
+        }
+
+
+        $site = $transaction->site;
+        if (!$site || empty($site->transaction_callback_url)) {
+            return $this->json(['message' => __('No transaction callback URL is configured for this site.')], 422);
+        }
+
+        $ok = $this->transactionWebhookService->sendPaidStatusChange($transaction);
+
+        if (!$ok) {
+            return $this->json(['message' => __('Callback request failed. Check logs for details.')], 502);
+        }
+
+        $this->data = [
+            'message' => __('Callback sent successfully.'),
+        ];
+
+        return $this->json($this->data, 200);
     }
 
     public function activityLogs(string $id): Renderable
