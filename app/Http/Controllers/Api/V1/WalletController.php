@@ -17,8 +17,8 @@ class WalletController extends BaseController
 
     public function index(): WalletResource
     {
-        $wallet = $this->walletService->getById(2);
-
+        // $wallet = $this->walletService->getById(2);
+        $wallet = $this->walletService->getFirst();
         return new WalletResource($wallet);
 
     }

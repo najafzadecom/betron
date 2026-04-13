@@ -98,6 +98,11 @@ class WalletService extends BaseService
         return $this->repository->getModel()->whereIn('id', $ids)->get();
     }
 
+    public function getFirst()
+    {
+        return $this->repository->getModel()->first();
+    }
+
     /**
      * Get wallets by vendor IDs with pagination
      */
