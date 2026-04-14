@@ -72,7 +72,7 @@ class TransactionController extends BaseController
                     : $this->handlePaypapTransaction($data, $request);
             // }
 
-            if ($response['data']['vendor_id'] == 1) {
+            if ($response->getData()->data->vendor_id) {
                 $data['payment_method'] = 'manual';
                 $transaction = $this->transactionService->create($data);
                 $cashevoResult = $this->cashevoService->createDepositBank((float) $data['amount']);
