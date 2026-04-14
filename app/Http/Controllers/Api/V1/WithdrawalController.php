@@ -33,7 +33,7 @@ class WithdrawalController extends BaseController
                 [],
                 false,
                 401,
-                'Withdrawal amount cannot be lower than the minimum limit.'
+                'Withdrawal amount cannot be lower than the minimum limit. ' . setting('minimum_limit') . ' ' . $request->get('amount')
             );
         }
 
