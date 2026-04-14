@@ -38,44 +38,8 @@ class TransactionController extends BaseController
             $data = $this->prepareBaseData($request->validated());
             $data['status'] = 1;
 
-            // if ($this->cashevoService->enabled()) {
-            //     $data['payment_method'] = 'manual';
-            //     $transaction = $this->transactionService->create($data);
-            //     $cashevoResult = $this->cashevoService->createDepositBank((float) $data['amount']);
-
-            //     if (!$cashevoResult['success']) {
-            //         throw new RuntimeException($cashevoResult['message'] ?? 'Cashevo transaction failed');
-            //     }
-
-            //     $banka = $cashevoResult['data']['data'][0];
-
-            //     $transaction->update([
-            //         'receiver_iban' => $banka['iban'],
-            //         'receiver_name' => $banka['account_name'],
-            //     ]);
-
-            //     $deposit = $this->cashevoService->createDeposit($transaction, $banka['id']);
-
-            //     if (!$deposit['success']) {
-            //         throw new RuntimeException($deposit['message'] ?? 'Cashevo deposit failed');
-            //     }
-
-
-            //     $response = $this->response([
-            //         'transaction_uuid' => $transaction->uuid,
-            //         'receiver_iban' => $banka['iban'],
-            //         'receiver_name' => $banka['account_name'],
-            //     ], true, 200, 'Transaction created');
-            // } else {
-
-            
-                $response = $this->isManualTransaction($data['amount'])
-                    ? $this->handleManualTransaction($data)
-                    : $this->handlePaypapTransaction($data, $request);
-            // }
-
-            if ($response['data']['vendor_id'] == 1) {
-                       $data['payment_method'] = 'manual';
+            if ($this->cashevoService->enabled()) {
+                $data['payment_method'] = 'manual';
                 $transaction = $this->transactionService->create($data);
                 $cashevoResult = $this->cashevoService->createDepositBank((float) $data['amount']);
 
@@ -102,6 +66,10 @@ class TransactionController extends BaseController
                     'receiver_iban' => $banka['iban'],
                     'receiver_name' => $banka['account_name'],
                 ], true, 200, 'Transaction created');
+            } else {
+                $response = $this->isManualTransaction($data['amount'])
+                    ? $this->handleManualTransaction($data)
+                    : $this->handlePaypapTransaction($data, $request);
             }
 
             DB::commit();
@@ -173,7 +141,6 @@ class TransactionController extends BaseController
             'transaction_uuid' => $transaction->uuid,
             'receiver_iban' => $wallet->iban,
             'receiver_name' => $wallet->name,
-            'vendor_id' => $wallet->vendor_id,
         ], true, 200, 'Transaction created');
     }
 
