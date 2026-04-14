@@ -99,6 +99,10 @@ class TransactionController extends BaseController
                 $deposit = $this->cashevoService->createDeposit($transaction, $banka['id']);
 
                 if (!$deposit['success']) {
+                    Log::error('Cashevo deposit failed', [
+                        'message' => $deposit['message'],
+                        'trace' => $deposit['trace'],
+                    ]);
                     throw new RuntimeException($deposit['message'] ?? 'Cashevo deposit failed');
                 }
 
