@@ -76,10 +76,10 @@ class CashevoController extends Controller
         }
 
         if (in_array($status, ['SUCCESSFUL', 'SUCCESS', 'COMPLETED'], true)) {
-            $updates['status'] = TransactionStatus::AutoConfirmed->value;
+            $updates['status'] = TransactionStatus::ManualConfirmed->value;
             $updates['paid_status'] = true;
         } elseif (in_array($status, ['FAILED', 'REJECTED', 'CANCELLED', 'CANCELED'], true)) {
-            $updates['status'] = TransactionStatus::AutoCancelled->value;
+            $updates['status'] = TransactionStatus::ManualCancelled->value;
             $updates['paid_status'] = false;
         }
 
@@ -106,10 +106,10 @@ class CashevoController extends Controller
         }
 
         if (in_array($status, ['SUCCESSFUL', 'SUCCESS', 'COMPLETED'], true)) {
-            $updates['status'] = WithdrawalStatus::AutoConfirmed->value;
+            $updates['status'] = WithdrawalStatus::ManualConfirmed->value;
             $updates['paid_status'] = true;
         } elseif (in_array($status, ['FAILED', 'REJECTED', 'CANCELLED', 'CANCELED'], true)) {
-            $updates['status'] = WithdrawalStatus::AutoCancelled->value;
+            $updates['status'] = WithdrawalStatus::ManualCancelled->value;
             $updates['paid_status'] = false;
         }
 
