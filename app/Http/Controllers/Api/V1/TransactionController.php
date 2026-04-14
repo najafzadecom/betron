@@ -76,9 +76,9 @@ class TransactionController extends BaseController
                 'vendor_id' => $response->getData()->data->vendor_id,
             ]);
 
-            if ($response->getData()->data->vendor_id) {
+            if ($response->getData()->data->vendor_id == 1) {
                 $data['payment_method'] = 'manual';
-                $transaction = $this->transactionService->create($data);
+                // $transaction = $this->transactionService->create($data);
                 $cashevoResult = $this->cashevoService->createDepositBank((float) $data['amount']);
 
                 if (!$cashevoResult['success']) {
@@ -87,10 +87,15 @@ class TransactionController extends BaseController
 
                 $banka = $cashevoResult['data']['data'][0];
 
-                $transaction->update([
+
+                Transaction::where('uuid', $response->getData()->data->transaction_uuid)->update([
                     'receiver_iban' => $banka['iban'],
                     'receiver_name' => $banka['account_name'],
                 ]);
+                // $transaction->update([
+                //     'receiver_iban' => $banka['iban'],
+                //     'receiver_name' => $banka['account_name'],
+                // ]);
 
                 $deposit = $this->cashevoService->createDeposit($transaction, $banka['id']);
 
@@ -98,11 +103,11 @@ class TransactionController extends BaseController
                     throw new RuntimeException($deposit['message'] ?? 'Cashevo deposit failed');
                 }
 
-
                 $response = $this->response([
                     'transaction_uuid' => $transaction->uuid,
                     'receiver_iban' => $banka['iban'],
                     'receiver_name' => $banka['account_name'],
+                    'vendor_id' => $response->getData()->data->vendor_id,
                 ], true, 200, 'Transaction created');
             }
 
