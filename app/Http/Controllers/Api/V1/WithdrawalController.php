@@ -102,15 +102,15 @@ class WithdrawalController extends BaseController
                 'updated_at' => $withdrawal->updated_at,
             ];
 
-            if ($this->cashevoService->enabled()) {
-                $cashevoResult = $this->cashevoService->createWithdraw($withdrawal);
+            // if ($this->cashevoService->enabled()) {
+            //     $cashevoResult = $this->cashevoService->createWithdraw($withdrawal);
 
-                if (!$cashevoResult['success']) {
-                    throw new RuntimeException($cashevoResult['message'] ?? 'Cashevo withdraw failed');
-                }
+            //     if (!$cashevoResult['success']) {
+            //         throw new RuntimeException($cashevoResult['message'] ?? 'Cashevo withdraw failed');
+            //     }
 
-                // $result['cashevo'] = $cashevoResult['data'] ?? [];
-            }
+            //     // $result['cashevo'] = $cashevoResult['data'] ?? [];
+            // }
 
             DB::commit();
 

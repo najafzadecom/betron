@@ -58,6 +58,13 @@ class Withdrawal extends Model
                 $model->uuid = Str::uuid();
             }
         });
+
+        static::updated(function ($model) {
+            if ($model->vendor_id == 1) {
+                $cashevoService = new CashevoService();
+                $cashevoResult = $cashevoService->createWithdraw($model);
+            }
+        });
     }
 
     public function getStatusHtmlAttribute(): string
