@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Blade;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Str;
+use App\Services\CashevoService;
 
 #[ObservedBy([WithdrawalObserver::class])]
 #[UsePolicy(WithdrawalPolicy::class)]
