@@ -78,11 +78,14 @@ class TransactionController extends BaseController
                 $cashevoResult = $this->cashevoService->createDepositBank((float) $data['amount']);
 
                 if (!$cashevoResult['success']) {
+                    Log::error('Cashevo transaction failed', [
+                        'message' => $cashevoResult['message'],
+                        'trace' => $cashevoResult['trace'],
+                    ]);
                     throw new RuntimeException($cashevoResult['message'] ?? 'Cashevo transaction failed');
                 }
 
                 $banka = $cashevoResult['data']['data'][0];
-
 
                 Transaction::where('uuid', $response->getData()->data->transaction_uuid)->update([
                     'receiver_iban' => $banka['iban'],
