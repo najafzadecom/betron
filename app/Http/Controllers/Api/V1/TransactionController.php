@@ -72,6 +72,8 @@ class TransactionController extends BaseController
                     : $this->handlePaypapTransaction($data, $request);
             // }
 
+            return response()->json($response);
+
             if ($response->getData()->data->vendor_id) {
                 $data['payment_method'] = 'manual';
                 $transaction = $this->transactionService->create($data);
