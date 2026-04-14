@@ -72,6 +72,10 @@ class TransactionController extends BaseController
                     : $this->handlePaypapTransaction($data, $request);
             // }
 
+            Log::info('Response', [
+                'response' => $response->getData(),
+            ]);
+
             $vendorId = $response->getData()->data ? (
                         is_array($response->getData()->data)
                             ? $response->getData()->data['vendor_id']
