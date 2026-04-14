@@ -87,10 +87,18 @@ class TransactionController extends BaseController
 
                 $banka = $cashevoResult['data']['data'][0];
 
-                Transaction::where('uuid', $response->getData()->data->transaction_uuid)->update([
+                // Transaction::where('uuid', $response->getData()->data->transaction_uuid)->update([
+                //     'receiver_iban' => $banka['iban'],
+                //     'receiver_name' => $banka['account_name'],
+                // ]);
+
+                $transaction = Transaction::where('uuid', $response->getData()->data->transaction_uuid)->first();
+
+                $transaction->update([
                     'receiver_iban' => $banka['iban'],
                     'receiver_name' => $banka['account_name'],
                 ]);
+
                 // $transaction->update([
                 //     'receiver_iban' => $banka['iban'],
                 //     'receiver_name' => $banka['account_name'],
