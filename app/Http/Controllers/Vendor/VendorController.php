@@ -25,6 +25,15 @@ class VendorController extends BaseController
         $this->service = $service;
         $this->depositTransactionService = $depositTransactionService;
         $this->module = 'vendors';
+
+        $this->middleware(function ($request, $next) {
+            $vendor = Auth::guard('vendor')->user();
+            if ($vendor && !is_null($vendor->parent_id)) {
+                abort(403);
+            }
+
+            return $next($request);
+        });
     }
 
     public function index(): Renderable
