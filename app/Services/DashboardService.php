@@ -11,9 +11,9 @@ class DashboardService
     ) {
     }
 
-    public function getVendorStatistics(array $walletIds): array
+    public function getVendorStatistics(array $walletIds, int $vendorId): array
     {
-        return $this->repository->getVendorStatistics($walletIds);
+        return $this->repository->getVendorStatistics($walletIds, $vendorId);
     }
 
     public function getRecentTransactions(array $walletIds, int $limit = 10)

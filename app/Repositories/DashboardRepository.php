@@ -2,9 +2,10 @@
 
 namespace App\Repositories;
 
-use App\Enums\TransactionStatus;
+use App\Enums\WithdrawalStatus;
 use App\Interfaces\DashboardInterface;
 use App\Models\Transaction;
+use App\Models\Withdrawal;
 
 class DashboardRepository implements DashboardInterface
 {
@@ -13,29 +14,35 @@ class DashboardRepository implements DashboardInterface
     ) {
     }
 
-    public function getVendorStatistics(array $walletIds): array
+    public function getVendorStatistics(array $walletIds, int $vendorId): array
     {
-        $totalWallets = count($walletIds);
-        
-        $totalTransactions = $this->transaction
-            ->whereIn('wallet_id', $walletIds)
-            ->count();
+        $totalReceivedDepositAmount = 0.0;
+        $totalReceivedDepositCount = 0;
+        $totalCommissionAmount = 0.0;
 
-        $totalAmount = $this->transaction
-            ->whereIn('wallet_id', $walletIds)
-            ->where('status', TransactionStatus::ManualConfirmed)
-            ->sum('amount');
+        if (!empty($walletIds)) {
+            $paidDeposits = $this->transaction
+                ->whereIn('wallet_id', $walletIds)
+                ->where('paid_status', true);
 
-        $pendingTransactions = $this->transaction
-            ->whereIn('wallet_id', $walletIds)
-            ->where('status', TransactionStatus::Pending)
-            ->count();
+            $totalReceivedDepositAmount = (float) (clone $paidDeposits)->sum('amount');
+            $totalReceivedDepositCount = (clone $paidDeposits)->count();
+            $totalCommissionAmount = (float) (clone $paidDeposits)->sum('fee_amount');
+        }
+
+        $pendingWithdrawals = Withdrawal::query()
+            ->where('vendor_id', $vendorId)
+            ->where('status', WithdrawalStatus::Pending);
+
+        $pendingWithdrawalsAmount = (float) (clone $pendingWithdrawals)->sum('amount');
+        $pendingWithdrawalsCount = (clone $pendingWithdrawals)->count();
 
         return [
-            'totalWallets' => $totalWallets,
-            'totalTransactions' => $totalTransactions,
-            'totalAmount' => $totalAmount,
-            'pendingTransactions' => $pendingTransactions,
+            'totalReceivedDepositAmount' => $totalReceivedDepositAmount,
+            'totalReceivedDepositCount' => $totalReceivedDepositCount,
+            'totalCommissionAmount' => $totalCommissionAmount,
+            'pendingWithdrawalsAmount' => $pendingWithdrawalsAmount,
+            'pendingWithdrawalsCount' => $pendingWithdrawalsCount,
         ];
     }
 

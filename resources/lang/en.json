@@ -396,5 +396,9 @@
     "Paid": "Paid",
     "Unpaid": "Unpaid",
     "Drag & drop files here...": "Drag & drop files here...",
-    "Remove file": "Remove file"
+    "Remove file": "Remove file",
+    "Total Received Deposits": "Total received deposits",
+    "Total Commission": "Commission amount",
+    "Pending Withdrawals": "Pending withdrawals",
+    "operations count": ":count operations"
 }

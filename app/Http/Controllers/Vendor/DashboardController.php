@@ -37,7 +37,7 @@ class DashboardController extends BaseController
         $walletIds = $this->dashboardService->getVendorWalletIds($vendorId, $this->vendorService);
 
         // Get statistics
-        $statistics = $this->dashboardService->getVendorStatistics($walletIds);
+        $statistics = $this->dashboardService->getVendorStatistics($walletIds, $vendorId);
 
         // Recent transactions
         $recentTransactions = $this->dashboardService->getRecentTransactions($walletIds, 10);
@@ -46,10 +46,11 @@ class DashboardController extends BaseController
             'title' => __('Dashboard'),
             'vendor' => $vendor,
             'depositAmount' => $vendor->deposit_amount ?? 0,
-            'totalWallets' => $statistics['totalWallets'],
-            'totalTransactions' => $statistics['totalTransactions'],
-            'totalAmount' => $statistics['totalAmount'],
-            'pendingTransactions' => $statistics['pendingTransactions'],
+            'totalReceivedDepositAmount' => $statistics['totalReceivedDepositAmount'],
+            'totalReceivedDepositCount' => $statistics['totalReceivedDepositCount'],
+            'totalCommissionAmount' => $statistics['totalCommissionAmount'],
+            'pendingWithdrawalsAmount' => $statistics['pendingWithdrawalsAmount'],
+            'pendingWithdrawalsCount' => $statistics['pendingWithdrawalsCount'],
             'recentTransactions' => $recentTransactions,
         ];
 

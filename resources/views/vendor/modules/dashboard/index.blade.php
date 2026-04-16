@@ -18,42 +18,44 @@
             </div>
 
             <div class="col-sm-6 col-xl-3">
-                <div class="card card-body">
+                <a href="{{ route('vendor.transactions.index') }}" class="card card-body text-decoration-none">
                     <div class="d-flex align-items-center">
                         <div class="flex-fill">
-                            <h4 class="mb-0">{{ $totalWallets }}</h4>
-                            <span class="text-muted">{{ __('Total Wallets') }}</span>
+                            <h4 class="mb-0 text-body">{{ number_format($totalReceivedDepositAmount, 2) }} ₺</h4>
+                            <div class="small text-muted">{{ __('operations count', ['count' => $totalReceivedDepositCount]) }}</div>
+                            <span class="text-muted">{{ __('Total Received Deposits') }}</span>
                         </div>
 
-                        <i class="ph-wallet ph-2x text-primary opacity-75 ms-3"></i>
+                        <i class="ph-arrow-down ph-2x text-primary opacity-75 ms-3"></i>
                     </div>
-                </div>
+                </a>
             </div>
 
             <div class="col-sm-6 col-xl-3">
                 <div class="card card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-fill">
-                            <h4 class="mb-0">{{ $totalTransactions }}</h4>
-                            <span class="text-muted">{{ __('Total Transactions') }}</span>
+                            <h4 class="mb-0">{{ number_format($totalCommissionAmount, 2) }} ₺</h4>
+                            <span class="text-muted">{{ __('Total Commission') }}</span>
                         </div>
 
-                        <i class="ph-coins ph-2x text-success opacity-75 ms-3"></i>
+                        <i class="ph-percent ph-2x text-success opacity-75 ms-3"></i>
                     </div>
                 </div>
             </div>
 
             <div class="col-sm-6 col-xl-3">
-                <div class="card card-body">
+                <a href="{{ route('vendor.withdrawals.index') }}" class="card card-body text-decoration-none">
                     <div class="d-flex align-items-center">
                         <div class="flex-fill">
-                            <h4 class="mb-0">{{ $pendingTransactions }}</h4>
-                            <span class="text-muted">{{ __('Pending Transactions') }}</span>
+                            <h4 class="mb-0 text-body">{{ number_format($pendingWithdrawalsAmount, 2) }} ₺</h4>
+                            <div class="small text-muted">{{ __('operations count', ['count' => $pendingWithdrawalsCount]) }}</div>
+                            <span class="text-muted">{{ __('Pending Withdrawals') }}</span>
                         </div>
 
-                        <i class="ph-clock ph-2x text-warning opacity-75 ms-3"></i>
+                        <i class="ph-bank ph-2x text-warning opacity-75 ms-3"></i>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
 
