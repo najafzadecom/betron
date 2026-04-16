@@ -45,3 +45,12 @@
     right: 0;
     left: auto;
 }
+
+/* Modals above theme chrome (sidebar/nav/configurator); fixes WebKit/Safari stacking when markup lived inside .content-inner */
+body .modal-backdrop {
+    z-index: 10990;
+}
+
+body .modal {
+    z-index: 11000;
+}
