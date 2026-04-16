@@ -13,18 +13,22 @@ use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
 class WithdrawalExport implements FromCollection, WithMapping, WithHeadings, WithStrictNullComparison
 {
     private Service $service;
+    private $vendorId;
 
     public function __construct(
-        Service $service
+        Service $service,
+        $vendorId
     ) {
         $this->service = $service;
+        $this->vendorId = $vendorId;
     }
     /**
      * @return iterable
      */
     public function collection(): iterable
     {
-        return $this->service->getAll('created_at', 'DESC'); //Todo: Fix By Vendor Or All
+        // return $this->service->getAll('created_at', 'DESC'); //Todo: Fix By Vendor Or All
+        return Withdrawal::where('vendor_id', $this->vendorId)->orderBy('created_at', 'DESC')->get();
     }
 
     /**
