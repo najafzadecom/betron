@@ -99,6 +99,17 @@
 
                         <div class="col-12 col-md-6 col-lg-2">
                             <div class="mb-3">
+                                <label class="form-label">{{ __('Vendor assignment') }}</label>
+                                <select name="vendor_assignment" class="form-select">
+                                    <option value="">{{ __('All') }}</option>
+                                    <option value="assigned" {{ request('vendor_assignment') === 'assigned' ? ' selected' : '' }}>{{ __('Vendor assigned') }}</option>
+                                    <option value="unassigned" {{ request('vendor_assignment') === 'unassigned' ? ' selected' : '' }}>{{ __('Vendor unassigned') }}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-2">
+                            <div class="mb-3">
                                 <label class="form-label">{{ __('Parent Vendor') }}</label>
                                 <select id="parent_vendor_filter" name="parent_vendor_id" class="form-select">
                                     <option value="">{{ __('All') }}</option>

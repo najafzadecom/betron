@@ -75,6 +75,18 @@ class WithdrawalScope implements Scope
             $builder->where('paid_status', $request->get('paid_status'));
         }
 
+        // Vendor assignment filter (admin / export)
+        if ($request->filled('vendor_assignment')) {
+            $assignment = $request->get('vendor_assignment');
+            if ($assignment === 'assigned') {
+                $builder->where('vendor_id', '>', 0);
+            } elseif ($assignment === 'unassigned') {
+                $builder->where(function ($q) {
+                    $q->whereNull('vendor_id')->orWhere('vendor_id', 0);
+                });
+            }
+        }
+
         // Wallet filter
 //        if ($request->filled('wallet_id')) {
 //            $builder->where('wallet_id', $request->get('wallet_id'));
