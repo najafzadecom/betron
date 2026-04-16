@@ -3,12 +3,13 @@
 @section('content')
     <div class="content">
         <!-- Statistics Cards -->
-        <div class="row">
-            <div class="col-sm-6 col-xl-3">
-                <a href="{{ route('vendor.deposit-transactions') }}" class="card card-body text-decoration-none">
-                    <div class="d-flex align-items-center">
+        <div class="row g-3 align-items-stretch">
+            <div class="col-sm-6 col-xl-3 d-flex">
+                <a href="{{ route('vendor.deposit-transactions') }}" class="card card-body text-decoration-none w-100 h-100 d-flex align-items-center">
+                    <div class="d-flex align-items-center w-100">
                         <div class="flex-fill">
                             <h4 class="mb-0">{{ number_format($depositAmount, 2) }} ₺</h4>
+                            <div class="small text-muted invisible" aria-hidden="true">{{ __('operations count', ['count' => 0]) }}</div>
                             <span class="text-muted">{{ __('Deposit Amount') }}</span>
                         </div>
 
@@ -17,9 +18,9 @@
                 </a>
             </div>
 
-            <div class="col-sm-6 col-xl-3">
-                <a href="{{ route('vendor.transactions.index') }}" class="card card-body text-decoration-none">
-                    <div class="d-flex align-items-center">
+            <div class="col-sm-6 col-xl-3 d-flex">
+                <a href="{{ route('vendor.transactions.index') }}" class="card card-body text-decoration-none w-100 h-100 d-flex align-items-center">
+                    <div class="d-flex align-items-center w-100">
                         <div class="flex-fill">
                             <h4 class="mb-0 text-body">{{ number_format($totalReceivedDepositAmount, 2) }} ₺</h4>
                             <div class="small text-muted">{{ __('operations count', ['count' => $totalReceivedDepositCount]) }}</div>
@@ -31,11 +32,12 @@
                 </a>
             </div>
 
-            <div class="col-sm-6 col-xl-3">
-                <div class="card card-body">
-                    <div class="d-flex align-items-center">
+            <div class="col-sm-6 col-xl-3 d-flex">
+                <div class="card card-body w-100 h-100 d-flex align-items-center">
+                    <div class="d-flex align-items-center w-100">
                         <div class="flex-fill">
                             <h4 class="mb-0">{{ number_format($totalCommissionAmount, 2) }} ₺</h4>
+                            <div class="small text-muted invisible" aria-hidden="true">{{ __('operations count', ['count' => 0]) }}</div>
                             <span class="text-muted">{{ __('Total Commission') }}</span>
                         </div>
 
@@ -44,9 +46,9 @@
                 </div>
             </div>
 
-            <div class="col-sm-6 col-xl-3">
-                <a href="{{ route('vendor.withdrawals.index') }}" class="card card-body text-decoration-none">
-                    <div class="d-flex align-items-center">
+            <div class="col-sm-6 col-xl-3 d-flex">
+                <a href="{{ route('vendor.withdrawals.index') }}" class="card card-body text-decoration-none w-100 h-100 d-flex align-items-center">
+                    <div class="d-flex align-items-center w-100">
                         <div class="flex-fill">
                             <h4 class="mb-0 text-body">{{ number_format($pendingWithdrawalsAmount, 2) }} ₺</h4>
                             <div class="small text-muted">{{ __('operations count', ['count' => $pendingWithdrawalsCount]) }}</div>
