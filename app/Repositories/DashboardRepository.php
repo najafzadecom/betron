@@ -23,6 +23,7 @@ class DashboardRepository implements DashboardInterface
         if (!empty($walletIds)) {
             $paidDeposits = $this->transaction
                 ->whereIn('wallet_id', $walletIds)
+                ->whereIn('status', [TransactionStatus::ManualConfirmed, TransactionStatus::AutoConfirmed])
                 ->where('paid_status', true);
 
             $totalReceivedDepositAmount = (float) (clone $paidDeposits)->sum('amount');
@@ -30,9 +31,11 @@ class DashboardRepository implements DashboardInterface
             $totalCommissionAmount = (float) (clone $paidDeposits)->sum('fee_amount');
         }
 
+        // API ve dağıtım akışı çoğunlukla Processing (1); Pending (0) da kalabilir
         $pendingWithdrawals = Withdrawal::query()
             ->where('vendor_id', $vendorId)
-            ->where('status', WithdrawalStatus::Pending);
+            ->where('paid_status', true)
+            ->whereIn('status', [WithdrawalStatus::ManualConfirmed, WithdrawalStatus::ManualConfirmed]);
 
         $pendingWithdrawalsAmount = (float) (clone $pendingWithdrawals)->sum('amount');
         $pendingWithdrawalsCount = (clone $pendingWithdrawals)->count();
