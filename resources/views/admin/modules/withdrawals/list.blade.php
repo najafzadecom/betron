@@ -221,7 +221,7 @@
                     @forelse($items as $item)
                         @php
                             // Sadece vendor'u olan ve status'u İşleniyor (Processing = 1) olan çekimler seçilebilir
-                            $canSelect = $item->vendor_id && $item->status->value === \App\Enums\WithdrawalStatus::Processing->value;
+                            $canSelect = $item->status->value === \App\Enums\WithdrawalStatus::Processing->value;
                         @endphp
                         <tr>
                             <td>
