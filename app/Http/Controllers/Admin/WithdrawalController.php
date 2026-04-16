@@ -447,8 +447,7 @@ class WithdrawalController extends BaseController
 
             // Filter withdrawals that have vendor assigned and are in Processing status only
             $validWithdrawals = $withdrawals->filter(function ($withdrawal) {
-                return $withdrawal->vendor_id && 
-                       $withdrawal->status->value === WithdrawalStatus::Processing->value;
+                return  $withdrawal->status->value === WithdrawalStatus::Processing->value;
             });
 
             if ($validWithdrawals->isEmpty()) {
