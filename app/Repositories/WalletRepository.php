@@ -65,6 +65,12 @@ class WalletRepository extends BaseRepository implements WalletInterface
                 $q->whereNull('vendors.parent_id')
                     ->orWhere('parent_vendors.status', 1);
             })
+            ->where(function ($q) use ($isPostgres) {
+                $depositEnabled = $isPostgres ? true : 1;
+                // Skip sub-vendors whose parent has deposits disabled
+                $q->whereNull('vendors.parent_id')
+                    ->orWhere('parent_vendors.deposit_enabled', $depositEnabled);
+            })
             ->whereHas('transactionBanks', function ($query) use ($bankId) {
                 $query->where('bank_id', $bankId);
             })
@@ -128,6 +134,11 @@ class WalletRepository extends BaseRepository implements WalletInterface
                     // Either no parent (parent_id is null) or parent is active
                     $q->whereNull('vendors.parent_id')
                         ->orWhere('parent_vendors.status', 1);
+                })
+                ->where(function ($q) use ($isPostgres) {
+                    $depositEnabled = $isPostgres ? true : 1;
+                    $q->whereNull('vendors.parent_id')
+                        ->orWhere('parent_vendors.deposit_enabled', $depositEnabled);
                 })
                 ->whereHas('transactionBanks', function ($query) use ($bankId) {
                     $query->where('bank_id', $bankId);
