@@ -11,15 +11,18 @@ use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
 class VendorTransactionExport implements FromCollection, WithMapping, WithHeadings, WithStrictNullComparison
 {
     private array $walletIds;
+    private $vendorId;
 
-    public function __construct(array $walletIds)
+    public function __construct(array $walletIds, $vendorId)
     {
         $this->walletIds = $walletIds;
+        $this->vendorId = $vendorId;
     }
 
     public function collection(): iterable
     {
         $query = Transaction::whereIn('wallet_id', $this->walletIds)
+            ->where('vendor_id', $this->vendorId)
             ->with(['wallet', 'site', 'bank']);
 
         $request = request();

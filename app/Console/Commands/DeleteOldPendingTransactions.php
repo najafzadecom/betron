@@ -28,7 +28,7 @@ class DeleteOldPendingTransactions extends Command
      */
     public function handle()
     {
-        $thirtyMinutesAgo = Carbon::now('Europe/Istanbul')->subMinutes(30);
+        $thirtyMinutesAgo = Carbon::now('Europe/Istanbul')->subMinutes(8);
 
         $transactions = Transaction::query()
             ->where('status', TransactionStatus::Pending)
@@ -44,7 +44,10 @@ class DeleteOldPendingTransactions extends Command
 
         $deleted = 0;
         foreach ($transactions as $transaction) {
-            $transaction->forceDelete();
+            $transaction->update([
+                'status' => TransactionStatus::ManualCancelled,
+                'paid_status' => false
+            ]);
             $deleted++;
         }
 

@@ -133,9 +133,10 @@ class TransactionController extends BaseController
     public function export(): BinaryFileResponse
     {
         $walletIds = $this->getWalletIds();
+        $vendor = $this->vendor();
 
         return Excel::download(
-            new VendorTransactionExport($walletIds),
+            new VendorTransactionExport($walletIds, $vendor->id),
             'my-transactions-' . date('Y-m-d_H:i:s') . '.xlsx'
         );
     }
