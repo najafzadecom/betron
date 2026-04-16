@@ -6,6 +6,7 @@ use App\Enums\WithdrawalStatus;
 use App\Interfaces\DashboardInterface;
 use App\Models\Transaction;
 use App\Models\Withdrawal;
+use App\Enums\TransactionStatus;
 
 class DashboardRepository implements DashboardInterface
 {
