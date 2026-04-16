@@ -3,7 +3,7 @@
 @section('content')
     <div class="content">
         <!-- Statistics Cards -->
-        <div class="row g-3 align-items-stretch">
+        <div class="row g-3 align-items-stretch mb-4">
             <div class="col-sm-6 col-xl-3 d-flex">
                 <a href="{{ route('vendor.deposit-transactions') }}" class="card card-body text-decoration-none w-100 h-100 d-flex align-items-center">
                     <div class="d-flex align-items-center w-100">
