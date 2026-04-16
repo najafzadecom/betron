@@ -50,10 +50,10 @@
                         <div class="flex-fill">
                             <h4 class="mb-0 text-body">{{ number_format($pendingWithdrawalsAmount, 2) }} ₺</h4>
                             <div class="small text-muted">{{ __('operations count', ['count' => $pendingWithdrawalsCount]) }}</div>
-                            <span class="text-muted">{{ __('Pending Withdrawals') }}</span>
+                            <span class="text-muted">{{ __('Total Withdrawal Amount') }}</span>
                         </div>
 
-                        <i class="ph-bank ph-2x text-warning opacity-75 ms-3"></i>
+                        <i class="ph-arrow-up ph-2x text-warning opacity-75 ms-3"></i>
                     </div>
                 </a>
             </div>

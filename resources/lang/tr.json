@@ -475,6 +475,7 @@
     "Total Transactions": "Toplam İşlemler",
     "Pending Transactions": "Bekleyen İşlemler",
     "Total Received Deposits": "Toplam Alınan Yatırım",
+    "Total Withdrawal Amount": "Toplam Çekim Tutarı",
     "Total Commission": "Komisyon Tutarı",
     "Pending Withdrawals": "Bekleyen Çekimler",
     "operations count": ":count işlem",
