@@ -28,7 +28,11 @@ class WithdrawalExport implements FromCollection, WithMapping, WithHeadings, Wit
     public function collection(): iterable
     {
         // return $this->service->getAll('created_at', 'DESC'); //Todo: Fix By Vendor Or All
+       if ($this->vendorId) {
         return Withdrawal::where('vendor_id', $this->vendorId)->orderBy('created_at', 'DESC')->get();
+       } else {
+        return Withdrawal::orderBy('created_at', 'DESC')->get();
+       }
     }
 
     /**
