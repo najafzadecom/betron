@@ -41,13 +41,13 @@ class DashboardController extends BaseController
 
         $commission = $vendor->transaction_fee ?? 0;
         $commissionAmount = $statistics['totalReceivedDepositAmount'] * $commission / 100;
-        $commissionAmount = $statistics['totalReceivedDepositAmount'] - $commissionAmount;
+        // $commissionAmount = $statistics['totalReceivedDepositAmount'] - $commissionAmount;
 
         // Recent transactions
         $recentTransactions = $this->dashboardService->getRecentTransactions($walletIds, 10);
 
         $this->data = [
-            'title' => __('Dashboard'),
+            'title' => __('Dashboard') . " - " . $commissionAmount,
             'vendor' => $vendor,
             'depositAmount' => $vendor->deposit_amount ?? 0,
             'totalReceivedDepositAmount' => $statistics['totalReceivedDepositAmount'],
