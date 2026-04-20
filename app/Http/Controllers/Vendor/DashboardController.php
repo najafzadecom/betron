@@ -39,7 +39,7 @@ class DashboardController extends BaseController
         // Get statistics
         $statistics = $this->dashboardService->getVendorStatistics($walletIds, $vendorId);
 
-        $commission = $vendor->commission;
+        $commission = $vendor->transaction_fee;
         $commissionAmount = $statistics['totalReceivedDepositAmount'] * $commission / 100;
         $commissionAmount = $statistics['totalReceivedDepositAmount'] - $commissionAmount;
 
