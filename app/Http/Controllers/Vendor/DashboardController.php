@@ -47,7 +47,7 @@ class DashboardController extends BaseController
         $recentTransactions = $this->dashboardService->getRecentTransactions($walletIds, 10);
 
         $this->data = [
-            'title' => __('Dashboard') . " - " . $commissionAmount,
+            'title' => __('Dashboard'),
             'vendor' => $vendor,
             'depositAmount' => $vendor->deposit_amount ?? 0,
             'totalReceivedDepositAmount' => $statistics['totalReceivedDepositAmount'],
