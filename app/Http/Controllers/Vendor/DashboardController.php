@@ -39,6 +39,10 @@ class DashboardController extends BaseController
         // Get statistics
         $statistics = $this->dashboardService->getVendorStatistics($walletIds, $vendorId);
 
+        $commission = $vendor->commission;
+        $commissionAmount = $statistics['totalReceivedDepositAmount'] * $commission / 100;
+        $commissionAmount = $statistics['totalReceivedDepositAmount'] - $commissionAmount;
+
         // Recent transactions
         $recentTransactions = $this->dashboardService->getRecentTransactions($walletIds, 10);
 
@@ -48,7 +52,7 @@ class DashboardController extends BaseController
             'depositAmount' => $vendor->deposit_amount ?? 0,
             'totalReceivedDepositAmount' => $statistics['totalReceivedDepositAmount'],
             'totalReceivedDepositCount' => $statistics['totalReceivedDepositCount'],
-            'totalCommissionAmount' => $statistics['totalCommissionAmount'],
+            'totalCommissionAmount' => $commissionAmount,
             'pendingWithdrawalsAmount' => $statistics['pendingWithdrawalsAmount'],
             'pendingWithdrawalsCount' => $statistics['pendingWithdrawalsCount'],
             'recentTransactions' => $recentTransactions,
