@@ -17,7 +17,7 @@ class WithdrawalExport implements FromCollection, WithMapping, WithHeadings, Wit
 
     public function __construct(
         Service $service,
-        $vendorId
+        $vendorId = null
     ) {
         $this->service = $service;
         $this->vendorId = $vendorId;
