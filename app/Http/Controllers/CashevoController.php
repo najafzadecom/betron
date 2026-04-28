@@ -90,7 +90,7 @@ class CashevoController extends Controller
 
     private function syncWithdrawalStatus(string $uuid, string $status, array $payload): void
     {
-        $withdrawal = Withdrawal::withoutGlobalScopes()->where('uuid', $uuid)->first();
+        $withdrawal = Withdrawal::withoutGlobalScopes()->where('order_id', $uuid)->first();
 
         if (!$withdrawal) {
             return;

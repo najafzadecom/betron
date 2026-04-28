@@ -100,7 +100,7 @@ class CashevoService
             'currency' => $currency,
             'username' => $this->usernameForUser($withdrawal->user_id, $withdrawal->order_id),
             'paymentSource' => (string) config('cashevo.client_name'),
-            'transactionId' => (string) $withdrawal->uuid,
+            'transactionId' => (string) $withdrawal->order_id,
             'paymentMethod' => (string) config('cashevo.payment_method'),
         ];
 
