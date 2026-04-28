@@ -70,7 +70,7 @@ class CashevoService
             'currency' => $currency,
             'username' => $this->usernameForUser($transaction->user_id, $transaction->order_id),
             'paymentSource' => (string) config('cashevo.client_name'),
-            'transactionId' => (string) $transaction->uuid,
+            'transactionId' => (string) $transaction->order_id,
             'paymentMethod' => (string) config('cashevo.payment_method'),
         ];
 
