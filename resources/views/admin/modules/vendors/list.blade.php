@@ -283,6 +283,9 @@
         </div>
     </div>
 
+@endsection
+
+@push('modals')
     <div id="show_modal" class="modal fade" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -437,7 +440,7 @@
             </div>
         </div>
     </div>
-@endsection
+@endpush
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
