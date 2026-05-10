@@ -1,21 +1,38 @@
-@extends('admin.layouts.app')
+@extends('vendor.layouts.app')
 @section('title', $title)
 @section('content')
     <div class="content">
         <div class="card">
             <div class="card-header d-flex flex-wrap align-items-center gap-2">
                 <h5 class="mb-0">{{ $module }}</h5>
+                @if(count($childVendors) > 0)
+                <div class="btn-group" role="group" aria-label="View type">
+                    <input type="radio" class="btn-check" name="view_type" id="view_type_own" value="own"
+                           {{ $viewType === 'own' ? 'checked' : '' }} onchange="changeViewType(this.value)">
+                    <label class="btn btn-outline-primary btn-sm" for="view_type_own">
+                        {{ __('My Withdrawals') }}
+                    </label>
+
+                    <input type="radio" class="btn-check" name="view_type" id="view_type_child_vendors" value="child_vendors"
+                           {{ $viewType === 'child_vendors' ? 'checked' : '' }} onchange="changeViewType(this.value)">
+                    <label class="btn btn-outline-primary btn-sm" for="view_type_child_vendors">
+                        {{ __('Child Vendors Withdrawals') }}
+                    </label>
+                </div>
+                @endif
                 <div class="ms-auto d-flex gap-2">
+                    @if(count($childVendors) > 0)
                     <button type="button" id="bulk_assign_vendor_btn" class="btn btn-primary btn-sm" style="display: none;" data-bs-toggle="modal" data-bs-target="#bulk_assign_vendor_modal">
                         <i class="ph-users me-1"></i> {{ __('Bulk Assign Vendor') }}
                     </button>
-                    <x-buttons.create title="{{ __('Create') }}" url="{{ route('admin.withdrawals.create') }}" permission="withdrawals-create"/>
-                    <x-buttons.export title="{{ __('Export') }}" url="{!! route('admin.withdrawals.export', request()->query())  !!} " permission="withdrawals-export"/>
+                    @endif
+                    <x-buttons.export title="{{ __('Export') }}" url="{!! route('vendor.withdrawals.export', request()->query())  !!} " permission="withdrawals-export"/>
                 </div>
             </div>
 
             <div class="card-body">
                 <form action="" method="GET" id="searchForm">
+                    <input type="hidden" name="view_type" id="view_type_input" value="{{ $viewType }}">
                     <div class="row">
                         <div class="col-12 col-md-6 col-lg-2">
                             <div class="mb-3">
@@ -65,7 +82,7 @@
                                 <label class="form-label">{{ __('Currency') }}</label>
                                 <select name="currency" class="form-select">
                                     <option value="">{{ __('All Currencies') }}</option>
-                                    @foreach($currencies as $currency)
+                                    @foreach(\App\Enums\Currency::cases() as $currency)
                                         <option value="{{ $currency->name }}"{{ request('currency') == $currency->name ? ' selected' : '' }}>
                                             {{ $currency->name }}</option>
                                     @endforeach
@@ -97,42 +114,28 @@
                             </div>
                         </div>
 
+                        @if(count($childVendors) > 0)
                         <div class="col-12 col-md-6 col-lg-2">
                             <div class="mb-3">
-                                <label class="form-label">{{ __('Vendor assignment') }}</label>
-                                <select name="vendor_assignment" class="form-select">
-                                    <option value="">{{ __('All') }}</option>
-                                    <option value="assigned" {{ request('vendor_assignment') === 'assigned' ? ' selected' : '' }}>{{ __('Vendor assigned') }}</option>
-                                    <option value="unassigned" {{ request('vendor_assignment') === 'unassigned' ? ' selected' : '' }}>{{ __('Vendor unassigned') }}</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="col-12 col-md-6 col-lg-2">
-                            <div class="mb-3">
-                                <label class="form-label">{{ __('Parent Vendor') }}</label>
-                                <select id="parent_vendor_filter" name="parent_vendor_id" class="form-select">
-                                    <option value="">{{ __('All') }}</option>
-                                    @foreach($topLevelVendors as $vendor)
-                                        <option value="{{ $vendor->id }}"{{ request('parent_vendor_id') == $vendor->id ? ' selected' : '' }}>
-                                            {{ $vendor->name }}
+                                <label class="form-label">{{ __('Child Vendor') }}</label>
+                                <select name="child_vendor_id" id="child_vendor_id" class="form-select" onchange="handleChildVendorChange(this.value)">
+                                    <option value="">{{ __('All Child Vendors') }}</option>
+                                    @foreach($childVendors as $childVendor)
+                                        <option value="{{ $childVendor->id }}"{{ request('child_vendor_id') == $childVendor->id ? ' selected' : '' }}>
+                                            {{ $childVendor->name }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
+                        @endif
 
                         <div class="col-12 col-md-6 col-lg-2">
                             <div class="mb-3">
-                                <label class="form-label">{{ __('Vendor') }}</label>
-                                <select id="vendor_filter" name="vendor_id" class="form-select" {{ !request('parent_vendor_id') ? 'disabled' : '' }}>
-                                    <option value="">{{ __('All') }}</option>
-                                    @foreach($childVendors as $vendor)
-                                        <option value="{{ $vendor->id }}"{{ request('vendor_id') == $vendor->id ? ' selected' : '' }}>
-                                            {{ $vendor->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                                <label class="form-label">{{ __('Wallet ID') }}</label>
+                                <input type="number" name="wallet_id" class="form-control"
+                                       placeholder="{{ __('Wallet ID') }}"
+                                       value="{{ request('wallet_id') }}">
                             </div>
                         </div>
 
@@ -166,7 +169,7 @@
                         <div class="col-12 col-md-6 col-lg-2">
                             <div class="mb-3">
                                 <label class="form-label">{{ __('Accepted Date Range') }}</label>
-                                <input type="text" id="accepted_date_range" name="creation_date_range"
+                                <input type="text" id="accepted_date_range" name="accepted_date_range"
                                        class="form-control daterange-picker"
                                        placeholder="{{ __('Select date range') }}"
                                        value="{{ request('accepted_from') && request('accepted_to') ? request('accepted_from') . ' - ' . request('accepted_to') : '' }}">
@@ -207,22 +210,22 @@
                 <table class="table text-nowrap table-xs table-striped table-hover">
                     <thead>
                     <tr>
-                        <th style="width: 50px;">
+                        @if(count($childVendors) > 0)
+                        <th class="text-center" style="width: 20px;">
                             <input type="checkbox" id="select_all_checkbox" title="{{ __('Select All') }}">
                         </th>
-                        <th></th>
+                        @endif
                         {!! sortableTableHeader('status', 'Status', 'withdrawals') !!}
                         {!! sortableTableHeader('paid_status', 'Paid', 'withdrawals') !!}
                         {!! sortableTableHeader('first_name', 'Receiver', 'withdrawals') !!}
                         {!! sortableTableHeader('amount', 'Amount', 'withdrawals') !!}
-                        {!! sortableTableHeader('fee_amount', 'Fee', 'withdrawals') !!}
                         {!! sortableTableHeader('created_at', 'Created At', 'withdrawals') !!}
                         {!! sortableTableHeader('accepted_at', 'Accepted At', 'withdrawals') !!}
                         <th>{{ __('Vendor') }}</th>
                         {!! sortableTableHeader('user_id', 'Site User ID', 'withdrawals') !!}
                         {!! sortableTableHeader('site_id', 'Site', 'withdrawals') !!}
                         {!! sortableTableHeader('order_id', 'Order', 'withdrawals') !!}
-                        {!! sortableTableHeader('uuid', 'Paypap ID', 'withdrawals') !!}
+                        <th></th>
                         <th class="text-center" style="width: 20px;">
                             <i class="ph-dots-three"></i>
                         </th>
@@ -231,21 +234,17 @@
                     <tbody>
                     @forelse($items as $item)
                         @php
-                            // Sadece vendor'u olan ve status'u İşleniyor (Processing = 1) olan çekimler seçilebilir
-                            $canSelect = $item->status->value === \App\Enums\WithdrawalStatus::Processing->value;
+                            // Vendor panelinde: mevcut vendor'ın kendi ve child vendor'ların withdrawal'ları seçilebilir
+                            $canSelect = count($childVendors) > 0;
                         @endphp
                         <tr>
+                            @if(count($childVendors) > 0)
                             <td>
                                 @if($canSelect)
                                     <input type="checkbox" class="withdrawal-checkbox" value="{{ $item->id }}" data-withdrawal-id="{{ $item->id }}">
                                 @endif
                             </td>
-                            <td>
-                                @if($item->payment_method == 'manual' && $item->status->value == 0)
-                                    <button class="btn btn-outline-success btn-sm approve-btn" data-id="{{ $item->id }}" data-type="withdrawal">{{ __('Approve') }}</button>
-                                    <button class="btn btn-outline-danger btn-sm cancel-btn" data-id="{{ $item->id }}" data-type="withdrawal">{{ __('Cancel') }}</button>
-                                @endif
-                            </td>
+                            @endif
                             <td>{!! $item->status_html !!}</td>
                             <td><x-paid-status :paid="$item->paid_status" /></td>
                             <td>
@@ -255,18 +254,19 @@
                             <td>
                                 <span class="badge bg-indigo bg-opacity-10 text-indigo">{{ $item->currency->code() }} {{ number_format($item->amount, 2) }}</span>
                             </td>
-                            <td>
-                                <span class="badge bg-success bg-opacity-10 text-success">{{ $item->currency->code() }} {{ number_format($item->fee_amount, 2) }}</span>
-                            </td>
                             <td>{{ $item->created_at->isoFormat('DD MMM YYYY HH:mm') }}</td>
                             <td>{{ $item->accepted_at?->isoFormat('DD MMM YYYY HH:mm') ?? '' }}</td>
                             <td>{{ $item->vendor?->name ?? '-' }}</td>
                             <td>{{ $item->user_id }}</td>
                             <td>{{ $item->site_name }}</td>
                             <td>{{ $item->order_id }}</td>
-                            <td>{{ $item->uuid }}</td>
                             <td>
-                                @canany(['withdrawals-show', 'withdrawals-edit', 'withdrawals-delete'])
+                                @if($item->payment_method?->value == 'manual' && $item->status->value == 1)
+                                    <button class="btn btn-outline-success btn-sm approve-btn" data-id="{{ $item->id }}" data-type="withdrawal">{{ __('Approve') }}</button>
+                                    <button class="btn btn-outline-danger btn-sm cancel-btn" data-id="{{ $item->id }}" data-type="withdrawal">{{ __('Cancel') }}</button>
+                                @endif
+                            </td>
+                            <td>
                                 <div class="dropdown">
                                     <a href="#" class="text-body" data-bs-toggle="dropdown" data-bs-boundary="viewport">
                                         <i class="ph-list"></i>
@@ -275,41 +275,13 @@
                                     <div class="dropdown-menu dropdown-menu-end" data-popper-placement="top-start"
                                          data-popper-reference-hidden="">
                                         <div class="dropdown-header">{{ __('Options') }}</div>
-                                        @can('withdrawals-show')
                                         <a href="#" class="dropdown-item"
-                                           data-url="{{ route('admin.withdrawals.show', $item->id) }}"
+                                           data-url="{{ route('vendor.withdrawals.show', $item->id) }}"
                                            data-bs-toggle="modal" data-bs-target="#show_modal">
                                             <i class="ph-eye me-2"></i>
                                             {{ __('Show withdrawal') }}
                                         </a>
-                                        @endcan
-                                        @can('withdrawals-edit')
-                                        <a href="{{ route('admin.withdrawals.edit', $item->id) }}"
-                                           class="dropdown-item">
-                                            <i class="ph-pen me-2"></i>
-                                            {{ __('Edit withdrawal') }}
-                                        </a>
-                                        @endcan
-                                        @can('withdrawals-delete')
-                                        <a href="#" class="dropdown-item text-danger"
-                                           data-delete-url="{{ route('admin.withdrawals.destroy', $item->id) }}"
-                                           data-item-name="withdrawal #{{ $item->id }}">
-                                            <i class="ph-trash me-2"></i>
-                                            {{ __('Delete withdrawal') }}
-                                        </a>
-                                        @endcan
-                                        <div class="dropdown-divider"></div>
-                                        <a href="{{ route('admin.withdrawals.activity-logs', $item->id) }}" class="dropdown-item">
-                                            <i class="ph-list-dashes me-2"></i>
-                                            {{ __('Activity Logs') }}
-                                        </a>
-                                        @if($item->withdrawal_id && $item->payment_method == 'paypap')
-                                            <a href="{{ route('admin.withdrawals.paypap-status', $item->id) }}" class="dropdown-item">
-                                                <i class="ph-info me-2"></i>
-                                                {{ __('Paypap Status') }}s
-                                            </a>
-                                        @endif
-                                        @can('withdrawals-edit')
+                                        @if(count($childVendors) > 0)
                                         <div class="dropdown-divider"></div>
                                         <a href="#" class="dropdown-item"
                                            data-withdrawal-id="{{ $item->id }}"
@@ -319,15 +291,14 @@
                                             <i class="ph-user me-2"></i>
                                             {{ __('Assign Vendor') }}
                                         </a>
-                                        @endcan
+                                        @endif
                                     </div>
                                 </div>
-                                @endcanany
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="13">{{ __('Data not found') }}</td>
+                            <td colspan="{{ count($childVendors) > 0 ? 15 : 14 }}">{{ __('Data not found') }}</td>
                         </tr>
                     @endforelse
                     </tbody>
@@ -336,7 +307,7 @@
 
             <div class="card-footer">
                 <div class="row mb-3 align-items-center">
-                    <div class="col-12 col-md-6 d-flex align-items-center mb-2 mb-md-0">
+                    <div class="col-md-6 col-sm-12 mb-2 mb-md-0 d-flex align-items-center">
                         <label for="limit" class="me-2 mb-0">{{ __('Display') }}:</label>
                         <select id="limit" name="limit" class="form-select w-auto" onchange="changeLimit(this.value)">
                             @foreach(config('pagination.per_pages') as $limit)
@@ -345,7 +316,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-12 col-md-6">
+                    <div class="col-md-6 col-sm-12">
                         @if(method_exists($items, 'links'))
                             {{ $items->links() }}
                         @endif
@@ -354,9 +325,7 @@
             </div>
         </div>
     </div>
-@endsection
 
-@push('modals')
     <div id="show_modal" class="modal fade" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -367,40 +336,48 @@
 
                 <div class="modal-body">
                     <div class="row mb-2">
-                        <div class="col-12 col-sm-5 fw-semibold text-muted">{{ __('ID') }}:</div>
-                        <div class="col-12 col-sm-7 text-sm-end" id="id">-</div>
+                        <div class="col-5 fw-semibold text-muted">{{ __('ID') }}:</div>
+                        <div class="col-7 text-end" id="id">-</div>
                     </div>
                     <div class="row mb-2">
-                        <div class="col-12 col-sm-5 fw-semibold text-muted">{{ __('Receiver') }}:</div>
-                        <div class="col-12 col-sm-7 text-sm-end" id="receiver">-</div>
+                        <div class="col-5 fw-semibold text-muted">{{ __('Wallet ID') }}:</div>
+                        <div class="col-7 text-end" id="wallet-id">-</div>
                     </div>
                     <div class="row mb-2">
-                        <div class="col-12 col-sm-5 fw-semibold text-muted">{{ __('Receiver IBAN') }}:</div>
-                        <div class="col-12 col-sm-7 text-sm-end" id="iban">-</div>
+                        <div class="col-5 fw-semibold text-muted">{{ __('Receiver') }}:</div>
+                        <div class="col-7 text-end" id="receiver">-</div>
                     </div>
                     <div class="row mb-2">
-                        <div class="col-12 col-sm-5 fw-semibold text-muted">{{ __('Amount') }}:</div>
-                        <div class="col-12 col-sm-7 text-sm-end" id="amount">-</div>
+                        <div class="col-5 fw-semibold text-muted">{{ __('Receiver IBAN') }}:</div>
+                        <div class="col-7 text-end" id="iban">-</div>
                     </div>
                     <div class="row mb-2">
-                        <div class="col-12 col-sm-5 fw-semibold text-muted">{{ __('Currency') }}:</div>
-                        <div class="col-12 col-sm-7 text-sm-end" id="currency">-</div>
+                        <div class="col-5 fw-semibold text-muted">{{ __('Amount') }}:</div>
+                        <div class="col-7 text-end" id="amount">-</div>
                     </div>
                     <div class="row mb-2">
-                        <div class="col-12 col-sm-5 fw-semibold text-muted">{{ __('Operation ID') }}:</div>
-                        <div class="col-12 col-sm-7 text-sm-end" id="operation-id">-</div>
+                        <div class="col-5 fw-semibold text-muted">{{ __('Currency') }}:</div>
+                        <div class="col-7 text-end" id="currency">-</div>
                     </div>
                     <div class="row mb-2">
-                        <div class="col-12 col-sm-5 fw-semibold text-muted">{{ __('Status') }}:</div>
-                        <div class="col-12 col-sm-7 text-sm-end" id="status-html">-</div>
+                        <div class="col-5 fw-semibold text-muted">{{ __('Operation ID') }}:</div>
+                        <div class="col-7 text-end" id="operation-id">-</div>
                     </div>
                     <div class="row mb-2">
-                        <div class="col-12 col-sm-5 fw-semibold text-muted">{{ __('Created At') }}:</div>
-                        <div class="col-12 col-sm-7 text-sm-end" id="created-at">-</div>
+                        <div class="col-5 fw-semibold text-muted">{{ __('Status') }}:</div>
+                        <div class="col-7 text-end" id="status-html">-</div>
                     </div>
                     <div class="row mb-2">
-                        <div class="col-12 col-sm-5 fw-semibold text-muted">{{ __('Updated At') }}:</div>
-                        <div class="col-12 col-sm-7 text-sm-end" id="updated-at">-</div>
+                        <div class="col-5 fw-semibold text-muted">{{ __('Wallet Info') }}:</div>
+                        <div class="col-7 text-end" id="wallet-info">-</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-5 fw-semibold text-muted">{{ __('Created At') }}:</div>
+                        <div class="col-7 text-end" id="created-at">-</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-5 fw-semibold text-muted">{{ __('Updated At') }}:</div>
+                        <div class="col-7 text-end" id="updated-at">-</div>
                     </div>
                 </div>
 
@@ -414,6 +391,7 @@
         </div>
     </div>
 
+    @if(count($childVendors) > 0)
     <div id="assign_vendor_modal" class="modal fade" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -432,11 +410,11 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">{{ __('Vendor') }} <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('Sub-Vendor') }} <span class="text-danger">*</span></label>
                             <select id="assign_vendor_id" name="vendor_id" class="form-select">
-                                <option value="">{{ __('Select Vendor') }}</option>
-                                @foreach($vendors as $vendor)
-                                    <option value="{{ $vendor->id }}">{{ $vendor->name }}</option>
+                                <option value="">{{ __('Select Sub-Vendor') }}</option>
+                                @foreach($childVendors as $childVendor)
+                                    <option value="{{ $childVendor->id }}">{{ $childVendor->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -464,7 +442,9 @@
             </div>
         </div>
     </div>
+    @endif
 
+    @if(count($childVendors) > 0)
     <div id="bulk_assign_vendor_modal" class="modal fade" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -483,14 +463,24 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">{{ __('Vendor') }} <span class="text-danger">*</span></label>
+                            <label class="form-label">{{ __('Sub-Vendor') }} <span class="text-danger">*</span></label>
                             <select id="bulk_assign_vendor_id" name="vendor_id" class="form-select">
-                                <option value="">{{ __('Select Vendor') }}</option>
-                                @foreach($topLevelVendors as $vendor)
-                                    <option value="{{ $vendor->id }}">{{ $vendor->name }}</option>
+                                <option value="">{{ __('Select Sub-Vendor') }}</option>
+                                @foreach($childVendors as $childVendor)
+                                    <option value="{{ $childVendor->id }}">{{ $childVendor->name }}</option>
                                 @endforeach
                             </select>
-                            <small class="text-muted">{{ __('Only top-level vendors can be assigned') }}</small>
+                            <small class="text-muted">{{ __('You can only assign to your sub-vendors') }}</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="bulk_assign_vendor_set_processing" name="set_processing" value="1">
+                                <label class="form-check-label" for="bulk_assign_vendor_set_processing">
+                                    {{ __('Set status to Processing') }}
+                                </label>
+                            </div>
+                            <small class="text-muted">{{ __('If checked, withdrawal status will be set to Processing after vendor assignment') }}</small>
                         </div>
                     </div>
 
@@ -499,19 +489,21 @@
                             {{ __('Cancel') }}
                         </button>
                         <button type="submit" class="btn btn-primary">
-                            {{ __('Assign Selected to Vendor') }}
+                            {{ __('Assign Selected to Sub-Vendor') }}
                         </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-@endpush
+    @endif
+@endsection
 
 @push('scripts')
     <script>
         // Module-specific functionality for withdrawals
         document.addEventListener('DOMContentLoaded', function () {
+            @if(count($childVendors) > 0)
             // Bulk assign vendor functionality
             const selectAllCheckbox = document.getElementById('select_all_checkbox');
             const withdrawalCheckboxes = document.querySelectorAll('.withdrawal-checkbox');
@@ -571,6 +563,7 @@
 
                     // Reset form
                     document.getElementById('bulk_assign_vendor_id').value = '';
+                    document.getElementById('bulk_assign_vendor_set_processing').checked = false;
                 });
             }
 
@@ -590,16 +583,18 @@
 
                     const vendorId = document.getElementById('bulk_assign_vendor_id').value;
                     if (!vendorId) {
-                        alert('{{ __("Please select a vendor") }}');
+                        alert('{{ __("Please select a sub-vendor") }}');
                         return;
                     }
+
+                    const setProcessing = document.getElementById('bulk_assign_vendor_set_processing').checked;
 
                     // Disable submit button
                     const submitButton = bulkAssignForm.querySelector('button[type="submit"]');
                     submitButton.disabled = true;
                     submitButton.textContent = '{{ __("Assigning...") }}';
 
-                    fetch('{{ route("admin.withdrawals.bulk-assign-vendor") }}', {
+                    fetch('{{ route("vendor.withdrawals.bulk-assign-vendor") }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -607,7 +602,8 @@
                         },
                         body: JSON.stringify({
                             withdrawal_ids: selectedIds,
-                            vendor_id: vendorId
+                            vendor_id: vendorId,
+                            set_processing: setProcessing ? 1 : 0
                         })
                     })
                     .then(response => response.json())
@@ -618,17 +614,18 @@
                         } else if (data.error) {
                             alert(data.error);
                             submitButton.disabled = false;
-                            submitButton.textContent = '{{ __("Assign Selected to Vendor") }}';
+                            submitButton.textContent = '{{ __("Assign Selected to Sub-Vendor") }}';
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
                         alert('{{ __("An error occurred") }}');
                         submitButton.disabled = false;
-                        submitButton.textContent = '{{ __("Assign Selected to Vendor") }}';
+                        submitButton.textContent = '{{ __("Assign Selected to Sub-Vendor") }}';
                     });
                 });
             }
+            @endif
 
             // Approve button handler
             document.querySelectorAll('.approve-btn').forEach(button => {
@@ -637,7 +634,7 @@
                     const type = this.getAttribute('data-type');
 
                     if (confirm('{{ __("Are you sure you want to approve this withdrawal?") }}')) {
-                        fetch(`{{ url('manage/withdrawals') }}/${id}/approve`, {
+                        fetch(`{{ url('vendor/withdrawals') }}/${id}/approve`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -666,7 +663,7 @@
                     const type = this.getAttribute('data-type');
 
                     if (confirm('{{ __("Are you sure you want to cancel this withdrawal?") }}')) {
-                        fetch(`{{ url('manage/withdrawals') }}/${id}/cancel`, {
+                        fetch(`{{ url('vendor/withdrawals') }}/${id}/cancel`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -719,68 +716,19 @@
                         if (data.amount && data.currency) {
                             document.getElementById('amount').innerText = formatAmountWithCurrency(data.amount, data.currency);
                         }
+
+                        // Handle wallet information
+                        if (data.wallet) {
+                            const walletInfo = `${data.wallet.name}<br><small>${data.wallet.iban}</small>`;
+                            document.getElementById('wallet-info').innerHTML = walletInfo;
+                        }
                     })
                     .catch(error => {
                         console.error('Error fetching withdrawal data:', error);
                     });
             });
 
-            // Parent vendor filter change handler
-            const parentVendorFilter = document.getElementById('parent_vendor_filter');
-            const vendorFilter = document.getElementById('vendor_filter');
-
-            if (parentVendorFilter && vendorFilter) {
-                parentVendorFilter.addEventListener('change', function() {
-                    const parentId = this.value;
-
-                    if (parentId) {
-                        // Show loading state
-                        vendorFilter.disabled = true;
-                        vendorFilter.innerHTML = '<option value="">{{ __("Loading...") }}</option>';
-
-                        // Fetch child vendors via AJAX
-                        fetch('{{ route("admin.vendor-users.get-child-vendors", ":id") }}'.replace(':id', parentId))
-                            .then(response => response.json())
-                            .then(data => {
-                                // Clear and populate vendor filter with child vendors
-                                vendorFilter.innerHTML = '<option value="">{{ __("All") }}</option>';
-
-                                const selectedVendorId = {{ request('vendor_id') ? (int)request('vendor_id') : 'null' }};
-
-                                data.vendors.forEach(function(vendor) {
-                                    const option = document.createElement('option');
-                                    option.value = vendor.id;
-                                    option.textContent = vendor.name;
-                                    if (selectedVendorId && vendor.id == selectedVendorId) {
-                                        option.selected = true;
-                                    }
-                                    vendorFilter.appendChild(option);
-                                });
-
-                                vendorFilter.disabled = false;
-                            })
-                            .catch(error => {
-                                console.error('Error fetching child vendors:', error);
-                                vendorFilter.innerHTML = '<option value="">{{ __("All") }}</option>';
-                                vendorFilter.disabled = false;
-                            });
-                    } else {
-                        // Reset vendor filter
-                        vendorFilter.innerHTML = '<option value="">{{ __("All") }}</option>';
-                        vendorFilter.disabled = true;
-                    }
-                });
-
-                // Trigger change on page load if parent vendor is selected
-                @if(request('parent_vendor_id'))
-                    const initialParentId = {{ request('parent_vendor_id') }};
-                    if (initialParentId) {
-                        parentVendorFilter.value = initialParentId;
-                        parentVendorFilter.dispatchEvent(new Event('change'));
-                    }
-                @endif
-            }
-
+            @if(count($childVendors) > 0)
             // Assign Vendor Modal Handler
             const assignVendorModal = document.getElementById('assign_vendor_modal');
             if (assignVendorModal) {
@@ -812,7 +760,7 @@
                         const setProcessing = document.getElementById('assign_vendor_set_processing').checked;
 
                         if (!vendorId) {
-                            alert('{{ __("Please select a vendor") }}');
+                            alert('{{ __("Please select a sub-vendor") }}');
                             return;
                         }
 
@@ -821,7 +769,7 @@
                         submitButton.disabled = true;
                         submitButton.textContent = '{{ __("Assigning...") }}';
 
-                        fetch(`{{ url('manage/withdrawals') }}/${withdrawalId}/assign-vendor`, {
+                        fetch(`{{ url('vendor/withdrawals') }}/${withdrawalId}/assign-vendor`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -848,6 +796,41 @@
                     });
                 }
             }
+            @endif
+
+            // View type change handler
+            window.changeViewType = function(value) {
+                document.getElementById('view_type_input').value = value;
+
+                // If switching to "own", clear child vendor filter
+                if (value === 'own') {
+                    const childVendorSelect = document.getElementById('child_vendor_id');
+                    if (childVendorSelect) {
+                        childVendorSelect.value = '';
+                    }
+                }
+
+                document.getElementById('searchForm').submit();
+            };
+
+            // Child vendor change handler
+            window.handleChildVendorChange = function(value) {
+                // If a child vendor is selected, automatically switch to child_vendors view
+                if (value) {
+                    document.getElementById('view_type_input').value = 'child_vendors';
+                    // Update radio button
+                    const childVendorsRadio = document.getElementById('view_type_child_vendors');
+                    const ownRadio = document.getElementById('view_type_own');
+                    if (childVendorsRadio) {
+                        childVendorsRadio.checked = true;
+                    }
+                    if (ownRadio) {
+                        ownRadio.checked = false;
+                    }
+                }
+                // Submit form to apply filter
+                document.getElementById('searchForm').submit();
+            };
         });
     </script>
     <script>
