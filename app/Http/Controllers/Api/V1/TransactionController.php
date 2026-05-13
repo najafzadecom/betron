@@ -83,7 +83,7 @@ class TransactionController extends BaseController
                     )
                     : null;
 
-            if ($vendorId == 1) {
+            if ($vendorId == 1 && $this->cashevoService->enabled()) {
                 $data['payment_method'] = 'manual';
                 // $transaction = $this->transactionService->create($data);
                 $cashevoResult = $this->cashevoService->createDepositBank((float) $data['amount']);
