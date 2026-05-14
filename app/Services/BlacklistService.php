@@ -16,7 +16,7 @@ class BlacklistService extends BaseService
     /**
      * Check if user is blacklisted
      */
-    public function isUserBlacklisted(int $userId): bool
+    public function isUserBlacklisted(string|int $userId): bool
     {
         return $this->repository->isUserBlacklisted($userId);
     }
@@ -32,7 +32,7 @@ class BlacklistService extends BaseService
     /**
      * Add user to blacklist
      */
-    public function addUserToBlacklist(int $userId, ?string $reason = null): Blacklist
+    public function addUserToBlacklist(string|int $userId, ?string $reason = null): Blacklist
     {
         return $this->repository->addUserToBlacklist($userId, $reason);
     }
@@ -64,10 +64,9 @@ class BlacklistService extends BaseService
     /**
      * Check if request should be blocked based on user ID or IP
      */
-    public function shouldBlockRequest(?int $userId, ?string $ipAddress): bool
+    public function shouldBlockRequest(string|int|null $userId, ?string $ipAddress): bool
     {
-        // Check user ID blacklist
-        if ($userId && $this->isUserBlacklisted($userId)) {
+        if ($userId !== null && $userId !== '' && $this->isUserBlacklisted($userId)) {
             return true;
         }
 
@@ -85,7 +84,7 @@ class BlacklistService extends BaseService
     public function autoAddToBlacklist(array $data, string $reason = 'Avtomatik əlavə edildi'): ?Blacklist
     {
         // Check if we have user_id
-        if (isset($data['user_id']) && $data['user_id'] > 0) {
+        if (filled($data['user_id'] ?? null)) {
             return $this->addUserToBlacklist($data['user_id'], $reason);
         }
 

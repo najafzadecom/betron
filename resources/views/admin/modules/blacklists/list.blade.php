@@ -17,9 +17,11 @@
                         <div class="col-12 col-md-6 col-lg-2">
                             <div class="mb-3">
                                 <label class="form-label">{{ __('User ID') }}</label>
-                                <input type="number" name="user_id" class="form-control"
+                                <input type="text" name="user_id" class="form-control"
                                        placeholder="{{ __('User ID') }}"
-                                       value="{{ request('user_id') }}">
+                                       value="{{ request('user_id') }}"
+                                       maxlength="255"
+                                       autocomplete="off">
                             </div>
                         </div>
 

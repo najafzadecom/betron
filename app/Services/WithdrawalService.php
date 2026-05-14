@@ -135,8 +135,8 @@ class WithdrawalService extends BaseService
 
         $result = [];
 
-        // Add user_id to blacklist if exists and greater than 0
-        if ($withdrawal->user_id && $withdrawal->user_id > 0) {
+        // Add user_id to blacklist when present
+        if (filled($withdrawal->user_id)) {
             $result['user_blacklist'] = $this->blacklistService->addUserToBlacklist(
                 $withdrawal->user_id,
                 $reason

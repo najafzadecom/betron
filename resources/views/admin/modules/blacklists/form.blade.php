@@ -43,12 +43,13 @@
                         <label class="col-lg-3 col-form-label">{{ __('User ID') }}:</label>
                         <div class="col-lg-9">
                             <input
-                                type="number"
+                                type="text"
                                 name="user_id"
                                 class="form-control @error('user_id') is-invalid @enderror"
                                 placeholder="{{ __('User ID') }}"
                                 value="{{ old('user_id', $item->user_id ?? '') }}"
-                                min="1"
+                                maxlength="255"
+                                autocomplete="off"
                             />
                             <div class="form-text">{{ __('Enter the user ID to be blacklisted') }}</div>
                             @error('user_id')

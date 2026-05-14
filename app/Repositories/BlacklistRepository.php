@@ -17,9 +17,9 @@ class BlacklistRepository extends BaseRepository implements BlacklistInterface
     /**
      * Check if user is blacklisted
      */
-    public function isUserBlacklisted(int $userId): bool
+    public function isUserBlacklisted(string|int $userId): bool
     {
-        return $this->model->where('user_id', $userId)
+        return $this->model->where('user_id', (string) $userId)
             ->where('type', 'user_id')
             ->where('is_active', true)
             ->exists();
@@ -39,8 +39,10 @@ class BlacklistRepository extends BaseRepository implements BlacklistInterface
     /**
      * Add user to blacklist
      */
-    public function addUserToBlacklist(int $userId, ?string $reason = null): Model
+    public function addUserToBlacklist(string|int $userId, ?string $reason = null): Model
     {
+        $userId = (string) $userId;
+
         // Check if already exists
         $existing = $this->model->where('user_id', $userId)
             ->where('type', 'user_id')

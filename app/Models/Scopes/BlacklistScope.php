@@ -30,11 +30,7 @@ class BlacklistScope implements Scope
 
         // Individual field filters
         if ($request->filled('user_id')) {
-            $userId = $request->get('user_id');
-            // Only apply filter if user_id is numeric (bigint column)
-            if (is_numeric($userId)) {
-                $builder->where('user_id', (int)$userId);
-            }
+            $builder->where('user_id', trim((string) $request->get('user_id')));
         }
 
         if ($request->filled('ip_address')) {

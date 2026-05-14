@@ -24,7 +24,7 @@ class BlacklistRequest extends FormRequest
     {
         return [
             'type' => 'required|in:user_id,ip_address',
-            'user_id' => 'required_if:type,user_id|nullable|integer|min:1',
+            'user_id' => 'required_if:type,user_id|nullable|string|max:255',
             'site_id' => 'required|integer|exists:sites,id',
             'ip_address' => 'required_if:type,ip_address|nullable|ip',
             'reason' => 'nullable|string|max:255',
@@ -37,6 +37,13 @@ class BlacklistRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
+        $userId = $this->input('user_id');
+        if ($userId !== null && $userId !== '') {
+            $this->merge([
+                'user_id' => is_string($userId) ? trim($userId) : (string) $userId,
+            ]);
+        }
+
         $this->merge([
             'is_active' => $this->boolean('is_active', true),
         ]);

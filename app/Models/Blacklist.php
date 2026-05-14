@@ -37,9 +37,9 @@ class Blacklist extends Model
     /**
      * Check if a user ID is blacklisted
      */
-    public static function isUserBlacklisted(int $userId, int $site_id = 0): bool
+    public static function isUserBlacklisted(string|int $userId, int $site_id = 0): bool
     {
-        return self::where('user_id', $userId)
+        return self::where('user_id', (string) $userId)
             ->where('type', 'user_id')
             ->where('site_id', $site_id)
             ->where('is_active', true)
@@ -61,10 +61,10 @@ class Blacklist extends Model
     /**
      * Add a user to blacklist
      */
-    public static function addUserToBlacklist(int $userId, ?string $reason = null, int $site_id = 0): self
+    public static function addUserToBlacklist(string|int $userId, ?string $reason = null, int $site_id = 0): self
     {
         return self::create([
-            'user_id' => $userId,
+            'user_id' => (string) $userId,
             'type' => 'user_id',
             'reason' => $reason,
             'site_id' => $site_id,

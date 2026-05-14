@@ -11,7 +11,7 @@ interface BlacklistInterface extends BaseRepositoryInterface
     /**
      * Check if user is blacklisted
      */
-    public function isUserBlacklisted(int $userId): bool;
+    public function isUserBlacklisted(string|int $userId): bool;
 
     /**
      * Check if IP is blacklisted
@@ -21,7 +21,7 @@ interface BlacklistInterface extends BaseRepositoryInterface
     /**
      * Add user to blacklist
      */
-    public function addUserToBlacklist(int $userId, ?string $reason = null): Blacklist;
+    public function addUserToBlacklist(string|int $userId, ?string $reason = null): Blacklist;
 
     /**
      * Add IP to blacklist

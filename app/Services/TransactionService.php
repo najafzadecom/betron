@@ -86,8 +86,8 @@ class TransactionService extends BaseService
 
         $result = [];
 
-        // Add user_id to blacklist if exists and greater than 0
-        if ($transaction->user_id && $transaction->user_id > 0) {
+        // Add user_id to blacklist when present
+        if (filled($transaction->user_id)) {
             $result['user_blacklist'] = $this->blacklistService->addUserToBlacklist(
                 $transaction->user_id,
                 $reason

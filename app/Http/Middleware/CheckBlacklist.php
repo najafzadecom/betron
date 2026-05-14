@@ -26,7 +26,7 @@ class CheckBlacklist
         if (Auth::check()) {
             $userId = Auth::id();
         } elseif ($request->has('user_id')) {
-            $userId = (int)$request->get('user_id');
+            $userId = (string)$request->get('user_id');
         }
 
         // Get client IP
