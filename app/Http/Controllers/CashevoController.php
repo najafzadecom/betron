@@ -60,7 +60,10 @@ class CashevoController extends Controller
 
     private function syncTransactionStatus(string $uuid, string $status, array $payload): void
     {
-        $transaction = Transaction::query()->where('order_id', $uuid)->first();
+        $transaction = Transaction::query()
+            ->where('order_id', $uuid)
+            ->where('vendor_id', 1)
+            ->first();
 
         if (!$transaction) {
             return;
