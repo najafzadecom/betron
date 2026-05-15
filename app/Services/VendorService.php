@@ -406,4 +406,18 @@ class VendorService extends BaseService
 
         return true;
     }
+
+    /**
+     * Get all active vendors for assignment (parent and child vendors).
+     */
+    public function getAssignableVendors()
+    {
+        return $this->repository->getModel()
+            ->with('parent:id,name')
+            ->where('status', 1)
+            ->orderByRaw('COALESCE(parent_id, id)')
+            ->orderBy('parent_id')
+            ->orderBy('name')
+            ->get(['id', 'name', 'parent_id']);
+    }
 }

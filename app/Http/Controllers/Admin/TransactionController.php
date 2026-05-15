@@ -51,7 +51,7 @@ class TransactionController extends BaseController
     ) {
         $this->middleware('permission:transactions-index|transactions-create|transactions-edit', ['only' => ['index']]);
         $this->middleware('permission:transactions-create', ['only' => ['create', 'store']]);
-        $this->middleware('permission:transactions-edit', ['only' => ['edit', 'update', 'resendCallback']]);
+        $this->middleware('permission:transactions-edit', ['only' => ['edit', 'update', 'resendCallback', 'assignVendor', 'bulkAssignVendor']]);
         $this->middleware('permission:transactions-delete', ['only' => ['destroy']]);
 
         $this->service = $service;
@@ -91,6 +91,7 @@ class TransactionController extends BaseController
             'transaction_statuses' => TransactionStatus::cases(),
             'paid_statuses' => PaidStatus::cases(),
             'currencies' => Currency::cases(),
+            'assignableVendors' => $this->vendorService->getAssignableVendors(),
         ];
 
         return $this->render('list');
@@ -402,5 +403,109 @@ class TransactionController extends BaseController
         ];
 
         return $this->render('paypap-status');
+    }
+
+    public function assignVendor(string $id): JsonResponse
+    {
+        $code = 500;
+        $message = __('Unknown error');
+
+        try {
+            $transaction = $this->service->getById($id);
+
+            if (!$transaction) {
+                return $this->json(['message' => __('Transaction not found')], 404);
+            }
+
+            $vendorId = request('vendor_id');
+
+            if (!$vendorId) {
+                return $this->json(['message' => __('Vendor is required')], 422);
+            }
+
+            $vendor = $this->vendorService->getById($vendorId);
+            if (!$vendor) {
+                return $this->json(['message' => __('Vendor not found')], 422);
+            }
+
+            $updateData = ['vendor_id' => $vendorId];
+
+            if (request('set_processing')) {
+                $updateData['status'] = TransactionStatus::Processing->value;
+            }
+
+            $this->service->update($id, $updateData);
+
+            $code = 200;
+            $message = __('Vendor assigned successfully');
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+        }
+
+        $this->data = [
+            'message' => $message,
+        ];
+
+        return $this->json($this->data, $code);
+    }
+
+    public function bulkAssignVendor(): JsonResponse
+    {
+        $code = 500;
+        $message = __('Unknown error');
+
+        try {
+            $transactionIds = request('transaction_ids', []);
+            $vendorId = request('vendor_id');
+
+            if (empty($transactionIds) || !is_array($transactionIds)) {
+                return $this->json(['error' => __('Please select at least one transaction')], 422);
+            }
+
+            if (!$vendorId) {
+                return $this->json(['error' => __('Vendor is required')], 422);
+            }
+
+            $vendor = $this->vendorService->getById($vendorId);
+            if (!$vendor) {
+                return $this->json(['error' => __('Vendor not found')], 422);
+            }
+
+            $transactions = $this->service->getByIds($transactionIds);
+
+            if ($transactions->isEmpty()) {
+                return $this->json(['error' => __('No valid transactions found')], 422);
+            }
+
+            $validTransactions = $transactions->filter(function ($transaction) {
+                return $transaction->vendor_id
+                    && $transaction->status->value === TransactionStatus::Processing->value;
+            });
+
+            if ($validTransactions->isEmpty()) {
+                return $this->json([
+                    'error' => __('No valid transactions to assign. Only transactions with assigned vendor and Processing status can be reassigned.'),
+                ], 422);
+            }
+
+            $updateData = ['vendor_id' => $vendorId];
+            $assignedCount = 0;
+
+            foreach ($validTransactions as $transaction) {
+                $this->service->update($transaction->id, $updateData);
+                $assignedCount++;
+            }
+
+            $code = 200;
+            $message = __('Bulk vendor assignment completed') . ' (' . $assignedCount . ' ' . __('transactions') . ')';
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+        }
+
+        $this->data = [
+            'message' => $message,
+        ];
+
+        return $this->json($this->data, $code);
     }
 }

@@ -6,6 +6,10 @@
             <div class="card-header d-flex flex-wrap align-items-center gap-2">
                 <h5 class="mb-0">{{ $module }}</h5>
                 <div class="ms-auto d-flex gap-2">
+                    <button type="button" id="bulk_assign_vendor_btn" class="btn btn-primary btn-sm"
+                            style="display: none;" data-bs-toggle="modal" data-bs-target="#bulk_assign_vendor_modal">
+                        <i class="ph-users me-1"></i> {{ __('Bulk Assign Vendor') }}
+                    </button>
                     <x-buttons.create title="{{ __('Create') }}" url="{{ route('admin.transactions.create') }}" permission="transactions-create"/>
                     <x-buttons.export title="{{ __('Export') }}" url="{!! route('admin.transactions.export', request()->query()) !!}" permission="transactions-export"/>
                 </div>
@@ -202,6 +206,9 @@
                 <table class="table text-nowrap table-xs table-striped table-hover">
                     <thead>
                     <tr>
+                        <th style="width: 50px;">
+                            <input type="checkbox" id="select_all_checkbox" title="{{ __('Select All') }}">
+                        </th>
                         <th></th>
                         {!! sortableTableHeader('order_id', 'Order ID', 'transactions') !!}
                         {!! sortableTableHeader('first_name', 'Sender', 'transactions') !!}
@@ -225,7 +232,16 @@
                     </thead>
                     <tbody>
                     @forelse($items as $item)
+                        @php
+                            $canSelect = $item->vendor_id
+                                && $item->status->value === \App\Enums\TransactionStatus::Processing->value;
+                        @endphp
                         <tr>
+                            <td>
+                                @if($canSelect)
+                                    <input type="checkbox" class="transaction-checkbox" value="{{ $item->id }}">
+                                @endif
+                            </td>
                             <td>
                                 @if($item->payment_method == 'manual' && $item->status->value == 1)
                                     <button class="btn btn-outline-success btn-sm approve-btn" data-id="{{ $item->id }}" data-type="transaction">{{ __('Approve') }}</button>
@@ -308,11 +324,19 @@
                                                 </a>
                                             @endif
                                             @can('transactions-edit')
-                                                    <a href="#" class="dropdown-item resend-callback-btn"
-                                                       data-url="{{ route('admin.transactions.resend-callback', $item->id) }}">
-                                                        <i class="ph-arrow-clockwise me-2"></i>
-                                                        {{ __('Resend callback') }}
-                                                    </a>
+                                                <div class="dropdown-divider"></div>
+                                                <a href="#" class="dropdown-item"
+                                                   data-transaction-id="{{ $item->id }}"
+                                                   data-current-vendor-name="{{ $item->vendor?->name ?? '' }}"
+                                                   data-bs-toggle="modal" data-bs-target="#assign_vendor_modal">
+                                                    <i class="ph-user me-2"></i>
+                                                    {{ __('Assign Vendor') }}
+                                                </a>
+                                                <a href="#" class="dropdown-item resend-callback-btn"
+                                                   data-url="{{ route('admin.transactions.resend-callback', $item->id) }}">
+                                                    <i class="ph-arrow-clockwise me-2"></i>
+                                                    {{ __('Resend callback') }}
+                                                </a>
                                             @endcan
                                         </div>
                                     </div>
@@ -321,7 +345,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="15">{{ __('Data not found') }}</td>
+                            <td colspan="16">{{ __('Data not found') }}</td>
                         </tr>
                     @endforelse
                     </tbody>
@@ -348,7 +372,9 @@
             </div>
         </div>
     </div>
+@endsection
 
+@push('modals')
     <div id="show_modal" class="modal fade" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -417,11 +443,273 @@
             </div>
         </div>
     </div>
-@endsection
+
+    <div id="assign_vendor_modal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ __('Assign Vendor') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <form id="assign_vendor_form">
+                    <div class="modal-body">
+                        <input type="hidden" id="assign_vendor_transaction_id" name="transaction_id">
+
+                        <div class="mb-3">
+                            <label class="form-label">{{ __('Current Vendor') }}</label>
+                            <input type="text" id="assign_vendor_current_vendor" class="form-control" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">{{ __('Vendor') }} <span class="text-danger">*</span></label>
+                            <select id="assign_vendor_id" name="vendor_id" class="form-select">
+                                <option value="">{{ __('Select Vendor') }}</option>
+                                @foreach($assignableVendors as $vendor)
+                                    <option value="{{ $vendor->id }}">
+                                        @if($vendor->parent)
+                                            {{ $vendor->parent->name }} › {{ $vendor->name }}
+                                        @else
+                                            {{ $vendor->name }}
+                                        @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="assign_vendor_set_processing" name="set_processing" value="1">
+                                <label class="form-check-label" for="assign_vendor_set_processing">
+                                    {{ __('Set status to Processing') }}
+                                </label>
+                            </div>
+                            <small class="text-muted">{{ __('If checked, transaction status will be set to Processing after vendor assignment') }}</small>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-link" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                        <button type="submit" class="btn btn-primary">{{ __('Assign') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="bulk_assign_vendor_modal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ __('Bulk Assign Vendor') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <form id="bulk_assign_vendor_form">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">{{ __('Selected Transactions') }}</label>
+                            <div class="alert alert-info">
+                                <span id="bulk_selected_count">0</span> {{ __('transactions selected') }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">{{ __('Vendor') }} <span class="text-danger">*</span></label>
+                            <select id="bulk_assign_vendor_id" name="vendor_id" class="form-select">
+                                <option value="">{{ __('Select Vendor') }}</option>
+                                @foreach($assignableVendors as $vendor)
+                                    <option value="{{ $vendor->id }}">
+                                        @if($vendor->parent)
+                                            {{ $vendor->parent->name }} › {{ $vendor->name }}
+                                        @else
+                                            {{ $vendor->name }}
+                                        @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-link" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                        <button type="submit" class="btn btn-primary">{{ __('Assign Selected to Vendor') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endpush
 
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const selectAllCheckbox = document.getElementById('select_all_checkbox');
+            const transactionCheckboxes = document.querySelectorAll('.transaction-checkbox');
+            const bulkAssignBtn = document.getElementById('bulk_assign_vendor_btn');
+            const bulkAssignModal = document.getElementById('bulk_assign_vendor_modal');
+            const bulkSelectedCount = document.getElementById('bulk_selected_count');
+
+            function updateBulkAssignButton() {
+                const selectedCount = document.querySelectorAll('.transaction-checkbox:checked').length;
+                if (bulkAssignBtn) {
+                    bulkAssignBtn.style.display = selectedCount > 0 ? 'block' : 'none';
+                }
+            }
+
+            function updateSelectedCount() {
+                if (bulkSelectedCount) {
+                    bulkSelectedCount.textContent = document.querySelectorAll('.transaction-checkbox:checked').length;
+                }
+            }
+
+            if (selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('change', function () {
+                    transactionCheckboxes.forEach(checkbox => {
+                        checkbox.checked = this.checked;
+                    });
+                    updateBulkAssignButton();
+                    updateSelectedCount();
+                });
+            }
+
+            transactionCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    updateBulkAssignButton();
+                    updateSelectedCount();
+
+                    if (selectAllCheckbox) {
+                        const allChecked = Array.from(transactionCheckboxes).every(cb => cb.checked);
+                        const someChecked = Array.from(transactionCheckboxes).some(cb => cb.checked);
+                        selectAllCheckbox.checked = allChecked;
+                        selectAllCheckbox.indeterminate = someChecked && !allChecked;
+                    }
+                });
+            });
+
+            if (bulkAssignModal) {
+                bulkAssignModal.addEventListener('show.bs.modal', function () {
+                    updateSelectedCount();
+                    const bulkVendorSelect = document.getElementById('bulk_assign_vendor_id');
+                    if (bulkVendorSelect) {
+                        bulkVendorSelect.value = '';
+                    }
+                });
+            }
+
+            const bulkAssignForm = document.getElementById('bulk_assign_vendor_form');
+            if (bulkAssignForm) {
+                bulkAssignForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    const selectedIds = Array.from(document.querySelectorAll('.transaction-checkbox:checked'))
+                        .map(cb => cb.value);
+
+                    if (selectedIds.length === 0) {
+                        alert('{{ __("No transactions selected") }}');
+                        return;
+                    }
+
+                    const vendorId = document.getElementById('bulk_assign_vendor_id').value;
+                    if (!vendorId) {
+                        alert('{{ __("Please select a vendor") }}');
+                        return;
+                    }
+
+                    const submitButton = bulkAssignForm.querySelector('button[type="submit"]');
+                    submitButton.disabled = true;
+                    submitButton.textContent = '{{ __("Assigning...") }}';
+
+                    fetch('{{ route("admin.transactions.bulk-assign-vendor") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            transaction_ids: selectedIds,
+                            vendor_id: vendorId
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.message) {
+                                alert(data.message);
+                                location.reload();
+                            } else if (data.error) {
+                                alert(data.error);
+                                submitButton.disabled = false;
+                                submitButton.textContent = '{{ __("Assign Selected to Vendor") }}';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('{{ __("An error occurred") }}');
+                            submitButton.disabled = false;
+                            submitButton.textContent = '{{ __("Assign Selected to Vendor") }}';
+                        });
+                });
+            }
+
+            const assignVendorModal = document.getElementById('assign_vendor_modal');
+            if (assignVendorModal) {
+                assignVendorModal.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    document.getElementById('assign_vendor_transaction_id').value = button.getAttribute('data-transaction-id');
+                    document.getElementById('assign_vendor_current_vendor').value = button.getAttribute('data-current-vendor-name') || '-';
+                    document.getElementById('assign_vendor_id').value = '';
+                    document.getElementById('assign_vendor_set_processing').checked = false;
+                });
+
+                const assignVendorForm = document.getElementById('assign_vendor_form');
+                if (assignVendorForm) {
+                    assignVendorForm.addEventListener('submit', function (e) {
+                        e.preventDefault();
+
+                        const transactionId = document.getElementById('assign_vendor_transaction_id').value;
+                        const vendorId = document.getElementById('assign_vendor_id').value;
+                        const setProcessing = document.getElementById('assign_vendor_set_processing').checked;
+
+                        if (!vendorId) {
+                            alert('{{ __("Please select a vendor") }}');
+                            return;
+                        }
+
+                        const submitButton = assignVendorForm.querySelector('button[type="submit"]');
+                        submitButton.disabled = true;
+                        submitButton.textContent = '{{ __("Assigning...") }}';
+
+                        fetch(`{{ url('manage/transactions') }}/${transactionId}/assign-vendor`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                vendor_id: vendorId,
+                                set_processing: setProcessing ? 1 : 0
+                            })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.message) {
+                                    alert(data.message);
+                                    location.reload();
+                                } else if (data.error) {
+                                    alert(data.error);
+                                    submitButton.disabled = false;
+                                    submitButton.textContent = '{{ __("Assign") }}';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('{{ __("An error occurred") }}');
+                                submitButton.disabled = false;
+                                submitButton.textContent = '{{ __("Assign") }}';
+                            });
+                    });
+                }
+            }
 
             // Approve button handler
             document.querySelectorAll('.approve-btn').forEach(button => {

@@ -715,5 +715,15 @@
     "Confirm New Password": "Yeni Şifre Onayı",
     "Update Password": "Şifreyi Güncelle",
     "Password updated successfully.": "Şifre başarıyla güncellendi.",
-    "Current password is incorrect.": "Mevcut şifre hatalı."
+    "Current password is incorrect.": "Mevcut şifre hatalı.",
+    "Selected Transactions": "Seçili Yatırımlar",
+    "transactions selected": "yatırım seçildi",
+    "transactions": "yatırımlar",
+    "No transactions selected": "Hiç yatırım seçilmedi",
+    "Please select at least one transaction": "Lütfen en az bir yatırım seçin",
+    "No valid transactions found": "Geçerli yatırım bulunamadı",
+    "No valid transactions to assign. Only transactions with assigned vendor and Processing status can be reassigned.": "Atanacak geçerli yatırım bulunamadı. Sadece bayi atanmış ve İşleniyor durumundaki yatırımlar yeniden atanabilir.",
+    "If checked, transaction status will be set to Processing after vendor assignment": "İşaretlenirse, bayi atamasından sonra yatırım durumu İşleniyor olarak ayarlanacaktır",
+    "Vendor assigned successfully": "Bayi başarıyla atandı",
+    "Vendor is required": "Bayi zorunludur"
 }

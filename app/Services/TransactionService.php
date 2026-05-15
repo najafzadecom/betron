@@ -145,4 +145,12 @@ class TransactionService extends BaseService
     {
         return $this->repository->update($id, ['status' => $status]);
     }
+
+    public function getByIds(array $ids)
+    {
+        return $this->repository
+            ->getModel()
+            ->whereIn('id', $ids)
+            ->get();
+    }
 }

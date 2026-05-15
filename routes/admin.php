@@ -73,7 +73,9 @@ Route::middleware('auth')
         Route::post('transactions/{id}/resend-callback', [TransactionController::class, 'resendCallback'])->name('transactions.resend-callback');
         Route::get('transactions/{id}/activity-logs', [TransactionController::class, 'activityLogs'])->name('transactions.activity-logs');
         Route::get('transactions/{id}/paypap-status', [TransactionController::class, 'paypapStatus'])->name('transactions.paypap-status');
-        
+        Route::post('transactions/{id}/assign-vendor', [TransactionController::class, 'assignVendor'])->name('transactions.assign-vendor');
+        Route::post('transactions/bulk-assign-vendor', [TransactionController::class, 'bulkAssignVendor'])->name('transactions.bulk-assign-vendor');
+
         Route::resource('withdrawals', WithdrawalController::class);
         Route::post('withdrawals/{id}/approve', [WithdrawalController::class, 'approve'])->name('withdrawals.approve');
         Route::post('withdrawals/{id}/cancel', [WithdrawalController::class, 'cancel'])->name('withdrawals.cancel');
