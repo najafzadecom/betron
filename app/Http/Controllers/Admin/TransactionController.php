@@ -428,7 +428,7 @@ class TransactionController extends BaseController
                 return $this->json(['message' => __('Vendor not found')], 422);
             }
 
-            $updateData = ['vendor_id' => $vendorId];
+            $updateData = $this->buildVendorAssignmentUpdateData((int) $vendorId);
 
             if (request('set_processing')) {
                 $updateData['status'] = TransactionStatus::Processing->value;
@@ -438,6 +438,8 @@ class TransactionController extends BaseController
 
             $code = 200;
             $message = __('Vendor assigned successfully');
+        } catch (\RuntimeException $e) {
+            return $this->json(['message' => $e->getMessage()], 422);
         } catch (\Exception $e) {
             $message = $e->getMessage();
         }
@@ -488,7 +490,7 @@ class TransactionController extends BaseController
                 ], 422);
             }
 
-            $updateData = ['vendor_id' => $vendorId];
+            $updateData = $this->buildVendorAssignmentUpdateData((int) $vendorId);
             $assignedCount = 0;
 
             foreach ($validTransactions as $transaction) {
@@ -498,6 +500,8 @@ class TransactionController extends BaseController
 
             $code = 200;
             $message = __('Bulk vendor assignment completed') . ' (' . $assignedCount . ' ' . __('transactions') . ')';
+        } catch (\RuntimeException $e) {
+            return $this->json(['error' => $e->getMessage()], 422);
         } catch (\Exception $e) {
             $message = $e->getMessage();
         }
@@ -507,5 +511,22 @@ class TransactionController extends BaseController
         ];
 
         return $this->json($this->data, $code);
+    }
+
+    private function buildVendorAssignmentUpdateData(int $vendorId): array
+    {
+        $wallet = $this->walletService->getRandomForVendor($vendorId);
+
+        if (!$wallet) {
+            throw new \RuntimeException(__('No wallet found for this vendor'));
+        }
+
+        return [
+            'vendor_id' => $vendorId,
+            'wallet_id' => $wallet->id,
+            'receiver_name' => $wallet->name,
+            'receiver_iban' => $wallet->iban,
+            'bank_id' => $wallet->bank_id ?? 0,
+        ];
     }
 }

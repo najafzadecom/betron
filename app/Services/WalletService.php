@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Core\Services\BaseService;
+use App\Enums\WalletStatus;
 use App\Models\VendorUser;
 use App\Repositories\WalletRepository as Repository;
 use Illuminate\Database\Eloquent\Model;
@@ -155,5 +156,18 @@ class WalletService extends BaseService
         return $this->repository->getModel()
             ->whereIn('vendor_id', $vendorIds)
             ->update(['status' => $status]);
+    }
+
+    /**
+     * Pick a random wallet belonging to the vendor (for transaction vendor reassignment).
+     */
+    public function getRandomForVendor(int $vendorId): ?object
+    {
+        return $this->repository->getModel()
+            ->withoutGlobalScopes()
+            ->where('vendor_id', $vendorId)
+            ->where('status', WalletStatus::Active->value)
+            ->inRandomOrder()
+            ->first(['id', 'name', 'iban', 'bank_id']);
     }
 }

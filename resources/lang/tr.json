@@ -725,5 +725,6 @@
     "No valid transactions to assign. Only transactions with assigned vendor and Processing status can be reassigned.": "Atanacak geçerli yatırım bulunamadı. Sadece bayi atanmış ve İşleniyor durumundaki yatırımlar yeniden atanabilir.",
     "If checked, transaction status will be set to Processing after vendor assignment": "İşaretlenirse, bayi atamasından sonra yatırım durumu İşleniyor olarak ayarlanacaktır",
     "Vendor assigned successfully": "Bayi başarıyla atandı",
-    "Vendor is required": "Bayi zorunludur"
+    "Vendor is required": "Bayi zorunludur",
+    "No wallet found for this vendor": "Bu bayiye ait cüzdan bulunamadı"
 }
