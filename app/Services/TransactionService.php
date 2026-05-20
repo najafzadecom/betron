@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Core\Services\BaseService;
+use App\Models\Transaction;
 use App\Repositories\TransactionRepository as Repository;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -17,6 +18,14 @@ class TransactionService extends BaseService
     public function paginate(): LengthAwarePaginator
     {
         return $this->repository->paginate();
+    }
+
+    public function getById(int $id): ?object
+    {
+        return $this->repository
+            ->getModel()
+            ->with(Transaction::DETAIL_RELATIONS)
+            ->find($id);
     }
 
     /**

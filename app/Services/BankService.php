@@ -20,4 +20,12 @@ class BankService extends BaseService
     {
         return $this->repository->getActiveWithdrawalBanks($sort, $direction);
     }
+
+    public function optionsForSelect()
+    {
+        return $this->repository->getModel()
+            ->select(['id', 'name'])
+            ->orderBy('name')
+            ->get();
+    }
 }

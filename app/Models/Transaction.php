@@ -46,7 +46,25 @@ class Transaction extends Model
         'order_id' => 'string',
     ];
 
-    protected $with = ['wallet', 'site', 'bank', 'vendor'];
+    public const DETAIL_RELATIONS = [
+        'wallet',
+        'site',
+        'bank',
+        'vendor.parent',
+    ];
+
+    public static function listRelations(): array
+    {
+        return [
+            'wallet' => function ($query) {
+                $query->without(['transactionBanks', 'users', 'vendor', 'creator', 'managers'])
+                    ->select(['id', 'name', 'iban']);
+            },
+            'site:id,name',
+            'vendor:id,name,parent_id',
+            'vendor.parent:id,name',
+        ];
+    }
 
     protected $appends = [
         'sender', 'receiver', 'site_name', 'bank_name'

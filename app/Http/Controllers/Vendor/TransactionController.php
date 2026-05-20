@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Vendor;
 use App\Enums\PaidStatus;
 use App\Enums\TransactionStatus;
 use App\Exports\VendorTransactionExport;
+use App\Models\Transaction;
 use App\Services\TransactionService;
 use App\Services\VendorService;
 use App\Services\WalletService;
@@ -93,7 +94,7 @@ class TransactionController extends BaseController
         }
 
         $query = $this->transactionService->getByWalletIds($walletIds)
-            ->with(['wallet.vendor', 'site', 'bank']);
+            ->with(Transaction::listRelations());
 
         // Sorting
         $sortBy = $request->get('sort', 'status');

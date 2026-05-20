@@ -21,7 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
         then: function () {
             Route::middleware('web')
-                ->prefix(env('ADMIN_PREFIX', 'admin'))
+                ->prefix(config('app.admin_prefix', 'manage'))
                 ->as('admin.')
                 ->group(base_path('routes/admin.php'));
 

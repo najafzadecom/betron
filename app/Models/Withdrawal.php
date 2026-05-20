@@ -36,7 +36,16 @@ class Withdrawal extends Model
 
     protected $guarded = [];
 
-    protected $with = ['vendor'];
+    public const LIST_RELATIONS = [
+        'site:id,name',
+        'vendor:id,name',
+    ];
+
+    public const DETAIL_RELATIONS = [
+        'site',
+        'vendor',
+        'wallet',
+    ];
 
     protected $appends = ['status_html', 'receiver', 'sender', 'site_name'];
 

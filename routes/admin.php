@@ -34,10 +34,10 @@ Route::middleware('auth')
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
         Route::get('withdrawals/send', [WithdrawalController::class, 'send'])->name('withdrawals.send');
-        Route::post('withdrawals/send', [WithdrawalController::class, 'send'])->name('withdrawals.send');
+        Route::post('withdrawals/send', [WithdrawalController::class, 'send']);
 
         Route::get('users/profile', [UserController::class, 'profile'])->name('users.profile');
-        Route::put('users/profile', [UserController::class, 'updateProfile'])->name('users.profile');
+        Route::put('users/profile', [UserController::class, 'updateProfile']);
 
         // Dashboard DataTable Ajax
         Route::get('dashboard/transactions-ajax', [DashboardController::class, 'ajaxTransactions'])->name('dashboard.transactions.ajax');

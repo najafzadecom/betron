@@ -44,6 +44,14 @@ class VendorService extends BaseService
         return $this->repository->getModel()->where('status', 1)->get();
     }
 
+    public function optionsForSelect()
+    {
+        return $this->repository->getModel()
+            ->select(['id', 'name', 'email'])
+            ->orderBy('name')
+            ->get();
+    }
+
     /**
      * Get child vendors for a parent vendor
      */

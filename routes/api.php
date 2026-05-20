@@ -13,8 +13,8 @@ Route::prefix('v1')
 
         Route::prefix('bank')->as('bank.')->group(function () {
 
-            // Get Active Banks
-            Route::get('/', [BankController::class, 'transaction'])->name('transaction');
+            // Get Active Banks (/ and /transaction are aliases; only one named route for route:cache)
+            Route::get('/', [BankController::class, 'transaction']);
             Route::get('/transaction', [BankController::class, 'transaction'])->name('transaction');
             Route::get('/withdrawal', [BankController::class, 'withdrawal'])->name('withdrawal');
         });

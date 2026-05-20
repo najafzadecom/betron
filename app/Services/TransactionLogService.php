@@ -58,23 +58,7 @@ class TransactionLogService
         // Add timestamp
         $context['timestamp'] = now()->format('Y-m-d H:i:s');
 
-        // Log to a transaction file
         Log::channel('transactions')->{$level}($message, $context);
-
-        // Also log to Telegram if the level is warning or higher
-        try {
-            // Check if we should send this message to Telegram based on level
-            $shouldSendToTelegram = in_array($level, ['warning', 'error', 'critical', 'alert', 'emergency', 'info']);
-
-            if ($shouldSendToTelegram) {
-                Log::channel('telegram')->{$level}($message, $context);
-            }
-        } catch (\Exception $e) {
-            Log::error('Error sending to Telegram', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-        }
     }
 
     /**

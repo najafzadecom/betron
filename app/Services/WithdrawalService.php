@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Core\Services\BaseService;
+use App\Models\Withdrawal;
 use App\Repositories\WithdrawalRepository as Repository;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,6 +13,14 @@ class WithdrawalService extends BaseService
         protected Repository     $repository,
         private BlacklistService $blacklistService
     ) {
+    }
+
+    public function getById(int $id): ?object
+    {
+        return $this->repository
+            ->getModel()
+            ->with(Withdrawal::DETAIL_RELATIONS)
+            ->find($id);
     }
 
     /**
@@ -163,19 +172,18 @@ class WithdrawalService extends BaseService
     public function getByVendorIdsPaginated(array $vendorIds, int $perPage = 25)
     {
         if (empty($vendorIds)) {
-            // Return empty paginated result if no vendor IDs
             return $this->repository->getModel()
-                ->whereRaw('1 = 0') // Always false condition
-                ->with(['site', 'vendor'])
-                ->latest()
+                ->whereRaw('1 = 0')
+                ->with(Withdrawal::LIST_RELATIONS)
+                ->latest('created_at')
                 ->paginate($perPage)
                 ->appends(request()->query());
         }
-        
+
         return $this->repository->getModel()
             ->whereIn('vendor_id', $vendorIds)
-            ->with(['site', 'vendor'])
-            ->latest()
+            ->with(Withdrawal::LIST_RELATIONS)
+            ->latest('created_at')
             ->paginate($perPage)
             ->appends(request()->query());
     }

@@ -84,6 +84,19 @@ class WalletService extends BaseService
     }
 
     /**
+     * Lightweight list for admin form dropdowns (no eager loads).
+     */
+    public function optionsForSelect()
+    {
+        return $this->repository->getModel()
+            ->newQuery()
+            ->without(['transactionBanks', 'users', 'vendor', 'creator', 'managers'])
+            ->select(['id', 'name', 'iban'])
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
      * Get active wallets
      */
     public function getActive()

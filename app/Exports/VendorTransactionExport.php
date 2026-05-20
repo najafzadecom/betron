@@ -23,7 +23,7 @@ class VendorTransactionExport implements FromCollection, WithMapping, WithHeadin
     {
         $query = Transaction::whereIn('wallet_id', $this->walletIds)
             ->where('vendor_id', $this->vendorId)
-            ->with(['wallet', 'site', 'bank']);
+            ->with(array_merge(Transaction::listRelations(), ['bank:id,name']));
 
         $request = request();
 
