@@ -170,8 +170,8 @@ class TransactionController extends BaseController
 
     private function handleManualTransaction(array $data): JsonResponse
     {
-        if ($data['amount'] < 2000) {
-            return $this->response([], false, 400, 'Minimum amount is 2000');
+        if ($data['amount'] < 1000) {
+            return $this->response([], false, 400, 'Minimum amount is 1000');
         }
 
         $existingTransaction = Transaction::where('user_id', $data['user_id'])
