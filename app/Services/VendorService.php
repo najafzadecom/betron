@@ -230,7 +230,7 @@ class VendorService extends BaseService
             'previous_balance' => $previousBalance,
             'new_balance' => $vendor->deposit_amount,
             'note' => $note,
-            'created_by' => auth()->id(),
+            'created_by' => $this->depositTransactionCreatedBy(),
         ]);
 
         // Log activity
@@ -273,7 +273,7 @@ class VendorService extends BaseService
             'previous_balance' => $currentDeposit,
             'new_balance' => $vendor->deposit_amount,
             'note' => $note,
-            'created_by' => auth()->id(),
+            'created_by' => $this->depositTransactionCreatedBy(),
         ]);
 
         // Log activity
@@ -337,7 +337,7 @@ class VendorService extends BaseService
             'new_balance' => $vendor->deposit_amount,
             'note' => __('Transaction deposit processed'),
             'transaction_id' => $transactionId,
-            'created_by' => auth()->id(),
+            'created_by' => $this->depositTransactionCreatedBy(),
         ]);
 
         // Log activity
@@ -396,7 +396,7 @@ class VendorService extends BaseService
             'new_balance' => $vendor->deposit_amount,
             'note' => __('Withdrawal deposit processed'),
             'withdrawal_id' => $withdrawalId,
-            'created_by' => auth()->id(),
+            'created_by' => $this->depositTransactionCreatedBy(),
         ]);
 
         // Log activity
@@ -413,6 +413,14 @@ class VendorService extends BaseService
             ->log('Withdrawal deposit processed');
 
         return true;
+    }
+
+    /**
+     * created_by FK references users — only admin (web guard) has a valid user id.
+     */
+    private function depositTransactionCreatedBy(): ?int
+    {
+        return auth('web')->check() ? auth('web')->id() : null;
     }
 
     /**
