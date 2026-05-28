@@ -22,6 +22,9 @@ class VendorService extends BaseService
     {
         $data['password'] = Hash::make($data['password']);
 
+        $guaranteeLimit = (float) ($data['guarantee_limit'] ?? 0);
+        $data['available_deposit_capacity'] = $guaranteeLimit;
+
         return $this->repository->create($data);
     }
 
@@ -33,7 +36,58 @@ class VendorService extends BaseService
             unset($data['password']);
         }
 
+        if (array_key_exists('guarantee_limit', $data)) {
+            $vendor = $this->getById($id);
+            if ($vendor) {
+                $data = $this->applyGuaranteeLimitChange($vendor, (float) $data['guarantee_limit'], $data);
+            }
+        }
+
         return $this->repository->update($id, $data);
+    }
+
+    /**
+     * Adjust available capacity when admin changes guarantee_limit.
+     */
+    private function applyGuaranteeLimitChange(object $vendor, float $newLimit, array $data): array
+    {
+        $oldLimit = (float) ($vendor->guarantee_limit ?? 0);
+        $currentCapacity = (float) ($vendor->available_deposit_capacity ?? 0);
+        $delta = $newLimit - $oldLimit;
+
+        $newCapacity = $currentCapacity + $delta;
+        $newCapacity = max(0, min($newCapacity, $newLimit));
+
+        $data['guarantee_limit'] = $newLimit;
+        $data['available_deposit_capacity'] = $newCapacity;
+
+        return $data;
+    }
+
+    /**
+     * Increase available capacity on withdrawal, capped at guarantee_limit.
+     */
+    private function increaseDepositCapacity(object $vendor, float $amount): void
+    {
+        $guaranteeLimit = (float) ($vendor->guarantee_limit ?? 0);
+        $currentCapacity = (float) ($vendor->available_deposit_capacity ?? 0);
+        $vendor->available_deposit_capacity = min($guaranteeLimit, $currentCapacity + $amount);
+    }
+
+    /**
+     * Decrease available capacity on confirmed transaction.
+     */
+    private function decreaseDepositCapacity(object $vendor, float $amount): bool
+    {
+        $currentCapacity = (float) ($vendor->available_deposit_capacity ?? 0);
+
+        if ($currentCapacity < $amount) {
+            return false;
+        }
+
+        $vendor->available_deposit_capacity = $currentCapacity - $amount;
+
+        return true;
     }
 
     /**
@@ -220,6 +274,8 @@ class VendorService extends BaseService
 
         $previousBalance = $vendor->deposit_amount ?? 0;
         $vendor->deposit_amount = $previousBalance + $amount;
+        $vendor->guarantee_limit = ($vendor->guarantee_limit ?? 0) + $amount;
+        $this->increaseDepositCapacity($vendor, $amount);
         $vendor->save();
 
         // Create transaction record
@@ -262,7 +318,19 @@ class VendorService extends BaseService
             return false; // Insufficient deposit
         }
 
+        $currentGuarantee = (float) ($vendor->guarantee_limit ?? 0);
+        if ($currentGuarantee < $amount) {
+            return false;
+        }
+
+        $currentCapacity = (float) ($vendor->available_deposit_capacity ?? 0);
+        if ($currentCapacity < $amount) {
+            return false;
+        }
+
         $vendor->deposit_amount = $currentDeposit - $amount;
+        $vendor->guarantee_limit = $currentGuarantee - $amount;
+        $vendor->available_deposit_capacity = $currentCapacity - $amount;
         $vendor->save();
 
         // Create transaction record
@@ -319,9 +387,8 @@ class VendorService extends BaseService
 
         $previousBalance = $vendor->deposit_amount ?? 0;
 
-        // Check if deposit is sufficient
-        if ($previousBalance < $vendorAmount) {
-            return false; // Insufficient deposit
+        if (!$this->decreaseDepositCapacity($vendor, $vendorAmount)) {
+            return false;
         }
 
         $vendor->deposit_amount = $previousBalance - $vendorAmount;
@@ -385,6 +452,7 @@ class VendorService extends BaseService
 
         $previousBalance = $vendor->deposit_amount ?? 0;
         $vendor->deposit_amount = $previousBalance + $vendorAmount;
+        $this->increaseDepositCapacity($vendor, $vendorAmount);
         $vendor->save();
 
         // Create transaction record

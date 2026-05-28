@@ -44,9 +44,9 @@ class WalletRepository extends BaseRepository implements WalletInterface
         $parentVendorAlias = 'parent_vendors';
 
         // For whereRaw() clauses, we need quoted references for PostgreSQL
-        $vendorDepositRef = $isPostgres ? '"vendors"."deposit_amount"' : 'vendors.deposit_amount';
+        $vendorCapacityRef = $isPostgres ? '"vendors"."available_deposit_capacity"' : 'vendors.available_deposit_capacity';
         $vendorTransactionFeeRef = $isPostgres ? '"vendors"."transaction_fee"' : 'vendors.transaction_fee';
-        $parentVendorDepositRef = $isPostgres ? '"parent_vendors"."deposit_amount"' : 'parent_vendors.deposit_amount';
+        $parentVendorCapacityRef = $isPostgres ? '"parent_vendors"."available_deposit_capacity"' : 'parent_vendors.available_deposit_capacity';
         $parentVendorTransactionFeeRef = $isPostgres ? '"parent_vendors"."transaction_fee"' : 'parent_vendors.transaction_fee';
 
         $query = $this->model
@@ -78,25 +78,24 @@ class WalletRepository extends BaseRepository implements WalletInterface
                 $q->where('wallets.single_deposit_min_amount', '<=', $amount)
                     ->where('wallets.single_deposit_max_amount', '>=', $amount);
             })
-            // Check if vendor has sufficient deposit (amount - fee_amount)
+            // Check if vendor has sufficient deposit capacity (guarantee-based limit)
             // fee_amount = (amount * transaction_fee) / 100
-            // Required deposit = amount - fee_amount = amount - (amount * transaction_fee / 100)
-            ->where(function ($q) use ($vendorDepositRef, $vendorTransactionFeeRef, $amount, $isPostgres) {
+            // Required capacity = amount - fee_amount = amount - (amount * transaction_fee / 100)
+            ->where(function ($q) use ($vendorCapacityRef, $vendorTransactionFeeRef, $amount, $isPostgres) {
                 if ($isPostgres) {
-                    $q->whereRaw("{$vendorDepositRef} >= (CAST(? AS DECIMAL) - (CAST(? AS DECIMAL) * CAST({$vendorTransactionFeeRef} AS DECIMAL) / 100))", [$amount, $amount]);
+                    $q->whereRaw("{$vendorCapacityRef} >= (CAST(? AS DECIMAL) - (CAST(? AS DECIMAL) * CAST({$vendorTransactionFeeRef} AS DECIMAL) / 100))", [$amount, $amount]);
                 } else {
-                    $q->whereRaw("{$vendorDepositRef} >= (? - (? * {$vendorTransactionFeeRef} / 100))", [$amount, $amount]);
+                    $q->whereRaw("{$vendorCapacityRef} >= (? - (? * {$vendorTransactionFeeRef} / 100))", [$amount, $amount]);
                 }
             })
-            // Check if parent vendor has sufficient deposit (if parent exists)
-            ->where(function ($q) use ($parentVendorDepositRef, $parentVendorTransactionFeeRef, $amount, $isPostgres) {
-                // Either no parent (parent_id is null) or parent has sufficient deposit
+            // Check if parent vendor has sufficient capacity (if parent exists)
+            ->where(function ($q) use ($parentVendorCapacityRef, $parentVendorTransactionFeeRef, $amount, $isPostgres) {
                 if ($isPostgres) {
                     $q->whereNull('vendors.parent_id')
-                        ->orWhereRaw("{$parentVendorDepositRef} >= (CAST(? AS DECIMAL) - (CAST(? AS DECIMAL) * CAST({$parentVendorTransactionFeeRef} AS DECIMAL) / 100))", [$amount, $amount]);
+                        ->orWhereRaw("{$parentVendorCapacityRef} >= (CAST(? AS DECIMAL) - (CAST(? AS DECIMAL) * CAST({$parentVendorTransactionFeeRef} AS DECIMAL) / 100))", [$amount, $amount]);
                 } else {
                     $q->whereNull('vendors.parent_id')
-                        ->orWhereRaw("{$parentVendorDepositRef} >= (? - (? * {$parentVendorTransactionFeeRef} / 100))", [$amount, $amount]);
+                        ->orWhereRaw("{$parentVendorCapacityRef} >= (? - (? * {$parentVendorTransactionFeeRef} / 100))", [$amount, $amount]);
                 }
             })
             ->select('wallets.*')
@@ -147,25 +146,22 @@ class WalletRepository extends BaseRepository implements WalletInterface
                     $q->where('wallets.single_deposit_min_amount', '<=', $amount)
                         ->where('wallets.single_deposit_max_amount', '>=', $amount);
                 })
-                // Check if vendor has sufficient deposit (amount - fee_amount)
-                // fee_amount = (amount * transaction_fee) / 100
-                // Required deposit = amount - fee_amount = amount - (amount * transaction_fee / 100)
-                ->where(function ($q) use ($vendorDepositRef, $vendorTransactionFeeRef, $amount, $isPostgres) {
+                // Check if vendor has sufficient deposit capacity (guarantee-based limit)
+                ->where(function ($q) use ($vendorCapacityRef, $vendorTransactionFeeRef, $amount, $isPostgres) {
                     if ($isPostgres) {
-                        $q->whereRaw("{$vendorDepositRef} >= (CAST(? AS DECIMAL) - (CAST(? AS DECIMAL) * CAST({$vendorTransactionFeeRef} AS DECIMAL) / 100))", [$amount, $amount]);
+                        $q->whereRaw("{$vendorCapacityRef} >= (CAST(? AS DECIMAL) - (CAST(? AS DECIMAL) * CAST({$vendorTransactionFeeRef} AS DECIMAL) / 100))", [$amount, $amount]);
                     } else {
-                        $q->whereRaw("{$vendorDepositRef} >= (? - (? * {$vendorTransactionFeeRef} / 100))", [$amount, $amount]);
+                        $q->whereRaw("{$vendorCapacityRef} >= (? - (? * {$vendorTransactionFeeRef} / 100))", [$amount, $amount]);
                     }
                 })
-                // Check if parent vendor has sufficient deposit (if parent exists)
-                ->where(function ($q) use ($parentVendorDepositRef, $parentVendorTransactionFeeRef, $amount, $isPostgres) {
-                    // Either no parent (parent_id is null) or parent has sufficient deposit
+                // Check if parent vendor has sufficient capacity (if parent exists)
+                ->where(function ($q) use ($parentVendorCapacityRef, $parentVendorTransactionFeeRef, $amount, $isPostgres) {
                     if ($isPostgres) {
                         $q->whereNull('vendors.parent_id')
-                            ->orWhereRaw("{$parentVendorDepositRef} >= (CAST(? AS DECIMAL) - (CAST(? AS DECIMAL) * CAST({$parentVendorTransactionFeeRef} AS DECIMAL) / 100))", [$amount, $amount]);
+                            ->orWhereRaw("{$parentVendorCapacityRef} >= (CAST(? AS DECIMAL) - (CAST(? AS DECIMAL) * CAST({$parentVendorTransactionFeeRef} AS DECIMAL) / 100))", [$amount, $amount]);
                     } else {
                         $q->whereNull('vendors.parent_id')
-                            ->orWhereRaw("{$parentVendorDepositRef} >= (? - (? * {$parentVendorTransactionFeeRef} / 100))", [$amount, $amount]);
+                            ->orWhereRaw("{$parentVendorCapacityRef} >= (? - (? * {$parentVendorTransactionFeeRef} / 100))", [$amount, $amount]);
                     }
                 })
                 ->select('wallets.*')

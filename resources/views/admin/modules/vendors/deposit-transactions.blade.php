@@ -38,6 +38,28 @@
                     <div class="col-sm-6 col-xl-3">
                         <div class="card card-body">
                             <div class="d-flex align-items-center">
+                                <i class="ph-shield-check ph-2x text-primary me-3"></i>
+                                <div class="flex-fill text-end">
+                                    <h4 class="mb-0">{{ number_format($vendor->guarantee_limit ?? 0, 2) }} ₺</h4>
+                                    <span class="text-muted">{{ __('Guarantee Limit') }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="card card-body">
+                            <div class="d-flex align-items-center">
+                                <i class="ph-gauge ph-2x text-warning me-3"></i>
+                                <div class="flex-fill text-end">
+                                    <h4 class="mb-0">{{ number_format($vendor->available_deposit_capacity ?? 0, 2) }} ₺</h4>
+                                    <span class="text-muted">{{ __('Available Deposit Capacity') }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="card card-body">
+                            <div class="d-flex align-items-center">
                                 <i class="ph-list-dashes ph-2x text-info me-3"></i>
                                 <div class="flex-fill text-end">
                                     <h4 class="mb-0">{{ $items->total() }}</h4>
