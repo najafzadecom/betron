@@ -17,6 +17,52 @@ use Illuminate\Support\Collection;
 
 class VendorReconciliationService
 {
+    public const DEFAULT_COMMISSION_RATE = 4.0;
+
+    public static function calculateYKomisyon(float $yatirim, float $manYatirim, float $oran): float
+    {
+        return round(($yatirim + $manYatirim) * $oran / 100, 2);
+    }
+
+    public static function calculateTKomisyon(float $teslimat, float $oran): float
+    {
+        return round($teslimat * $oran / 100, 2);
+    }
+
+    public static function defaultDepositCommissionRate(?Vendor $vendor): float
+    {
+        $fee = (float) ($vendor?->transaction_fee ?? 0);
+
+        return $fee > 0 ? $fee : self::DEFAULT_COMMISSION_RATE;
+    }
+
+    public static function defaultSettlementCommissionRate(?Vendor $vendor): float
+    {
+        $fee = (float) ($vendor?->settlement_fee ?? 0);
+
+        return $fee > 0 ? $fee : self::DEFAULT_COMMISSION_RATE;
+    }
+
+    /**
+     * @param  array<string, float>  $amounts
+     * @return array<string, float>
+     */
+    public static function applyCommissionAmounts(array $amounts, float $yKomisyonOran, float $tKomisyonOran): array
+    {
+        $amounts['y_komisyon'] = self::calculateYKomisyon(
+            (float) ($amounts['yatirim'] ?? 0),
+            (float) ($amounts['man_yatirim'] ?? 0),
+            $yKomisyonOran
+        );
+        $amounts['t_komisyon'] = self::calculateTKomisyon(
+            (float) ($amounts['teslimat'] ?? 0),
+            $tKomisyonOran
+        );
+        $amounts['kalan'] = self::calculateKalan($amounts);
+
+        return $amounts;
+    }
+
     public static function calculateKalan(array $fields): float
     {
         return round(
@@ -113,22 +159,10 @@ class VendorReconciliationService
             ->whereBetween('created_at', [$from, $to])
             ->sum('amount');
 
-        $transactionFee = (float) ($vendor?->transaction_fee ?? 0);
-        $totalTransactionAmount = (float) Transaction::query()
-            ->where('vendor_id', $vendorId)
-            ->whereNull('deleted_at')
-            ->whereBetween('accepted_at', [$from, $to])
-            ->where('paid_status', true)
-            ->whereIn('status', $confirmedTransactionStatuses)
-            ->sum('amount');
-
-        $yKomisyon = round($totalTransactionAmount * $transactionFee / 100, 2);
-
         $teslimat = 0.0;
-        $settlementFee = (float) ($vendor?->settlement_fee ?? 0);
-        $tKomisyon = round($teslimat * $settlementFee / 100, 2);
-
         $devir = $this->getDevirForDate($vendorId, $date);
+        $yKomisyonOran = self::defaultDepositCommissionRate($vendor);
+        $tKomisyonOran = self::defaultSettlementCommissionRate($vendor);
 
         $fields = [
             'devir' => $devir,
@@ -136,14 +170,12 @@ class VendorReconciliationService
             'man_yatirim' => round($manYatirimTransactions + $manYatirimDeposit, 2),
             'cekim' => round($cekim, 2),
             'man_cekim' => round($manCekimWithdrawals + $manCekimDeposit, 2),
-            'y_komisyon' => $yKomisyon,
+            'y_komisyon_oran' => $yKomisyonOran,
             'teslimat' => $teslimat,
-            't_komisyon' => $tKomisyon,
+            't_komisyon_oran' => $tKomisyonOran,
         ];
 
-        $fields['kalan'] = self::calculateKalan($fields);
-
-        return $fields;
+        return self::applyCommissionAmounts($fields, $yKomisyonOran, $tKomisyonOran);
     }
 
     public function listForVendorMonth(int $vendorId, int $year, int $month): Collection
@@ -195,8 +227,10 @@ class VendorReconciliationService
             'man_yatirim' => $suggested['man_yatirim'],
             'cekim' => $suggested['cekim'],
             'man_cekim' => $suggested['man_cekim'],
+            'y_komisyon_oran' => $suggested['y_komisyon_oran'],
             'y_komisyon' => $suggested['y_komisyon'],
             'teslimat' => $suggested['teslimat'],
+            't_komisyon_oran' => $suggested['t_komisyon_oran'],
             't_komisyon' => $suggested['t_komisyon'],
             'kalan' => $suggested['kalan'],
             'status' => VendorReconciliationStatus::Draft,
@@ -211,19 +245,24 @@ class VendorReconciliationService
             throw new \RuntimeException(__('Only draft reconciliations can be edited.'));
         }
 
+        $yKomisyonOran = (float) ($data['y_komisyon_oran'] ?? $record->y_komisyon_oran ?? self::DEFAULT_COMMISSION_RATE);
+        $tKomisyonOran = (float) ($data['t_komisyon_oran'] ?? $record->t_komisyon_oran ?? self::DEFAULT_COMMISSION_RATE);
+
         $fields = [
             'devir' => (float) ($data['devir'] ?? $record->devir),
             'yatirim' => (float) ($data['yatirim'] ?? $record->yatirim),
             'man_yatirim' => (float) ($data['man_yatirim'] ?? $record->man_yatirim),
             'cekim' => (float) ($data['cekim'] ?? $record->cekim),
             'man_cekim' => (float) ($data['man_cekim'] ?? $record->man_cekim),
-            'y_komisyon' => (float) ($data['y_komisyon'] ?? $record->y_komisyon),
             'teslimat' => (float) ($data['teslimat'] ?? $record->teslimat),
-            't_komisyon' => (float) ($data['t_komisyon'] ?? $record->t_komisyon),
         ];
 
+        $fields = self::applyCommissionAmounts($fields, $yKomisyonOran, $tKomisyonOran);
+
         $record->fill($fields);
-        $record->kalan = self::calculateKalan($fields);
+        $record->y_komisyon_oran = $yKomisyonOran;
+        $record->t_komisyon_oran = $tKomisyonOran;
+        $record->kalan = $fields['kalan'];
         $record->notes = $data['notes'] ?? $record->notes;
         $record->save();
 
@@ -244,19 +283,24 @@ class VendorReconciliationService
         );
 
         $devir = (float) $record->devir;
-        $fields = array_merge($suggested, ['devir' => $devir]);
-        $record->fill([
-            'yatirim' => $fields['yatirim'],
-            'man_yatirim' => $fields['man_yatirim'],
-            'cekim' => $fields['cekim'],
-            'man_cekim' => $fields['man_cekim'],
-            'y_komisyon' => $fields['y_komisyon'],
-            'teslimat' => $record->teslimat,
-            't_komisyon' => $record->t_komisyon,
-        ]);
-        $record->kalan = self::calculateKalan($record->only([
-            'devir', 'yatirim', 'man_yatirim', 'cekim', 'man_cekim', 'y_komisyon', 'teslimat', 't_komisyon',
-        ]));
+        $yKomisyonOran = (float) ($record->y_komisyon_oran ?: $suggested['y_komisyon_oran']);
+        $tKomisyonOran = (float) ($record->t_komisyon_oran ?: $suggested['t_komisyon_oran']);
+
+        $fields = [
+            'devir' => $devir,
+            'yatirim' => $suggested['yatirim'],
+            'man_yatirim' => $suggested['man_yatirim'],
+            'cekim' => $suggested['cekim'],
+            'man_cekim' => $suggested['man_cekim'],
+            'teslimat' => (float) $record->teslimat,
+        ];
+
+        $fields = self::applyCommissionAmounts($fields, $yKomisyonOran, $tKomisyonOran);
+
+        $record->fill($fields);
+        $record->y_komisyon_oran = $yKomisyonOran;
+        $record->t_komisyon_oran = $tKomisyonOran;
+        $record->kalan = $fields['kalan'];
         $record->save();
 
         return $record->fresh(['vendor', 'approver', 'archiver']);
@@ -270,9 +314,13 @@ class VendorReconciliationService
             throw new \RuntimeException(__('Only draft reconciliations can be approved.'));
         }
 
-        $record->kalan = self::calculateKalan($record->only([
-            'devir', 'yatirim', 'man_yatirim', 'cekim', 'man_cekim', 'y_komisyon', 'teslimat', 't_komisyon',
-        ]));
+        $fields = self::applyCommissionAmounts(
+            $record->only(['devir', 'yatirim', 'man_yatirim', 'cekim', 'man_cekim', 'teslimat']),
+            (float) ($record->y_komisyon_oran ?? self::DEFAULT_COMMISSION_RATE),
+            (float) ($record->t_komisyon_oran ?? self::DEFAULT_COMMISSION_RATE)
+        );
+        $record->fill($fields);
+        $record->kalan = $fields['kalan'];
         $record->status = VendorReconciliationStatus::Approved;
         $record->approved_at = now();
         $record->approved_by = auth('web')->id();

@@ -210,23 +210,26 @@
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            @foreach([
-                                                'devir' => __('Carryover (Devir)'),
-                                                'yatirim' => __('Deposit (Yatırım)'),
-                                                'man_yatirim' => __('Manual Deposit'),
-                                                'cekim' => __('Withdrawal (Çekim)'),
-                                                'man_cekim' => __('Manual Withdrawal'),
-                                                'y_komisyon' => __('Deposit Commission'),
-                                                'teslimat' => __('Settlement (Teslimat)'),
-                                                't_komisyon' => __('Settlement Commission'),
-                                            ] as $field => $label)
+                                            @php
+                                                $yOran = old('y_komisyon_oran', $reconciliation->y_komisyon_oran ?? \App\Services\VendorReconciliationService::DEFAULT_COMMISSION_RATE);
+                                                $tOran = old('t_komisyon_oran', $reconciliation->t_komisyon_oran ?? \App\Services\VendorReconciliationService::DEFAULT_COMMISSION_RATE);
+                                                $amountFields = [
+                                                    'devir' => __('Carryover (Devir)'),
+                                                    'yatirim' => __('Deposit (Yatırım)'),
+                                                    'man_yatirim' => __('Manual Deposit'),
+                                                    'cekim' => __('Withdrawal (Çekim)'),
+                                                    'man_cekim' => __('Manual Withdrawal'),
+                                                    'teslimat' => __('Settlement (Teslimat)'),
+                                                ];
+                                            @endphp
+                                            @foreach($amountFields as $field => $label)
                                                 <tr>
                                                     <td class="fw-semibold">{{ $label }}</td>
                                                     <td>
                                                         <input type="number"
                                                                step="0.01"
                                                                name="{{ $field }}"
-                                                               class="form-control form-control-sm text-end reconciliation-input @error($field) is-invalid @enderror"
+                                                               class="form-control form-control-sm text-end reconciliation-amount @error($field) is-invalid @enderror"
                                                                value="{{ old($field, $reconciliation->$field ?? 0) }}"
                                                                @disabled(!$isDraft)
                                                                data-field="{{ $field }}">
@@ -236,6 +239,74 @@
                                                     </td>
                                                 </tr>
                                             @endforeach
+                                            <tr class="table-light">
+                                                <td class="fw-semibold">
+                                                    {{ __('Deposit Commission') }}
+                                                    <div class="text-muted fs-sm fw-normal">{{ __('(Yatırım + Man. Yatırım) × oran') }}</div>
+                                                </td>
+                                                <td>
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="number"
+                                                               step="0.01"
+                                                               min="0"
+                                                               max="100"
+                                                               name="y_komisyon_oran"
+                                                               id="y_komisyon_oran"
+                                                               class="form-control text-end reconciliation-rate @error('y_komisyon_oran') is-invalid @enderror"
+                                                               value="{{ $yOran }}"
+                                                               @disabled(!$isDraft)>
+                                                        <span class="input-group-text">%</span>
+                                                        <input type="text"
+                                                               id="y_komisyon_display"
+                                                               class="form-control text-end bg-light"
+                                                               value="{{ number_format(old('y_komisyon', $reconciliation->y_komisyon ?? 0), 2, '.', '') }}"
+                                                               readonly
+                                                               tabindex="-1">
+                                                        <span class="input-group-text">₺</span>
+                                                    </div>
+                                                    @error('y_komisyon_oran')
+                                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                                    @enderror
+                                                </td>
+                                            </tr>
+                                            <tr class="table-light">
+                                                <td class="fw-semibold">
+                                                    {{ __('Settlement Commission') }}
+                                                    <div class="text-muted fs-sm fw-normal">{{ __('Teslimat × oran') }}</div>
+                                                </td>
+                                                <td>
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="number"
+                                                               step="0.01"
+                                                               min="0"
+                                                               max="100"
+                                                               name="t_komisyon_oran"
+                                                               id="t_komisyon_oran"
+                                                               class="form-control text-end reconciliation-rate @error('t_komisyon_oran') is-invalid @enderror"
+                                                               value="{{ $tOran }}"
+                                                               @disabled(!$isDraft)>
+                                                        <span class="input-group-text">%</span>
+                                                        <input type="text"
+                                                               id="t_komisyon_display"
+                                                               class="form-control text-end bg-light"
+                                                               value="{{ number_format(old('t_komisyon', $reconciliation->t_komisyon ?? 0), 2, '.', '') }}"
+                                                               readonly
+                                                               tabindex="-1">
+                                                        <span class="input-group-text">₺</span>
+                                                    </div>
+                                                    @error('t_komisyon_oran')
+                                                    <span class="invalid-feedback d-block">{{ $message }}</span>
+                                                    @enderror
+                                                </td>
+                                            </tr>
+                                            @if(!$isDraft)
+                                                <tr class="d-none">
+                                                    <td colspan="2">
+                                                        <span>{{ __('Deposit commission rate') }}: {{ number_format($reconciliation->y_komisyon_oran ?? 4, 2) }}%</span>
+                                                        <span class="ms-3">{{ __('Settlement commission rate') }}: {{ number_format($reconciliation->t_komisyon_oran ?? 4, 2) }}%</span>
+                                                    </td>
+                                                </tr>
+                                            @endif
                                             <tr class="table-primary">
                                                 <td class="fw-bold">{{ __('Remaining (Kalan)') }}</td>
                                                 <td>
@@ -281,7 +352,9 @@
                                 </form>
 
                                 <p class="text-muted fs-sm mt-3 mb-0">
-                                    {{ __('Formula') }}: {{ __('Kalan = Devir + Yatırım + Man.Yatırım − Çekim − Man.Çekim − Y.Komisyon − Teslimat − T.Komisyon') }}
+                                    {{ __('Formula') }}: {{ __('Kalan = Devir + Yatırım + Man.Yatırım − Çekim − Man.Çekim − Y.Komisyon − Teslimat − T.Komisyon') }}<br>
+                                    {{ __('Y.Komisyon') }} = ({{ __('Yatırım') }} + {{ __('Manual Deposit') }}) × %{{ __('Deposit commission rate') }}<br>
+                                    {{ __('T.Komisyon') }} = {{ __('Settlement (Teslimat)') }} × %{{ __('Settlement commission rate') }}
                                 </p>
                             @else
                                 <p class="text-muted mb-0">{{ __('No reconciliation for this day. Click "Start Reconciliation" to create a draft.') }}</p>
@@ -322,22 +395,47 @@
                 });
             }
 
-            const inputs = document.querySelectorAll('.reconciliation-input');
             const kalanDisplay = document.getElementById('kalan_display');
+            const yKomisyonDisplay = document.getElementById('y_komisyon_display');
+            const tKomisyonDisplay = document.getElementById('t_komisyon_display');
 
-            function recalculateKalan() {
-                if (!kalanDisplay || !inputs.length) return;
-                const fields = ['devir', 'yatirim', 'man_yatirim', 'cekim', 'man_cekim', 'y_komisyon', 'teslimat', 't_komisyon'];
-                let kalan = 0;
-                fields.forEach((name, i) => {
-                    const el = document.querySelector('[name="' + name + '"]');
-                    const val = parseFloat(el?.value) || 0;
-                    if (i < 3) kalan += val; else kalan -= val;
-                });
-                kalanDisplay.value = kalan.toFixed(2);
+            function num(name) {
+                const el = document.querySelector('[name="' + name + '"]');
+                return parseFloat(el?.value) || 0;
             }
 
-            inputs.forEach(input => input.addEventListener('input', recalculateKalan));
+            function calcYKomisyon() {
+                const base = num('yatirim') + num('man_yatirim');
+                const oran = num('y_komisyon_oran');
+                return Math.round(base * oran / 100 * 100) / 100;
+            }
+
+            function calcTKomisyon() {
+                const base = num('teslimat');
+                const oran = num('t_komisyon_oran');
+                return Math.round(base * oran / 100 * 100) / 100;
+            }
+
+            function recalculateAll() {
+                if (yKomisyonDisplay) {
+                    yKomisyonDisplay.value = calcYKomisyon().toFixed(2);
+                }
+                if (tKomisyonDisplay) {
+                    tKomisyonDisplay.value = calcTKomisyon().toFixed(2);
+                }
+                if (!kalanDisplay) return;
+
+                const yKom = parseFloat(yKomisyonDisplay?.value) || 0;
+                const tKom = parseFloat(tKomisyonDisplay?.value) || 0;
+                const kalan = num('devir') + num('yatirim') + num('man_yatirim')
+                    - num('cekim') - num('man_cekim') - yKom - num('teslimat') - tKom;
+                kalanDisplay.value = (Math.round(kalan * 100) / 100).toFixed(2);
+            }
+
+            document.querySelectorAll('.reconciliation-amount, .reconciliation-rate').forEach(el => {
+                el.addEventListener('input', recalculateAll);
+            });
+            recalculateAll();
         });
     </script>
 @endpush

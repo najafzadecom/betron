@@ -175,12 +175,19 @@ class VendorReconciliationController extends BaseController
 
     public function calculate(Request $request): JsonResponse
     {
-        $fields = $request->only([
-            'devir', 'yatirim', 'man_yatirim', 'cekim', 'man_cekim', 'y_komisyon', 'teslimat', 't_komisyon',
-        ]);
+        $yOran = (float) $request->input('y_komisyon_oran', VendorReconciliationService::DEFAULT_COMMISSION_RATE);
+        $tOran = (float) $request->input('t_komisyon_oran', VendorReconciliationService::DEFAULT_COMMISSION_RATE);
+
+        $fields = VendorReconciliationService::applyCommissionAmounts(
+            $request->only(['devir', 'yatirim', 'man_yatirim', 'cekim', 'man_cekim', 'teslimat']),
+            $yOran,
+            $tOran
+        );
 
         $this->data = [
-            'kalan' => VendorReconciliationService::calculateKalan($fields),
+            'y_komisyon' => $fields['y_komisyon'],
+            't_komisyon' => $fields['t_komisyon'],
+            'kalan' => $fields['kalan'],
         ];
 
         return $this->json();
