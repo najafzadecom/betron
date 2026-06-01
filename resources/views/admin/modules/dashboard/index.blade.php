@@ -3,7 +3,7 @@
 @section('content')
     <div class="content">
         @can('vendor-reconciliations-index')
-            @if(!auth()->user()->hasRole('Merchant'))
+            @if(!auth()->user()->hasRole('Merchant') && \Illuminate\Support\Facades\Route::has('admin.vendor-reconciliations.index'))
                 <div class="row mb-3">
                     <div class="col-12">
                         <a href="{{ route('admin.vendor-reconciliations.index') }}" class="card card-body text-decoration-none text-body d-flex align-items-center gap-3">

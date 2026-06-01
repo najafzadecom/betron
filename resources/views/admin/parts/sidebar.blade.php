@@ -173,6 +173,7 @@
                         </li>
                     @endcan
                     @can('vendor-reconciliations-index')
+                        @if(\Illuminate\Support\Facades\Route::has('admin.vendor-reconciliations.index'))
                         <li class="nav-item">
                             <a href="{{ route('admin.vendor-reconciliations.index') }}"
                                class="nav-link @if(request()->routeIs('admin.vendor-reconciliations.*')) active @endif">
@@ -180,6 +181,7 @@
                                 <span>{{ __('Vendor Reconciliation') }}</span>
                             </a>
                         </li>
+                        @endif
                     @endcan
                     @can('activity-logs-index')
                         <li class="nav-item">
