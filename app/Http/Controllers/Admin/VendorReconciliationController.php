@@ -162,13 +162,15 @@ class VendorReconciliationController extends BaseController
         $vendor = $record->vendor;
         $parentId = $vendor?->parent_id ?: $record->vendor_id;
 
-        return redirect()->route('admin.vendor-reconciliations.index', array_filter([
-            'vendor_id' => $record->vendor_id,
-            'parent_vendor_id' => request('parent_vendor_id', $parentId),
-            'date' => $record->reconciliation_date->format('Y-m-d'),
-            'year' => $record->reconciliation_date->year,
-            'month' => $record->reconciliation_date->month,
-        ])->with(['success' => true, 'message' => $message]);
+        return redirect()
+            ->route('admin.vendor-reconciliations.index', array_filter([
+                'vendor_id' => $record->vendor_id,
+                'parent_vendor_id' => request('parent_vendor_id', $parentId),
+                'date' => $record->reconciliation_date->format('Y-m-d'),
+                'year' => $record->reconciliation_date->year,
+                'month' => $record->reconciliation_date->month,
+            ]))
+            ->with(['success' => true, 'message' => $message]);
     }
 
     public function calculate(Request $request): JsonResponse
