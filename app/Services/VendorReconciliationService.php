@@ -325,4 +325,67 @@ class VendorReconciliationService
 
         return $record->fresh(['vendor', 'approver', 'archiver']);
     }
+
+    /**
+     * @return array{date: string, rows: array<int, array<string, mixed>>, totals: array<string, float>, missing_count: int}
+     */
+    public function getGeneralSummaryForDate(string $date): array
+    {
+        $vendors = Vendor::query()
+            ->withoutGlobalScopes()
+            ->whereNull('deleted_at')
+            ->where('status', 1)
+            ->with('parent:id,name')
+            ->orderBy('name')
+            ->get(['id', 'name', 'parent_id']);
+
+        $reconciliations = VendorDailyReconciliation::query()
+            ->whereDate('reconciliation_date', $date)
+            ->get()
+            ->keyBy('vendor_id');
+
+        $numericFields = [
+            'devir', 'yatirim', 'man_yatirim', 'cekim', 'man_cekim',
+            'y_komisyon', 'teslimat', 't_komisyon', 'kalan',
+        ];
+
+        $totals = array_fill_keys($numericFields, 0.0);
+        $rows = [];
+        $missingCount = 0;
+
+        foreach ($vendors as $vendor) {
+            $record = $reconciliations->get($vendor->id);
+            $exists = $record !== null;
+
+            if (!$exists) {
+                $missingCount++;
+            }
+
+            $values = [];
+            foreach ($numericFields as $field) {
+                $values[$field] = $exists ? (float) $record->{$field} : 0.0;
+                $totals[$field] += $values[$field];
+            }
+
+            $rows[] = [
+                'vendor_id' => $vendor->id,
+                'vendor_name' => $vendor->name,
+                'parent_name' => $vendor->parent?->name,
+                'exists' => $exists,
+                'status' => $record?->status,
+                'values' => $values,
+            ];
+        }
+
+        foreach ($totals as $key => $value) {
+            $totals[$key] = round($value, 2);
+        }
+
+        return [
+            'date' => $date,
+            'rows' => $rows,
+            'totals' => $totals,
+            'missing_count' => $missingCount,
+        ];
+    }
 }

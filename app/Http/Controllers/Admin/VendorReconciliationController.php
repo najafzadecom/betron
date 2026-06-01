@@ -17,7 +17,7 @@ class VendorReconciliationController extends BaseController
         protected VendorReconciliationService $reconciliationService,
         protected VendorService $vendorService,
     ) {
-        $this->middleware('permission:vendor-reconciliations-index', ['only' => ['index']]);
+        $this->middleware('permission:vendor-reconciliations-index', ['only' => ['index', 'summary']]);
         $this->middleware('permission:vendor-reconciliations-edit', [
             'only' => ['update', 'loadDay', 'refresh', 'approve', 'archive', 'reopen'],
         ]);
@@ -77,6 +77,23 @@ class VendorReconciliationController extends BaseController
         ];
 
         return $this->render('index');
+    }
+
+    public function summary(): Renderable
+    {
+        $date = request('date', date('Y-m-d'));
+        $summary = $this->reconciliationService->getGeneralSummaryForDate($date);
+
+        $this->data = [
+            'module' => __('General Reconciliation'),
+            'title' => __('General Reconciliation'),
+            'date' => $date,
+            'rows' => $summary['rows'],
+            'totals' => $summary['totals'],
+            'missingCount' => $summary['missing_count'],
+        ];
+
+        return $this->render('summary');
     }
 
     public function loadDay(Request $request): RedirectResponse

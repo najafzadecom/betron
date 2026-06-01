@@ -109,6 +109,7 @@ Route::middleware('auth')
         Route::get('statistics/index', [StatisticsController::class, 'index'])->name('statistics.index');
 
         Route::get('vendor-reconciliations', [VendorReconciliationController::class, 'index'])->name('vendor-reconciliations.index');
+        Route::get('vendor-reconciliations/summary', [VendorReconciliationController::class, 'summary'])->name('vendor-reconciliations.summary');
         Route::post('vendor-reconciliations/load-day', [VendorReconciliationController::class, 'loadDay'])->name('vendor-reconciliations.load-day');
         Route::put('vendor-reconciliations/{id}', [VendorReconciliationController::class, 'update'])->name('vendor-reconciliations.update');
         Route::post('vendor-reconciliations/{id}/refresh', [VendorReconciliationController::class, 'refresh'])->name('vendor-reconciliations.refresh');

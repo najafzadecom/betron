@@ -176,9 +176,16 @@
                         @if(\Illuminate\Support\Facades\Route::has('admin.vendor-reconciliations.index'))
                         <li class="nav-item">
                             <a href="{{ route('admin.vendor-reconciliations.index') }}"
-                               class="nav-link @if(request()->routeIs('admin.vendor-reconciliations.*')) active @endif">
+                               class="nav-link @if(request()->routeIs('admin.vendor-reconciliations.index')) active @endif">
                                 <i class="ph-scales"></i>
                                 <span>{{ __('Vendor Reconciliation') }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.vendor-reconciliations.summary') }}"
+                               class="nav-link @if(request()->routeIs('admin.vendor-reconciliations.summary')) active @endif">
+                                <i class="ph-chart-pie-slice"></i>
+                                <span>{{ __('General Reconciliation') }}</span>
                             </a>
                         </li>
                         @endif
