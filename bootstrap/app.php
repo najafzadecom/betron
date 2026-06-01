@@ -57,6 +57,7 @@ return Application::configure(basePath: dirname(__DIR__))
         //$schedule->command('app:apply-withdrawal')->everyMinute();
         $schedule->command('withdrawals:distribute')->everyMinute();
         $schedule->command('app:delete-old-pending-transactions')->everyMinute();
+        $schedule->command('vendor-reconciliations:sync-drafts')->everyMinute();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
