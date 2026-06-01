@@ -2,15 +2,12 @@
 
 namespace App\Services;
 
-use App\Enums\PaymentProvider;
 use App\Enums\TransactionStatus;
-use App\Enums\VendorDepositTransactionType;
 use App\Enums\VendorReconciliationStatus;
 use App\Enums\WithdrawalStatus;
 use App\Models\Transaction;
 use App\Models\Vendor;
 use App\Models\VendorDailyReconciliation;
-use App\Models\VendorDepositTransaction;
 use App\Models\Withdrawal;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -106,29 +103,13 @@ class VendorReconciliationService
             WithdrawalStatus::AutoConfirmed->value,
         ];
 
+        // Tüm onaylı yatırımlar (manuel/otomatik onay fark etmez) → yatirim. man_* alanları elle girilir.
         $yatirim = (float) Transaction::query()
             ->where('vendor_id', $vendorId)
             ->whereNull('deleted_at')
             ->whereBetween('accepted_at', [$from, $to])
             ->where('paid_status', true)
             ->whereIn('status', $confirmedTransactionStatuses)
-            ->where('payment_method', '!=', PaymentProvider::Manual->value)
-            ->sum('amount');
-
-        $manYatirimTransactions = (float) Transaction::query()
-            ->where('vendor_id', $vendorId)
-            ->whereNull('deleted_at')
-            ->whereBetween('accepted_at', [$from, $to])
-            ->where('paid_status', true)
-            ->whereIn('status', $confirmedTransactionStatuses)
-            ->where('payment_method', PaymentProvider::Manual->value)
-            ->sum('amount');
-
-        $manYatirimDeposit = (float) VendorDepositTransaction::query()
-            ->where('vendor_id', $vendorId)
-            ->where('type', VendorDepositTransactionType::ADD->value)
-            ->whereNull('transaction_id')
-            ->whereBetween('created_at', [$from, $to])
             ->sum('amount');
 
         $cekim = (float) Withdrawal::query()
@@ -137,26 +118,6 @@ class VendorReconciliationService
             ->whereBetween('accepted_at', [$from, $to])
             ->where('paid_status', true)
             ->whereIn('status', $confirmedWithdrawalStatuses)
-            ->where(function ($q) {
-                $q->whereNull('payment_method')
-                    ->orWhere('payment_method', '!=', PaymentProvider::Manual->value);
-            })
-            ->sum('amount');
-
-        $manCekimWithdrawals = (float) Withdrawal::query()
-            ->where('vendor_id', $vendorId)
-            ->whereNull('deleted_at')
-            ->whereBetween('accepted_at', [$from, $to])
-            ->where('paid_status', true)
-            ->whereIn('status', $confirmedWithdrawalStatuses)
-            ->where('payment_method', PaymentProvider::Manual->value)
-            ->sum('amount');
-
-        $manCekimDeposit = (float) VendorDepositTransaction::query()
-            ->where('vendor_id', $vendorId)
-            ->where('type', VendorDepositTransactionType::SUBTRACT->value)
-            ->whereNull('withdrawal_id')
-            ->whereBetween('created_at', [$from, $to])
             ->sum('amount');
 
         $teslimat = 0.0;
@@ -167,9 +128,9 @@ class VendorReconciliationService
         $fields = [
             'devir' => $devir,
             'yatirim' => round($yatirim, 2),
-            'man_yatirim' => round($manYatirimTransactions + $manYatirimDeposit, 2),
+            'man_yatirim' => 0.0,
             'cekim' => round($cekim, 2),
-            'man_cekim' => round($manCekimWithdrawals + $manCekimDeposit, 2),
+            'man_cekim' => 0.0,
             'y_komisyon_oran' => $yKomisyonOran,
             'teslimat' => $teslimat,
             't_komisyon_oran' => $tKomisyonOran,
@@ -289,9 +250,9 @@ class VendorReconciliationService
         $fields = [
             'devir' => $devir,
             'yatirim' => $suggested['yatirim'],
-            'man_yatirim' => $suggested['man_yatirim'],
+            'man_yatirim' => (float) $record->man_yatirim,
             'cekim' => $suggested['cekim'],
-            'man_cekim' => $suggested['man_cekim'],
+            'man_cekim' => (float) $record->man_cekim,
             'teslimat' => (float) $record->teslimat,
         ];
 
