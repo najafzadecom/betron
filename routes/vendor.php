@@ -10,6 +10,7 @@ use App\Http\Controllers\Vendor\VendorUserController;
 use App\Http\Controllers\Vendor\WalletController;
 use App\Http\Controllers\Vendor\WithdrawalController;
 use App\Http\Controllers\Vendor\ProfileController;
+use App\Http\Controllers\Vendor\VendorReconciliationController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')
@@ -70,4 +71,7 @@ Route::middleware('auth:vendor')
 
         // Statistics
         Route::get('statistics', [StatisticsController::class, 'index'])->name('statistics.index');
+
+        // Reconciliation (read-only, own vendor)
+        Route::get('reconciliations', [VendorReconciliationController::class, 'index'])->name('reconciliations.index');
     });

@@ -327,6 +327,69 @@ class VendorReconciliationService
     }
 
     /**
+     * @return array{
+     *     year: int,
+     *     month: int,
+     *     date: string,
+     *     days: Collection,
+     *     exists: bool,
+     *     reconciliation: VendorDailyReconciliation|null,
+     *     values: array<string, float>
+     * }
+     */
+    public function getVendorPanelView(int $vendorId, ?string $date = null): array
+    {
+        $date = $date ?: date('Y-m-d');
+        $carbon = Carbon::parse($date);
+        $year = (int) $carbon->year;
+        $month = (int) $carbon->month;
+
+        $reconciliation = VendorDailyReconciliation::query()
+            ->where('vendor_id', $vendorId)
+            ->whereDate('reconciliation_date', $date)
+            ->first();
+
+        $numericFields = [
+            'devir', 'yatirim', 'man_yatirim', 'cekim', 'man_cekim',
+            'y_komisyon_oran', 'y_komisyon', 'teslimat', 't_komisyon_oran', 't_komisyon', 'kalan',
+        ];
+
+        $values = array_fill_keys($numericFields, 0.0);
+        if ($reconciliation) {
+            foreach ($numericFields as $field) {
+                $values[$field] = (float) $reconciliation->{$field};
+            }
+        }
+
+        return [
+            'year' => $year,
+            'month' => $month,
+            'date' => $date,
+            'days' => $this->listForVendorMonth($vendorId, $year, $month),
+            'exists' => $reconciliation !== null,
+            'reconciliation' => $reconciliation,
+            'values' => $values,
+        ];
+    }
+
+    public static function resolvePanelDate(int $year, int $month, ?string $requestedDate = null): string
+    {
+        if ($requestedDate) {
+            $parsed = Carbon::parse($requestedDate);
+            if ((int) $parsed->year === $year && (int) $parsed->month === $month) {
+                return $parsed->format('Y-m-d');
+            }
+        }
+
+        $today = Carbon::today();
+        if ((int) $today->year === $year && (int) $today->month === $month) {
+            return $today->format('Y-m-d');
+        }
+
+        return Carbon::create($year, $month, 1)->format('Y-m-d');
+    }
+
+    /**
      * @return array{date: string, rows: array<int, array<string, mixed>>, totals: array<string, float>, missing_count: int}
      */
     public function getGeneralSummaryForDate(string $date): array

@@ -432,6 +432,8 @@
     "Total remaining for all vendors on this date": "Bu tarih için tüm bayilerin toplam kalan bakiyesi",
     "Vendor reconciliations": "Bayi mutabakatları",
     "Reconciliation not created": "Mutabakat oluşturulmadı",
+    "No reconciliation has been created for this day yet. All values are shown as zero.": "Bu gün için henüz mutabakat oluşturulmadı. Tüm değerler sıfır olarak gösterilir.",
+    "This page is read-only. Contact the administrator for changes.": "Bu sayfa salt okunurdur. Değişiklik için yönetici ile iletişime geçin.",
     ":count vendor(s) have no reconciliation for this date. Those rows are shown in yellow with zero values.": ":count bayi için bu tarihte mutabakat yok. Bu satırlar sarı renkte ve sıfır değerlerle gösterilir.",
     "Total": "Toplam",
     "Man. Yatırım": "Man. Yatırım",

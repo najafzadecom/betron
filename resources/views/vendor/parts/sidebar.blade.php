@@ -43,6 +43,13 @@
                         </span>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="{{ route('vendor.reconciliations.index') }}"
+                       class="nav-link @if(request()->routeIs('vendor.reconciliations.*')) active @endif">
+                        <i class="ph-scales"></i>
+                        <span>{{ __('Vendor Reconciliation') }}</span>
+                    </a>
+                </li>
 
                 <!-- Wallet Management -->
                 @canany(['vendor-wallets-index', 'vendor-transactions-index', 'vendor-withdrawals-index'])
