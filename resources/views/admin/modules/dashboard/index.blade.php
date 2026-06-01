@@ -2,6 +2,22 @@
 @section('title', $title)
 @section('content')
     <div class="content">
+        @can('vendor-reconciliations-index')
+            @if(!auth()->user()->hasRole('Merchant'))
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <a href="{{ route('admin.vendor-reconciliations.index') }}" class="card card-body text-decoration-none text-body d-flex align-items-center gap-3">
+                            <i class="ph-scales ph-2x text-primary"></i>
+                            <div>
+                                <h6 class="mb-0">{{ __('Vendor Reconciliation') }}</h6>
+                                <span class="text-muted fs-sm">{{ __('Daily Reconciliation') }}</span>
+                            </div>
+                            <i class="ph-arrow-right ms-auto"></i>
+                        </a>
+                    </div>
+                </div>
+            @endif
+        @endcan
         <div class="row">
             <div class="col-lg-6">
                 <div class="card">

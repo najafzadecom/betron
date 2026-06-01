@@ -158,7 +158,7 @@
                     </li>
                 @endcan
 
-                @canany(['statistics-index','activity-logs-index','blacklists-index','settings-index'])
+                @canany(['statistics-index','vendor-reconciliations-index','activity-logs-index','blacklists-index','settings-index'])
                     <li class="nav-item-header">
                         <div class="text-uppercase fs-sm lh-sm opacity-50 sidebar-resize-hide">{{ __('System') }}</div>
                         <i class="ph-dots-three sidebar-resize-show"></i>
@@ -169,6 +169,15 @@
                                class="nav-link @if(request()->routeIs('admin.statistics.*')) active @endif">
                                 <i class="ph-chart-bar"></i>
                                 <span>{{ __('Statistics') }}</span>
+                            </a>
+                        </li>
+                    @endcan
+                    @can('vendor-reconciliations-index')
+                        <li class="nav-item">
+                            <a href="{{ route('admin.vendor-reconciliations.index') }}"
+                               class="nav-link @if(request()->routeIs('admin.vendor-reconciliations.*')) active @endif">
+                                <i class="ph-scales"></i>
+                                <span>{{ __('Vendor Reconciliation') }}</span>
                             </a>
                         </li>
                     @endcan

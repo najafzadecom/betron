@@ -115,6 +115,10 @@ class PermissionSeeder extends Seeder
             'vendors-delete',
             'vendors-show',
 
+            // Vendor reconciliation (Admin panel)
+            'vendor-reconciliations-index',
+            'vendor-reconciliations-edit',
+
             // Vendor Users permissions (Admin panel)
             'vendor-users-index',
             'vendor-users-create',

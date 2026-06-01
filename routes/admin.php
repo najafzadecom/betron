@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\StatisticsController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VendorController;
+use App\Http\Controllers\Admin\VendorReconciliationController;
 use App\Http\Controllers\Admin\VendorUserController;
 use App\Http\Controllers\Admin\WalletController;
 use App\Http\Controllers\Admin\WithdrawalController;
@@ -106,5 +107,14 @@ Route::middleware('auth')
         Route::post('blacklists/{id}/toggle-status', [BlacklistController::class, 'toggleStatus'])->name('blacklists.toggle-status');
 
         Route::get('statistics/index', [StatisticsController::class, 'index'])->name('statistics.index');
+
+        Route::get('vendor-reconciliations', [VendorReconciliationController::class, 'index'])->name('vendor-reconciliations.index');
+        Route::post('vendor-reconciliations/load-day', [VendorReconciliationController::class, 'loadDay'])->name('vendor-reconciliations.load-day');
+        Route::put('vendor-reconciliations/{id}', [VendorReconciliationController::class, 'update'])->name('vendor-reconciliations.update');
+        Route::post('vendor-reconciliations/{id}/refresh', [VendorReconciliationController::class, 'refresh'])->name('vendor-reconciliations.refresh');
+        Route::post('vendor-reconciliations/{id}/approve', [VendorReconciliationController::class, 'approve'])->name('vendor-reconciliations.approve');
+        Route::post('vendor-reconciliations/{id}/archive', [VendorReconciliationController::class, 'archive'])->name('vendor-reconciliations.archive');
+        Route::post('vendor-reconciliations/{id}/reopen', [VendorReconciliationController::class, 'reopen'])->name('vendor-reconciliations.reopen');
+        Route::post('vendor-reconciliations/calculate', [VendorReconciliationController::class, 'calculate'])->name('vendor-reconciliations.calculate');
 
     });
