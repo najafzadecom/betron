@@ -225,6 +225,7 @@
                         {!! sortableTableHeader('user_id', 'Site User ID', 'withdrawals') !!}
                         {!! sortableTableHeader('site_id', 'Site', 'withdrawals') !!}
                         {!! sortableTableHeader('order_id', 'Order', 'withdrawals') !!}
+                        <th>{{ __('Receipt') }}</th>
                         <th></th>
                         <th class="text-center" style="width: 20px;">
                             <i class="ph-dots-three"></i>
@@ -261,8 +262,18 @@
                             <td>{{ $item->site_name }}</td>
                             <td>{{ $item->order_id }}</td>
                             <td>
+                                @if($item->receipt_path)
+                                    <span class="badge bg-info bg-opacity-10 text-info" title="{{ $item->receipt_original_name }}">
+                                        <i class="ph-receipt me-1"></i>{{ __('Receipt') }}
+                                    </span>
+                                @endif
+                            </td>
+                            <td>
                                 @if($item->payment_method?->value == 'manual' && $item->status->value == 1)
-                                    <button class="btn btn-outline-success btn-sm approve-btn" data-id="{{ $item->id }}" data-type="withdrawal">{{ __('Approve') }}</button>
+                                    <button type="button" class="btn btn-outline-success btn-sm approve-btn"
+                                            data-id="{{ $item->id }}"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#approve_withdrawal_modal">{{ __('Approve') }}</button>
                                     <button class="btn btn-outline-danger btn-sm cancel-btn" data-id="{{ $item->id }}" data-type="withdrawal">{{ __('Cancel') }}</button>
                                 @endif
                             </td>
@@ -298,7 +309,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ count($childVendors) > 0 ? 15 : 14 }}">{{ __('Data not found') }}</td>
+                            <td colspan="{{ count($childVendors) > 0 ? 16 : 15 }}">{{ __('Data not found') }}</td>
                         </tr>
                     @endforelse
                     </tbody>
@@ -379,6 +390,10 @@
                         <div class="col-5 fw-semibold text-muted">{{ __('Updated At') }}:</div>
                         <div class="col-7 text-end" id="updated-at">-</div>
                     </div>
+                    <div class="row mb-2 d-none" id="receipt-row">
+                        <div class="col-5 fw-semibold text-muted">{{ __('Payment Receipt') }}:</div>
+                        <div class="col-7 text-end" id="receipt-container">-</div>
+                    </div>
                 </div>
 
 
@@ -387,6 +402,35 @@
                         {{ __('Close') }}
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="approve_withdrawal_modal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ __('Approve withdrawal') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="approve_withdrawal_form" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <input type="hidden" id="approve_withdrawal_id" name="withdrawal_id">
+                        <p class="text-muted mb-3">{{ __('You can approve without a receipt for now. Upload a payment receipt (dekont) if available.') }}</p>
+                        <div class="mb-0">
+                            <label for="approve_receipt_file" class="form-label">{{ __('Payment Receipt') }}</label>
+                            <input type="file" class="form-control" id="approve_receipt_file" name="receipt"
+                                   accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.jpg,.jpeg,.png,.gif,.webp,.bmp,.heic,.heif,image/*">
+                            <small class="text-muted">{{ __('PDF, Office documents, or images. Max :size MB.', ['size' => (int) (config('bunny.receipt_max_kb', 10240) / 1024)]) }}</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-link" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                        <button type="submit" class="btn btn-success" id="approve_withdrawal_submit">
+                            <i class="ph-check me-1"></i>{{ __('Approve') }}
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -501,6 +545,28 @@
 
 @push('scripts')
     <script>
+        function renderWithdrawalReceipt(data) {
+            const row = document.getElementById('receipt-row');
+            const container = document.getElementById('receipt-container');
+            if (!row || !container) return;
+
+            if (!data.receipt_url) {
+                row.classList.add('d-none');
+                container.innerHTML = '-';
+                return;
+            }
+
+            row.classList.remove('d-none');
+            const name = data.receipt_original_name || '{{ __("Payment Receipt") }}';
+            if (data.receipt_is_image) {
+                container.innerHTML = `<a href="${data.receipt_url}" target="_blank" rel="noopener">${name}</a>
+                    <div class="mt-2"><img src="${data.receipt_url}" alt="${name}" class="img-fluid rounded border" style="max-height: 240px;"></div>`;
+            } else {
+                container.innerHTML = `<a href="${data.receipt_url}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">
+                    <i class="ph-download-simple me-1"></i>${name}</a>`;
+            }
+        }
+
         // Module-specific functionality for withdrawals
         document.addEventListener('DOMContentLoaded', function () {
             @if(count($childVendors) > 0)
@@ -627,34 +693,51 @@
             }
             @endif
 
-            // Approve button handler
-            document.querySelectorAll('.approve-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const id = this.getAttribute('data-id');
-                    const type = this.getAttribute('data-type');
+            const approveModal = document.getElementById('approve_withdrawal_modal');
+            if (approveModal) {
+                approveModal.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    document.getElementById('approve_withdrawal_id').value = button.getAttribute('data-id') || '';
+                    document.getElementById('approve_receipt_file').value = '';
+                });
 
-                    if (confirm('{{ __("Are you sure you want to approve this withdrawal?") }}')) {
+                const approveForm = document.getElementById('approve_withdrawal_form');
+                if (approveForm) {
+                    approveForm.addEventListener('submit', function (e) {
+                        e.preventDefault();
+                        const id = document.getElementById('approve_withdrawal_id').value;
+                        const submitBtn = document.getElementById('approve_withdrawal_submit');
+                        const formData = new FormData();
+                        formData.append('_token', '{{ csrf_token() }}');
+                        const fileInput = document.getElementById('approve_receipt_file');
+                        if (fileInput.files.length > 0) {
+                            formData.append('receipt', fileInput.files[0]);
+                        }
+
+                        submitBtn.disabled = true;
+
                         fetch(`{{ url('vendor/withdrawals') }}/${id}/approve`, {
                             method: 'POST',
                             headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            }
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json',
+                            },
+                            body: formData,
                         })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.message) {
-                                alert(data.message);
-                                location.reload();
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('{{ __("An error occurred") }}');
-                        });
-                    }
-                });
-            });
+                            .then(response => response.json().then(data => ({ ok: response.ok, data })))
+                            .then(({ ok, data }) => {
+                                if (ok && data.message) {
+                                    alert(data.message);
+                                    location.reload();
+                                    return;
+                                }
+                                alert(data.message || data.error || '{{ __("An error occurred") }}');
+                            })
+                            .catch(() => alert('{{ __("An error occurred") }}'))
+                            .finally(() => { submitBtn.disabled = false; });
+                    });
+                }
+            }
 
             // Cancel button handler
             document.querySelectorAll('.cancel-btn').forEach(button => {
@@ -722,6 +805,8 @@
                             const walletInfo = `${data.wallet.name}<br><small>${data.wallet.iban}</small>`;
                             document.getElementById('wallet-info').innerHTML = walletInfo;
                         }
+
+                        renderWithdrawalReceipt(data);
                     })
                     .catch(error => {
                         console.error('Error fetching withdrawal data:', error);

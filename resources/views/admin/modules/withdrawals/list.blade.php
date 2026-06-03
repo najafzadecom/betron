@@ -223,6 +223,7 @@
                         {!! sortableTableHeader('site_id', 'Site', 'withdrawals') !!}
                         {!! sortableTableHeader('order_id', 'Order', 'withdrawals') !!}
                         {!! sortableTableHeader('uuid', 'Paypap ID', 'withdrawals') !!}
+                        <th>{{ __('Receipt') }}</th>
                         <th class="text-center" style="width: 20px;">
                             <i class="ph-dots-three"></i>
                         </th>
@@ -265,6 +266,13 @@
                             <td>{{ $item->site_name }}</td>
                             <td>{{ $item->order_id }}</td>
                             <td>{{ $item->uuid }}</td>
+                            <td>
+                                @if($item->receipt_path)
+                                    <span class="badge bg-info bg-opacity-10 text-info" title="{{ $item->receipt_original_name }}">
+                                        <i class="ph-receipt me-1"></i>{{ __('Receipt') }}
+                                    </span>
+                                @endif
+                            </td>
                             <td>
                                 @canany(['withdrawals-show', 'withdrawals-edit', 'withdrawals-delete'])
                                 <div class="dropdown">
@@ -327,7 +335,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="13">{{ __('Data not found') }}</td>
+                            <td colspan="14">{{ __('Data not found') }}</td>
                         </tr>
                     @endforelse
                     </tbody>
@@ -401,6 +409,10 @@
                     <div class="row mb-2">
                         <div class="col-12 col-sm-5 fw-semibold text-muted">{{ __('Updated At') }}:</div>
                         <div class="col-12 col-sm-7 text-sm-end" id="updated-at">-</div>
+                    </div>
+                    <div class="row mb-2 d-none" id="receipt-row">
+                        <div class="col-12 col-sm-5 fw-semibold text-muted">{{ __('Payment Receipt') }}:</div>
+                        <div class="col-12 col-sm-7 text-sm-end" id="receipt-container">-</div>
                     </div>
                 </div>
 
@@ -510,6 +522,28 @@
 
 @push('scripts')
     <script>
+        function renderWithdrawalReceipt(data) {
+            const row = document.getElementById('receipt-row');
+            const container = document.getElementById('receipt-container');
+            if (!row || !container) return;
+
+            if (!data.receipt_url) {
+                row.classList.add('d-none');
+                container.innerHTML = '-';
+                return;
+            }
+
+            row.classList.remove('d-none');
+            const name = data.receipt_original_name || '{{ __("Payment Receipt") }}';
+            if (data.receipt_is_image) {
+                container.innerHTML = `<a href="${data.receipt_url}" target="_blank" rel="noopener">${name}</a>
+                    <div class="mt-2"><img src="${data.receipt_url}" alt="${name}" class="img-fluid rounded border" style="max-height: 240px;"></div>`;
+            } else {
+                container.innerHTML = `<a href="${data.receipt_url}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">
+                    <i class="ph-download-simple me-1"></i>${name}</a>`;
+            }
+        }
+
         // Module-specific functionality for withdrawals
         document.addEventListener('DOMContentLoaded', function () {
             // Bulk assign vendor functionality
@@ -719,6 +753,8 @@
                         if (data.amount && data.currency) {
                             document.getElementById('amount').innerText = formatAmountWithCurrency(data.amount, data.currency);
                         }
+
+                        renderWithdrawalReceipt(data);
                     })
                     .catch(error => {
                         console.error('Error fetching withdrawal data:', error);

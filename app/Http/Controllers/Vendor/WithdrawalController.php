@@ -8,9 +8,11 @@ use App\Enums\WithdrawalStatus;
 use App\Exports\WithdrawalExport;
 use App\Services\SiteService;
 use App\Services\VendorService;
+use App\Services\WithdrawalReceiptService;
 use App\Services\WithdrawalService as Service;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -23,7 +25,8 @@ class WithdrawalController extends BaseController
     public function __construct(
         Service       $service,
         SiteService   $siteService,
-        VendorService $vendorService
+        VendorService $vendorService,
+        protected WithdrawalReceiptService $receiptService,
     ) {
         $this->middleware('vendor_permission:vendor-withdrawals-index', ['only' => ['index']]);
 
@@ -130,11 +133,13 @@ class WithdrawalController extends BaseController
         );
     }
 
-    public function approve(string $id): JsonResponse
+    public function approve(Request $request, string $id): JsonResponse
     {
         if (!$this->authorizeWithdrawal($id)) {
             return response()->json(['error' => __('Unauthorized')], 403);
         }
+
+        $request->validate(WithdrawalReceiptService::validationRules());
 
         $code = 500;
         $message = __('Unknown error');
@@ -150,10 +155,22 @@ class WithdrawalController extends BaseController
                 return response()->json(['message' => __('Only pending withdrawals can be approved')], 422);
             }
 
-            $this->service->update($id, [
+            $this->receiptService->assertStorageReady($request->file('receipt'));
+
+            $updateData = [
                 'status' => WithdrawalStatus::ManualConfirmed->value,
-                'paid_status' => true
-            ]);
+                'paid_status' => true,
+            ];
+
+            if ($request->hasFile('receipt')) {
+                $stored = $this->receiptService->store($withdrawal, $request->file('receipt'));
+                $updateData['receipt_path'] = $stored['path'];
+                $updateData['receipt_original_name'] = $stored['original_name'];
+                $updateData['receipt_mime'] = $stored['mime'];
+                $updateData['receipt_uploaded_at'] = now();
+            }
+
+            $this->service->update($id, $updateData);
 
             $code = 200;
             $message = __('Withdrawal approved successfully');

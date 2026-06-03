@@ -47,7 +47,14 @@ class Withdrawal extends Model
         'wallet',
     ];
 
-    protected $appends = ['status_html', 'receiver', 'sender', 'site_name'];
+    protected $appends = [
+        'status_html',
+        'receiver',
+        'sender',
+        'site_name',
+        'receipt_url',
+        'receipt_is_image',
+    ];
 
     protected $casts = [
         'paid_status' => 'boolean',
@@ -55,6 +62,7 @@ class Withdrawal extends Model
         'currency' => Currency::class,
         'payment_method' => PaymentProvider::class,
         'accepted_at' => 'datetime',
+        'receipt_uploaded_at' => 'datetime',
         'user_id' => 'string',
         'order_id' => 'string',
     ];
@@ -120,5 +128,25 @@ class Withdrawal extends Model
     public function vendor(): BelongsTo
     {
         return $this->belongsTo(Vendor::class);
+    }
+
+    public function getReceiptUrlAttribute(): ?string
+    {
+        if (!$this->receipt_path) {
+            return null;
+        }
+
+        return app(\App\Services\BunnyStorageService::class)->publicUrl($this->receipt_path);
+    }
+
+    public function getReceiptIsImageAttribute(): bool
+    {
+        if ($this->receipt_mime) {
+            return str_starts_with($this->receipt_mime, 'image/');
+        }
+
+        $ext = strtolower(pathinfo((string) $this->receipt_path, PATHINFO_EXTENSION));
+
+        return in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'heic', 'heif'], true);
     }
 }
