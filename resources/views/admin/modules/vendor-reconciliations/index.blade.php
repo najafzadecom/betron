@@ -221,12 +221,14 @@
                                                     'cekim' => __('Withdrawal (Çekim)'),
                                                     'man_cekim' => __('Manual Withdrawal'),
                                                     'cekim_iptal' => __('Withdrawal Cancelled (Çekim İptal)'),
-                                                    'teslimat' => __('Settlement (Teslimat)'),
                                                 ];
+                                                $deductionFields = ['yatirim_iptal', 'cekim', 'man_cekim'];
                                             @endphp
                                             @foreach($amountFields as $field => $label)
                                                 <tr>
-                                                    <td class="fw-semibold">{{ $label }}</td>
+                                                    <td class="fw-semibold @if(in_array($field, $deductionFields, true)) text-danger @endif">
+                                                        @if(in_array($field, $deductionFields, true))− @endif{{ $label }}
+                                                    </td>
                                                     <td>
                                                         <input type="number"
                                                                step="0.01"
@@ -243,7 +245,7 @@
                                             @endforeach
                                             <tr class="table-light">
                                                 <td class="fw-semibold">
-                                                    {{ __('Deposit Commission') }}
+                                                    − {{ __('Deposit Commission') }}
                                                     <div class="text-muted fs-sm fw-normal">{{ __('(Yatırım + Man. Yatırım) × oran') }}</div>
                                                 </td>
                                                 <td>
@@ -271,10 +273,30 @@
                                                     @enderror
                                                 </td>
                                             </tr>
+                                            <tr class="table-warning">
+                                                <td class="fw-semibold text-danger">
+                                                    − {{ __('Settlement (Teslimat)') }}
+                                                    <div class="text-muted fs-sm fw-normal">{{ __('Deducted from remaining balance') }}</div>
+                                                </td>
+                                                <td>
+                                                    <input type="number"
+                                                           step="0.01"
+                                                           min="0"
+                                                           name="teslimat"
+                                                           id="field_teslimat"
+                                                           class="form-control form-control-sm text-end reconciliation-amount @error('teslimat') is-invalid @enderror"
+                                                           value="{{ old('teslimat', $reconciliation->teslimat ?? 0) }}"
+                                                           @disabled(!$isDraft)
+                                                           data-field="teslimat">
+                                                    @error('teslimat')
+                                                    <span class="invalid-feedback">{{ $message }}</span>
+                                                    @enderror
+                                                </td>
+                                            </tr>
                                             <tr class="table-light">
                                                 <td class="fw-semibold">
-                                                    {{ __('Settlement Commission') }}
-                                                    <div class="text-muted fs-sm fw-normal">{{ __('Teslimat × oran') }}</div>
+                                                    − {{ __('Settlement Commission') }}
+                                                    <div class="text-muted fs-sm fw-normal">{{ __('Teslimat × oran') }} — {{ __('Deducted from remaining balance') }}</div>
                                                 </td>
                                                 <td>
                                                     <div class="input-group input-group-sm">
@@ -354,7 +376,7 @@
                                 </form>
 
                                 <p class="text-muted fs-sm mt-3 mb-0">
-                                    {{ __('Formula') }}: {{ __('Kalan = Devir + Yatırım + Man.Yatırım − Çekim − Man.Çekim − Y.Komisyon − Teslimat − T.Komisyon') }}<br>
+                                    {{ __('Formula') }}: {{ __('Kalan = Devir + Yatırım + Man.Yatırım − Yatırım İptal + Çekim İptal − Çekim − Man.Çekim − Y.Komisyon − Teslimat − T.Komisyon') }}<br>
                                     {{ __('Y.Komisyon') }} = ({{ __('Yatırım') }} + {{ __('Manual Deposit') }}) × %{{ __('Deposit commission rate') }}<br>
                                     {{ __('T.Komisyon') }} = {{ __('Settlement (Teslimat)') }} × %{{ __('Settlement commission rate') }}
                                 </p>
@@ -397,12 +419,13 @@
                 });
             }
 
+            const reconciliationForm = document.getElementById('reconciliationForm');
             const kalanDisplay = document.getElementById('kalan_display');
             const yKomisyonDisplay = document.getElementById('y_komisyon_display');
             const tKomisyonDisplay = document.getElementById('t_komisyon_display');
 
             function num(name) {
-                const el = document.querySelector('[name="' + name + '"]');
+                const el = reconciliationForm?.querySelector('[name="' + name + '"]');
                 return parseFloat(el?.value) || 0;
             }
 
@@ -434,7 +457,7 @@
                 kalanDisplay.value = (Math.round(kalan * 100) / 100).toFixed(2);
             }
 
-            document.querySelectorAll('.reconciliation-amount, .reconciliation-rate').forEach(el => {
+            document.querySelectorAll('#reconciliationForm .reconciliation-amount, #reconciliationForm .reconciliation-rate').forEach(el => {
                 el.addEventListener('input', recalculateAll);
             });
             recalculateAll();

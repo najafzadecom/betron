@@ -123,19 +123,19 @@
                                     </tr>
                                 @endforeach
                                 <tr class="table-light">
-                                    <td class="fw-semibold">
-                                        {{ __('Deposit Commission') }}
+                                    <td class="fw-semibold text-danger">
+                                        − {{ __('Deposit Commission') }}
                                         <div class="text-muted fs-sm fw-normal">{{ number_format($values['y_komisyon_oran'] ?? 0, 2) }}%</div>
                                     </td>
                                     <td class="text-end">{{ number_format($values['y_komisyon'] ?? 0, 2) }} ₺</td>
                                 </tr>
-                                <tr>
-                                    <td class="fw-semibold">{{ __('Settlement (Teslimat)') }}</td>
+                                <tr class="table-warning">
+                                    <td class="fw-semibold text-danger">− {{ __('Settlement (Teslimat)') }}</td>
                                     <td class="text-end">{{ number_format($values['teslimat'] ?? 0, 2) }} ₺</td>
                                 </tr>
                                 <tr class="table-light">
-                                    <td class="fw-semibold">
-                                        {{ __('Settlement Commission') }}
+                                    <td class="fw-semibold text-danger">
+                                        − {{ __('Settlement Commission') }}
                                         <div class="text-muted fs-sm fw-normal">{{ number_format($values['t_komisyon_oran'] ?? 0, 2) }}%</div>
                                     </td>
                                     <td class="text-end">{{ number_format($values['t_komisyon'] ?? 0, 2) }} ₺</td>

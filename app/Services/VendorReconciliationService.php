@@ -60,6 +60,10 @@ class VendorReconciliationService
         return $amounts;
     }
 
+    /**
+     * kalan = devir + yatirim + man_yatirim - yatirim_iptal + cekim_iptal
+     *         - cekim - man_cekim - y_komisyon - teslimat - t_komisyon
+     */
     public static function calculateKalan(array $fields): float
     {
         return round(
