@@ -19,6 +19,7 @@ class VendorReconciliationRequest extends FormRequest
             'man_yatirim' => 'required|numeric',
             'cekim' => 'required|numeric',
             'man_cekim' => 'required|numeric',
+            'cekim_iptal' => 'required|numeric',
             'y_komisyon_oran' => 'required|numeric|min:0|max:100',
             'teslimat' => 'required|numeric',
             't_komisyon_oran' => 'required|numeric|min:0|max:100',

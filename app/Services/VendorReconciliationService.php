@@ -68,6 +68,7 @@ class VendorReconciliationService
             + (float) ($fields['man_yatirim'] ?? 0)
             - (float) ($fields['cekim'] ?? 0)
             - (float) ($fields['man_cekim'] ?? 0)
+            + (float) ($fields['cekim_iptal'] ?? 0)
             - (float) ($fields['y_komisyon'] ?? 0)
             - (float) ($fields['teslimat'] ?? 0)
             - (float) ($fields['t_komisyon'] ?? 0),
@@ -131,6 +132,7 @@ class VendorReconciliationService
             'man_yatirim' => 0.0,
             'cekim' => round($cekim, 2),
             'man_cekim' => 0.0,
+            'cekim_iptal' => 0.0,
             'y_komisyon_oran' => $yKomisyonOran,
             'teslimat' => $teslimat,
             't_komisyon_oran' => $tKomisyonOran,
@@ -188,6 +190,7 @@ class VendorReconciliationService
             'man_yatirim' => $suggested['man_yatirim'],
             'cekim' => $suggested['cekim'],
             'man_cekim' => $suggested['man_cekim'],
+            'cekim_iptal' => $suggested['cekim_iptal'],
             'y_komisyon_oran' => $suggested['y_komisyon_oran'],
             'y_komisyon' => $suggested['y_komisyon'],
             'teslimat' => $suggested['teslimat'],
@@ -215,6 +218,7 @@ class VendorReconciliationService
             'man_yatirim' => (float) ($data['man_yatirim'] ?? $record->man_yatirim),
             'cekim' => (float) ($data['cekim'] ?? $record->cekim),
             'man_cekim' => (float) ($data['man_cekim'] ?? $record->man_cekim),
+            'cekim_iptal' => (float) ($data['cekim_iptal'] ?? $record->cekim_iptal),
             'teslimat' => (float) ($data['teslimat'] ?? $record->teslimat),
         ];
 
@@ -253,6 +257,7 @@ class VendorReconciliationService
             'man_yatirim' => (float) $record->man_yatirim,
             'cekim' => $suggested['cekim'],
             'man_cekim' => (float) $record->man_cekim,
+            'cekim_iptal' => (float) $record->cekim_iptal,
             'teslimat' => (float) $record->teslimat,
         ];
 
@@ -276,7 +281,7 @@ class VendorReconciliationService
         }
 
         $fields = self::applyCommissionAmounts(
-            $record->only(['devir', 'yatirim', 'man_yatirim', 'cekim', 'man_cekim', 'teslimat']),
+            $record->only(['devir', 'yatirim', 'man_yatirim', 'cekim', 'man_cekim', 'cekim_iptal', 'teslimat']),
             (float) ($record->y_komisyon_oran ?? self::DEFAULT_COMMISSION_RATE),
             (float) ($record->t_komisyon_oran ?? self::DEFAULT_COMMISSION_RATE)
         );
@@ -350,7 +355,7 @@ class VendorReconciliationService
             ->first();
 
         $numericFields = [
-            'devir', 'yatirim', 'man_yatirim', 'cekim', 'man_cekim',
+            'devir', 'yatirim', 'man_yatirim', 'cekim', 'man_cekim', 'cekim_iptal',
             'y_komisyon_oran', 'y_komisyon', 'teslimat', 't_komisyon_oran', 't_komisyon', 'kalan',
         ];
 
@@ -408,7 +413,7 @@ class VendorReconciliationService
             ->keyBy('vendor_id');
 
         $numericFields = [
-            'devir', 'yatirim', 'man_yatirim', 'cekim', 'man_cekim',
+            'devir', 'yatirim', 'man_yatirim', 'cekim', 'man_cekim', 'cekim_iptal',
             'y_komisyon', 'teslimat', 't_komisyon', 'kalan',
         ];
 

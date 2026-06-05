@@ -196,7 +196,7 @@ class VendorReconciliationController extends BaseController
         $tOran = (float) $request->input('t_komisyon_oran', VendorReconciliationService::DEFAULT_COMMISSION_RATE);
 
         $fields = VendorReconciliationService::applyCommissionAmounts(
-            $request->only(['devir', 'yatirim', 'man_yatirim', 'cekim', 'man_cekim', 'teslimat']),
+            $request->only(['devir', 'yatirim', 'man_yatirim', 'cekim', 'man_cekim', 'cekim_iptal', 'teslimat']),
             $yOran,
             $tOran
         );

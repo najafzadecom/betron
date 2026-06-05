@@ -114,6 +114,7 @@
                                     'man_yatirim' => __('Manual Deposit'),
                                     'cekim' => __('Withdrawal (Çekim)'),
                                     'man_cekim' => __('Manual Withdrawal'),
+                                    'cekim_iptal' => __('Withdrawal Cancelled (Çekim İptal)'),
                                 ] as $field => $label)
                                     <tr>
                                         <td class="fw-semibold">{{ $label }}</td>
