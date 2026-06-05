@@ -221,18 +221,17 @@
                                                     'cekim' => __('Withdrawal (Çekim)'),
                                                     'man_cekim' => __('Manual Withdrawal'),
                                                     'cekim_iptal' => __('Withdrawal Cancelled (Çekim İptal)'),
+                                                    'teslimat' => __('Settlement (Teslimat)'),
                                                 ];
-                                                $deductionFields = ['yatirim_iptal', 'cekim', 'man_cekim'];
                                             @endphp
                                             @foreach($amountFields as $field => $label)
                                                 <tr>
-                                                    <td class="fw-semibold @if(in_array($field, $deductionFields, true)) text-danger @endif">
-                                                        @if(in_array($field, $deductionFields, true))− @endif{{ $label }}
-                                                    </td>
+                                                    <td class="fw-semibold">{{ $label }}</td>
                                                     <td>
                                                         <input type="number"
                                                                step="0.01"
                                                                name="{{ $field }}"
+                                                               @if($field === 'teslimat') id="field_teslimat" @endif
                                                                class="form-control form-control-sm text-end reconciliation-amount @error($field) is-invalid @enderror"
                                                                value="{{ old($field, $reconciliation->$field ?? 0) }}"
                                                                @disabled(!$isDraft)
@@ -245,7 +244,7 @@
                                             @endforeach
                                             <tr class="table-light">
                                                 <td class="fw-semibold">
-                                                    − {{ __('Deposit Commission') }}
+                                                    {{ __('Deposit Commission') }}
                                                     <div class="text-muted fs-sm fw-normal">{{ __('(Yatırım + Man. Yatırım) × oran') }}</div>
                                                 </td>
                                                 <td>
@@ -273,30 +272,10 @@
                                                     @enderror
                                                 </td>
                                             </tr>
-                                            <tr class="table-warning">
-                                                <td class="fw-semibold text-danger">
-                                                    − {{ __('Settlement (Teslimat)') }}
-                                                    <div class="text-muted fs-sm fw-normal">{{ __('Deducted from remaining balance') }}</div>
-                                                </td>
-                                                <td>
-                                                    <input type="number"
-                                                           step="0.01"
-                                                           min="0"
-                                                           name="teslimat"
-                                                           id="field_teslimat"
-                                                           class="form-control form-control-sm text-end reconciliation-amount @error('teslimat') is-invalid @enderror"
-                                                           value="{{ old('teslimat', $reconciliation->teslimat ?? 0) }}"
-                                                           @disabled(!$isDraft)
-                                                           data-field="teslimat">
-                                                    @error('teslimat')
-                                                    <span class="invalid-feedback">{{ $message }}</span>
-                                                    @enderror
-                                                </td>
-                                            </tr>
                                             <tr class="table-light">
                                                 <td class="fw-semibold">
-                                                    − {{ __('Settlement Commission') }}
-                                                    <div class="text-muted fs-sm fw-normal">{{ __('Teslimat × oran') }} — {{ __('Deducted from remaining balance') }}</div>
+                                                    {{ __('Settlement Commission') }}
+                                                    <div class="text-muted fs-sm fw-normal">{{ __('Teslimat × oran') }}</div>
                                                 </td>
                                                 <td>
                                                     <div class="input-group input-group-sm">
