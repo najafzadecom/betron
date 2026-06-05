@@ -17,6 +17,7 @@ class VendorReconciliationRequest extends FormRequest
             'devir' => 'required|numeric',
             'yatirim' => 'required|numeric',
             'man_yatirim' => 'required|numeric',
+            'yatirim_iptal' => 'required|numeric',
             'cekim' => 'required|numeric',
             'man_cekim' => 'required|numeric',
             'cekim_iptal' => 'required|numeric',

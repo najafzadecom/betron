@@ -112,6 +112,7 @@
                                     'devir' => __('Carryover (Devir)'),
                                     'yatirim' => __('Deposit (Yatırım)'),
                                     'man_yatirim' => __('Manual Deposit'),
+                                    'yatirim_iptal' => __('Deposit Cancelled (Yatırım İptal)'),
                                     'cekim' => __('Withdrawal (Çekim)'),
                                     'man_cekim' => __('Manual Withdrawal'),
                                     'cekim_iptal' => __('Withdrawal Cancelled (Çekim İptal)'),

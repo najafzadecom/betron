@@ -43,6 +43,7 @@
                 'devir' => __('Carryover (Devir)'),
                 'yatirim' => __('Deposit (Yatırım)'),
                 'man_yatirim' => __('Manual Deposit'),
+                'yatirim_iptal' => __('Deposit Cancelled (Yatırım İptal)'),
                 'cekim' => __('Withdrawal (Çekim)'),
                 'man_cekim' => __('Manual Withdrawal'),
                 'cekim_iptal' => __('Withdrawal Cancelled (Çekim İptal)'),
@@ -71,6 +72,7 @@
                         <th class="text-end">{{ __('Devir') }}</th>
                         <th class="text-end">{{ __('Yatırım') }}</th>
                         <th class="text-end">{{ __('Man. Yatırım') }}</th>
+                        <th class="text-end">{{ __('Yatırım İptal') }}</th>
                         <th class="text-end">{{ __('Çekim') }}</th>
                         <th class="text-end">{{ __('Man. Çekim') }}</th>
                         <th class="text-end">{{ __('Çekim İptal') }}</th>
@@ -93,7 +95,7 @@
                                     <br><small class="text-warning-emphasis"><i class="ph-warning-circle me-1"></i>{{ __('Reconciliation not created') }}</small>
                                 @endif
                             </td>
-                            @foreach(['devir', 'yatirim', 'man_yatirim', 'cekim', 'man_cekim', 'cekim_iptal', 'y_komisyon', 'teslimat', 't_komisyon', 'kalan'] as $field)
+                            @foreach(['devir', 'yatirim', 'man_yatirim', 'yatirim_iptal', 'cekim', 'man_cekim', 'cekim_iptal', 'y_komisyon', 'teslimat', 't_komisyon', 'kalan'] as $field)
                                 <td class="text-end">{{ number_format($row['values'][$field] ?? 0, 2) }}</td>
                             @endforeach
                             <td class="text-center">
@@ -106,14 +108,14 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="12" class="text-center text-muted py-4">{{ __('Data not found') }}</td>
+                            <td colspan="13" class="text-center text-muted py-4">{{ __('Data not found') }}</td>
                         </tr>
                     @endforelse
                     </tbody>
                     <tfoot class="table-primary fw-bold">
                     <tr>
                         <td>{{ __('Total') }}</td>
-                        @foreach(['devir', 'yatirim', 'man_yatirim', 'cekim', 'man_cekim', 'cekim_iptal', 'y_komisyon', 'teslimat', 't_komisyon', 'kalan'] as $field)
+                        @foreach(['devir', 'yatirim', 'man_yatirim', 'yatirim_iptal', 'cekim', 'man_cekim', 'cekim_iptal', 'y_komisyon', 'teslimat', 't_komisyon', 'kalan'] as $field)
                             <td class="text-end">{{ number_format($totals[$field] ?? 0, 2) }}</td>
                         @endforeach
                         <td></td>

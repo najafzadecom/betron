@@ -217,6 +217,7 @@
                                                     'devir' => __('Carryover (Devir)'),
                                                     'yatirim' => __('Deposit (Yatırım)'),
                                                     'man_yatirim' => __('Manual Deposit'),
+                                                    'yatirim_iptal' => __('Deposit Cancelled (Yatırım İptal)'),
                                                     'cekim' => __('Withdrawal (Çekim)'),
                                                     'man_cekim' => __('Manual Withdrawal'),
                                                     'cekim_iptal' => __('Withdrawal Cancelled (Çekim İptal)'),
@@ -428,7 +429,7 @@
 
                 const yKom = parseFloat(yKomisyonDisplay?.value) || 0;
                 const tKom = parseFloat(tKomisyonDisplay?.value) || 0;
-                const kalan = num('devir') + num('yatirim') + num('man_yatirim') + num('cekim_iptal')
+                const kalan = num('devir') + num('yatirim') + num('man_yatirim') - num('yatirim_iptal') + num('cekim_iptal')
                     - num('cekim') - num('man_cekim') - yKom - num('teslimat') - tKom;
                 kalanDisplay.value = (Math.round(kalan * 100) / 100).toFixed(2);
             }
