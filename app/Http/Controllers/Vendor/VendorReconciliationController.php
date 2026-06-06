@@ -12,6 +12,7 @@ class VendorReconciliationController extends BaseController
         protected VendorReconciliationService $reconciliationService,
         protected VendorService $vendorService,
     ) {
+        $this->middleware('vendor_permission:vendor-reconciliations-index', ['only' => ['index']]);
         $this->module = 'reconciliations';
     }
 

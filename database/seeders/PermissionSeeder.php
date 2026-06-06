@@ -173,6 +173,9 @@ class PermissionSeeder extends Seeder
             'vendor-withdrawals-index',
             'vendor-withdrawals-show',
             'vendor-withdrawals-export',
+
+            // Reconciliation (read-only)
+            'vendor-reconciliations-index',
         ];
 
         foreach ($vendorPermissions as $permission) {

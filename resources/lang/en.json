@@ -302,6 +302,8 @@
     "activity-logs-index": "List Activity Logs",
     "activity-logs-show": "Show Activity Log",
     "statistics-index": "Statistics",
+    "vendor-reconciliations-index": "View Vendor Reconciliation",
+    "vendor-reconciliations-edit": "Edit Vendor Reconciliation",
     "Other": "Other",
     "User": "User",
     "Wallet": "Wallet",
