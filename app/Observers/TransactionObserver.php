@@ -9,11 +9,23 @@ use App\Models\Transaction as Model;
 use App\Models\Wallet;
 use App\Services\VendorService;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 
 class TransactionObserver
 {
     protected string $prefix = 'transaction_';
+
+    /** @var array<int, TransactionStatus> */
+    private const CANCELLED_STATUSES = [
+        TransactionStatus::Cancelled,
+        TransactionStatus::AutoCancelled,
+        TransactionStatus::ManualCancelled,
+    ];
+
+    /** @var array<int, TransactionStatus> */
+    private const CONFIRMED_STATUSES = [
+        TransactionStatus::AutoConfirmed,
+        TransactionStatus::ManualConfirmed,
+    ];
 
     public function __construct(
         protected VendorService $vendorService
@@ -22,7 +34,6 @@ class TransactionObserver
 
     public function creating(Model $data): void
     {
-        // Set vendor_id from wallet if wallet_id is provided but vendor_id is not
         if (!empty($data->wallet_id) && empty($data->vendor_id)) {
             $wallet = Wallet::withoutGlobalScopes()
                 ->select('id', 'vendor_id')
@@ -32,15 +43,12 @@ class TransactionObserver
             }
         }
 
-        // Calculate fee_amount based on fee or site's transaction_fee
         if (!isset($data->fee_amount) && isset($data->amount)) {
             $fee = null;
 
-            // If fee is already set, use it
             if (isset($data->fee)) {
                 $fee = $data->fee;
-            } // If site_id is provided but fee is not, get transaction_fee from site
-            elseif (isset($data->site_id)) {
+            } elseif (isset($data->site_id)) {
                 $site = Site::find($data->site_id);
                 if ($site) {
                     $fee = $site->transaction_fee ?? 0;
@@ -48,11 +56,9 @@ class TransactionObserver
                 }
             }
 
-            // Calculate fee_amount if we have fee and amount
             if ($fee !== null) {
                 $data->fee_amount = ($data->amount * $fee) / 100;
             } else {
-                // If neither fee nor site_id is provided, set fee_amount to 0
                 $data->fee_amount = 0;
             }
         }
@@ -61,15 +67,15 @@ class TransactionObserver
     public function created(Model $data): void
     {
         Cache::rememberForever($this->prefix . $data->id, fn () => $data);
+
+        $this->decreaseCapacityForTransaction($data);
     }
 
     public function updating(Model $data): void
     {
-        // If amount is being updated, recalculate fee_amount based on fee
         if ($data->isDirty('amount')) {
             $fee = $data->fee ?? $data->getOriginal('fee') ?? 0;
-            $newAmount = $data->amount;
-            $data->fee_amount = ($newAmount * $fee) / 100;
+            $data->fee_amount = ($data->amount * $fee) / 100;
         }
     }
 
@@ -77,54 +83,27 @@ class TransactionObserver
     {
         Cache::rememberForever($this->prefix . $data->id, fn () => $data);
 
-        // Check if paid_status changed to true and send webhook via queue
-            // afterCommit() default true: job transaction commit sonrası push edilir;
-            SendTransactionWebhookJob::dispatch($data->id);
+        SendTransactionWebhookJob::dispatch($data->id);
 
-        // Check if transaction status changed to confirmed
+        if ($data->wasChanged('wallet_id') && $data->wallet_id && !$data->getOriginal('wallet_id')) {
+            $this->decreaseCapacityForTransaction($data);
+        }
+
         if ($data->wasChanged('status')) {
             $oldStatus = $data->getOriginal('status');
             $newStatus = $data->status;
 
-            // If status changed to confirmed (AutoConfirmed or ManualConfirmed)
-            if (in_array($newStatus, [TransactionStatus::AutoConfirmed, TransactionStatus::ManualConfirmed])) {
-                // Check if this transaction was not already processed
-                if (!in_array($oldStatus, [TransactionStatus::AutoConfirmed, TransactionStatus::ManualConfirmed])) {
-                    // Set accepted_at timestamp
-                    if (empty($data->accepted_at)) {
-                        $data->accepted_at = now();
-                        $data->saveQuietly();
-                    }
-
-                    // Get vendor from wallet
-                    if ($data->wallet && $data->wallet->vendor_id) {
-                        // Transaction amount (vendor fee will be calculated in VendorService)
-                        $amount = $data->amount ?? 0;
-
-                        // Process deposit (decreases deposit)
-                        // VendorService will calculate: amount - (amount * vendor.transaction_fee / 100)
-                        $this->vendorService->processTransactionDeposit(
-                            $data->id,
-                            $amount,
-                            $data->wallet->vendor_id
-                        );
-
-                        // Also process deposit for parent vendor if exists
-                        $vendor = $data->wallet->vendor;
-                        if ($vendor && $vendor->parent_id) {
-                            $parentVendor = $vendor->parent;
-                            if ($parentVendor) {
-                                // Process deposit for parent vendor (decreases deposit)
-                                // Parent vendor fee will be calculated in VendorService
-                                $this->vendorService->processTransactionDeposit(
-                                    $data->id,
-                                    $amount,
-                                    $parentVendor->id
-                                );
-                            }
-                        }
-                    }
+            if ($this->isConfirmedStatus($newStatus) && !$this->isConfirmedStatus($oldStatus)) {
+                if (empty($data->accepted_at)) {
+                    $data->accepted_at = now();
+                    $data->saveQuietly();
                 }
+
+                $this->processConfirmedDeposit($data);
+            }
+
+            if ($this->isCancelledStatus($newStatus) && !$this->isConfirmedStatus($oldStatus)) {
+                $this->releaseCapacityForTransaction($data);
             }
         }
     }
@@ -132,6 +111,10 @@ class TransactionObserver
     public function deleted(Model $data): void
     {
         Cache::forget($this->prefix . $data->id);
+
+        if (!$this->isConfirmedStatus($data->status)) {
+            $this->releaseCapacityForTransaction($data);
+        }
     }
 
     public function restored(Model $data): void
@@ -143,5 +126,115 @@ class TransactionObserver
     {
         Cache::forget($this->prefix . $data->id);
     }
-}
 
+    private function decreaseCapacityForTransaction(Model $transaction): void
+    {
+        if ($this->isCancelledStatus($transaction->status) || $transaction->status === TransactionStatus::Draft) {
+            return;
+        }
+
+        if (!$this->resolveVendorId($transaction)) {
+            return;
+        }
+
+        $amount = (float) ($transaction->amount ?? 0);
+        if ($amount <= 0) {
+            return;
+        }
+
+        $this->eachTransactionVendor(
+            $transaction,
+            fn (int $vendorId) => $this->vendorService->blockTransactionCapacity($vendorId, $amount)
+        );
+    }
+
+    private function releaseCapacityForTransaction(Model $transaction): void
+    {
+        if (!$this->resolveVendorId($transaction)) {
+            return;
+        }
+
+        $amount = (float) ($transaction->amount ?? 0);
+        if ($amount <= 0) {
+            return;
+        }
+
+        $this->eachTransactionVendor(
+            $transaction,
+            fn (int $vendorId) => $this->vendorService->releaseTransactionCapacity($vendorId, $amount)
+        );
+    }
+
+    private function processConfirmedDeposit(Model $transaction): void
+    {
+        if (!$this->resolveVendorId($transaction)) {
+            return;
+        }
+
+        $amount = (float) ($transaction->amount ?? 0);
+
+        $this->eachTransactionVendor(
+            $transaction,
+            function (int $vendorId) use ($transaction, $amount) {
+                $this->vendorService->processTransactionDeposit(
+                    $transaction->id,
+                    $amount,
+                    $vendorId
+                );
+            }
+        );
+    }
+
+    /**
+     * @param  callable(int): void  $callback
+     */
+    private function eachTransactionVendor(Model $transaction, callable $callback): void
+    {
+        foreach ($this->transactionVendorIds($transaction) as $vendorId) {
+            $callback($vendorId);
+        }
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function transactionVendorIds(Model $transaction): array
+    {
+        $vendorId = $this->resolveVendorId($transaction);
+        if (!$vendorId) {
+            return [];
+        }
+
+        $ids = [$vendorId];
+
+        $transaction->loadMissing('wallet.vendor.parent', 'vendor.parent');
+        $vendor = $transaction->wallet?->vendor ?? $transaction->vendor;
+        if ($vendor?->parent_id && $vendor->parent) {
+            $ids[] = (int) $vendor->parent->id;
+        }
+
+        return $ids;
+    }
+
+    private function resolveVendorId(Model $transaction): ?int
+    {
+        if ($transaction->wallet_id) {
+            $transaction->loadMissing('wallet:id,vendor_id');
+            if ($transaction->wallet?->vendor_id) {
+                return (int) $transaction->wallet->vendor_id;
+            }
+        }
+
+        return $transaction->vendor_id ? (int) $transaction->vendor_id : null;
+    }
+
+    private function isConfirmedStatus(mixed $status): bool
+    {
+        return in_array($status, self::CONFIRMED_STATUSES, true);
+    }
+
+    private function isCancelledStatus(mixed $status): bool
+    {
+        return in_array($status, self::CANCELLED_STATUSES, true);
+    }
+}

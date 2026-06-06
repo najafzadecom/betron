@@ -38,12 +38,10 @@ class WalletRepository extends BaseRepository implements WalletInterface
             : "{$transactionsTable}.paid_status = 1";
 
         // Vendor table references for joins
-        // Use unquoted table/column names - Laravel will quote them automatically
         $vendorTable = 'vendors';
         $parentVendorTable = 'vendors';
         $parentVendorAlias = 'parent_vendors';
 
-        // For whereRaw() clauses, we need quoted references for PostgreSQL
         $vendorCapacityRef = $isPostgres ? '"vendors"."available_deposit_capacity"' : 'vendors.available_deposit_capacity';
         $vendorTransactionFeeRef = $isPostgres ? '"vendors"."transaction_fee"' : 'vendors.transaction_fee';
         $parentVendorCapacityRef = $isPostgres ? '"parent_vendors"."available_deposit_capacity"' : 'parent_vendors.available_deposit_capacity';
@@ -78,9 +76,6 @@ class WalletRepository extends BaseRepository implements WalletInterface
                 $q->where('wallets.single_deposit_min_amount', '<=', $amount)
                     ->where('wallets.single_deposit_max_amount', '>=', $amount);
             })
-            // Check if vendor has sufficient deposit capacity (guarantee-based limit)
-            // fee_amount = (amount * transaction_fee) / 100
-            // Required capacity = amount - fee_amount = amount - (amount * transaction_fee / 100)
             ->where(function ($q) use ($vendorCapacityRef, $vendorTransactionFeeRef, $amount, $isPostgres) {
                 if ($isPostgres) {
                     $q->whereRaw("{$vendorCapacityRef} >= (CAST(? AS DECIMAL) - (CAST(? AS DECIMAL) * CAST({$vendorTransactionFeeRef} AS DECIMAL) / 100))", [$amount, $amount]);
@@ -88,7 +83,6 @@ class WalletRepository extends BaseRepository implements WalletInterface
                     $q->whereRaw("{$vendorCapacityRef} >= (? - (? * {$vendorTransactionFeeRef} / 100))", [$amount, $amount]);
                 }
             })
-            // Check if parent vendor has sufficient capacity (if parent exists)
             ->where(function ($q) use ($parentVendorCapacityRef, $parentVendorTransactionFeeRef, $amount, $isPostgres) {
                 if ($isPostgres) {
                     $q->whereNull('vendors.parent_id')

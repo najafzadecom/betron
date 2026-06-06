@@ -75,13 +75,13 @@ class VendorService extends BaseService
     }
 
     /**
-     * Decrease available capacity on confirmed transaction.
+     * Decrease available capacity. Transaction blocks may go negative.
      */
-    private function decreaseDepositCapacity(object $vendor, float $amount): bool
+    private function decreaseDepositCapacity(object $vendor, float $amount, bool $allowNegative = false): bool
     {
         $currentCapacity = (float) ($vendor->available_deposit_capacity ?? 0);
 
-        if ($currentCapacity < $amount) {
+        if (!$allowNegative && $currentCapacity < $amount) {
             return false;
         }
 
@@ -358,6 +358,44 @@ class VendorService extends BaseService
         return true;
     }
 
+    public function calculateTransactionVendorAmount(object $vendor, float $amount): float
+    {
+        $transactionFee = (float) ($vendor->transaction_fee ?? 0);
+
+        return round($amount - ($amount * $transactionFee / 100), 2);
+    }
+
+    /**
+     * Decrease available capacity when a transaction is created (pending/processing).
+     * Wallet selection already checks capacity; allowNegative tolerates concurrent requests.
+     */
+    public function blockTransactionCapacity(int $vendorId, float $amount): void
+    {
+        $vendor = $this->getById($vendorId);
+        if (!$vendor) {
+            return;
+        }
+
+        $vendorAmount = $this->calculateTransactionVendorAmount($vendor, $amount);
+        $this->decreaseDepositCapacity($vendor, $vendorAmount, allowNegative: true);
+        $vendor->save();
+    }
+
+    /**
+     * Release blocked capacity when a pending transaction is cancelled.
+     */
+    public function releaseTransactionCapacity(int $vendorId, float $amount): void
+    {
+        $vendor = $this->getById($vendorId);
+        if (!$vendor) {
+            return;
+        }
+
+        $vendorAmount = $this->calculateTransactionVendorAmount($vendor, $amount);
+        $this->increaseDepositCapacity($vendor, $vendorAmount);
+        $vendor->save();
+    }
+
     /**
      * Process transaction deposit (decreases deposit when transaction is confirmed)
      */
@@ -381,16 +419,10 @@ class VendorService extends BaseService
             return false;
         }
 
-        // Calculate vendor fee: amount - (amount * transaction_fee / 100)
-        $transactionFee = $vendor->transaction_fee ?? 0;
-        $vendorAmount = $amount - ($amount * $transactionFee / 100);
+        // Capacity is blocked on transaction create; only operational deposit changes here.
+        $vendorAmount = $this->calculateTransactionVendorAmount($vendor, $amount);
 
         $previousBalance = $vendor->deposit_amount ?? 0;
-
-        if (!$this->decreaseDepositCapacity($vendor, $vendorAmount)) {
-            return false;
-        }
-
         $vendor->deposit_amount = $previousBalance - $vendorAmount;
         $vendor->save();
 
@@ -413,7 +445,7 @@ class VendorService extends BaseService
             ->withProperties([
                 'transaction_id' => $transactionId,
                 'amount' => $vendorAmount,
-                'transaction_fee' => $transactionFee,
+                'transaction_fee' => $vendor->transaction_fee ?? 0,
                 'original_amount' => $amount,
                 'previous_balance' => $previousBalance,
                 'new_balance' => $vendor->deposit_amount,

@@ -421,7 +421,7 @@
     "Guarantee Limit": "Güvence Limiti",
     "Available Deposit Capacity": "Kalan Yatırım Kapasitesi",
     "Maximum deposit volume the vendor can accept. Withdrawals can restore capacity up to this limit.": "Bayinin kabul edebileceği maksimum yatırım hacmi. Çekim ödemeleri kapasiteyi bu limite kadar geri yükler.",
-    "Remaining deposit acceptance capacity (read-only, updated by transactions).": "Kalan yatırım kabul kapasitesi (salt okunur, işlemlerle güncellenir).",
+    "Remaining deposit acceptance capacity (read-only, updated by transactions).": "Kalan yatırım kabul kapasitesi (salt okunur; yatırım oluşunca bloke, iptalde serbest, onayda depozito düşer).",
     "Operational deposit balance (read-only, use deposit actions on the list).": "Operasyonel depozito bakiyesi (salt okunur, listeden depozito işlemleriyle yönetilir).",
     "Deposit Enabled": "Yatırım Durumu",
     "Disabled": "Devre Dışı",
