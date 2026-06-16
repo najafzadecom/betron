@@ -16,6 +16,11 @@ class VendorReconciliationService
 {
     public const DEFAULT_COMMISSION_RATE = 4.0;
 
+    public function __construct(
+        protected VendorService $vendorService,
+    ) {
+    }
+
     public static function calculateYKomisyon(float $yatirim, float $manYatirim, float $oran): float
     {
         return round(($yatirim + $manYatirim) * $oran / 100, 2);
@@ -81,20 +86,36 @@ class VendorReconciliationService
         );
     }
 
-    public function getDevirForDate(int $vendorId, string $date): float
+    /**
+     * @param  array<int>  $vendorIds
+     */
+    public function getDevirForDate(array $vendorIds, string $date): float
     {
         $previous = VendorDailyReconciliation::query()
-            ->where('vendor_id', $vendorId)
+            ->whereIn('vendor_id', $vendorIds)
             ->where('reconciliation_date', '<', $date)
             ->where('status', VendorReconciliationStatus::Approved)
             ->orderByDesc('reconciliation_date')
-            ->first();
+            ->get(['vendor_id', 'kalan']);
 
-        return $previous ? (float) $previous->kalan : 0.0;
+        $sum = 0.0;
+        $picked = [];
+
+        foreach ($previous as $record) {
+            if (isset($picked[$record->vendor_id])) {
+                continue;
+            }
+
+            $picked[$record->vendor_id] = true;
+            $sum += (float) $record->kalan;
+        }
+
+        return round($sum, 2);
     }
 
     public function computeSuggestedValues(int $vendorId, string $date): array
     {
+        $vendorIds = array_merge([$vendorId], $this->vendorService->getDescendants($vendorId));
         $vendor = Vendor::query()->find($vendorId);
         $from = $date . ' 00:00:00';
         $to = $date . ' 23:59:59';
@@ -111,7 +132,7 @@ class VendorReconciliationService
 
         // Tüm onaylı yatırımlar (manuel/otomatik onay fark etmez) → yatirim. man_* alanları elle girilir.
         $yatirim = (float) Transaction::query()
-            ->where('vendor_id', $vendorId)
+            ->whereIn('vendor_id', $vendorIds)
             ->whereNull('deleted_at')
             ->whereBetween('accepted_at', [$from, $to])
             ->where('paid_status', true)
@@ -119,7 +140,7 @@ class VendorReconciliationService
             ->sum('amount');
 
         $cekim = (float) Withdrawal::query()
-            ->where('vendor_id', $vendorId)
+            ->whereIn('vendor_id', $vendorIds)
             ->whereNull('deleted_at')
             ->whereBetween('accepted_at', [$from, $to])
             ->where('paid_status', true)
@@ -127,7 +148,7 @@ class VendorReconciliationService
             ->sum('amount');
 
         $teslimat = 0.0;
-        $devir = $this->getDevirForDate($vendorId, $date);
+        $devir = $this->getDevirForDate($vendorIds, $date);
         $yKomisyonOran = self::defaultDepositCommissionRate($vendor);
         $tKomisyonOran = self::defaultSettlementCommissionRate($vendor);
 
@@ -255,7 +276,7 @@ class VendorReconciliationService
             $record->reconciliation_date->format('Y-m-d')
         );
 
-        $devir = (float) $record->devir;
+        $devir = (float) $suggested['devir'];
         $yKomisyonOran = (float) ($record->y_komisyon_oran ?: $suggested['y_komisyon_oran']);
         $tKomisyonOran = (float) ($record->t_komisyon_oran ?: $suggested['t_komisyon_oran']);
 
