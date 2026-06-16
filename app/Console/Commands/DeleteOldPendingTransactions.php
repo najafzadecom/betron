@@ -31,7 +31,7 @@ class DeleteOldPendingTransactions extends Command
         $thirtyMinutesAgo = Carbon::now('Europe/Istanbul')->subMinutes(env('PENDING_TRANSACTION_EXPIRE_TIME', 10));
 
         $transactions = Transaction::query()
-            ->where('status', TransactionStatus::Pending)
+            ->where('status', TransactionStatus::Processing)
             ->where('created_at', '<', $thirtyMinutesAgo)
             ->get();
 
