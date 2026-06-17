@@ -123,6 +123,18 @@
                                         </div>
                                     </div>
                                 </div>
+                                @if($showAcceptedAverage ?? false)
+                                    <div class="row mb-3">
+                                        <label class="col-form-label col-lg-4">Ortalama <span class="text-success"><strong>Onaylanan</strong></span>
+                                            Tutar</label>
+                                        <div class="col-lg-8">
+                                            <div class="input-group">
+                                                <input type="number" disabled="disabled" class="form-control" value="{{ $acceptedTransactionsAverage ?? 0 }}">
+                                                <span class="input-group-text">₺</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
                                 <div class="row mb-3">
                                     <label class="col-form-label col-lg-4">Toplam <span class="text-danger"><strong>Reddedilen</strong></span>
                                         Tutar</label>

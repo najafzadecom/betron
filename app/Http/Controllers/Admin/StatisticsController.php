@@ -115,6 +115,11 @@ class StatisticsController extends BaseController
         $rejectedWithdrawalsAmount = $this->statisticsService->getRejectedWithdrawalsAmount();
         $pendingWithdrawalsAmount = $this->statisticsService->getPendingWithdrawalsAmount();
 
+        $showAcceptedAverage = config('statistics.show_admin_accepted_average');
+        $acceptedTransactionsAverage = $showAcceptedAverage && $acceptedTransactions > 0
+            ? round($acceptedTransactionsAmount / $acceptedTransactions, 2)
+            : null;
+
         $this->data = [
             'module' => __('Statistics'),
             'title' => __('List'),
@@ -141,7 +146,9 @@ class StatisticsController extends BaseController
             'rejectedWithdrawalsAmount' => $rejectedWithdrawalsAmount,
             'pendingWithdrawalsAmount' => $pendingWithdrawalsAmount,
             'createdFrom' => $createdFrom,
-            'createdTo' => $createdTo
+            'createdTo' => $createdTo,
+            'showAcceptedAverage' => $showAcceptedAverage,
+            'acceptedTransactionsAverage' => $acceptedTransactionsAverage,
         ];
 
         return $this->render('list');
