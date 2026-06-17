@@ -31,6 +31,7 @@ Route::prefix('v1')
 
             // Create Withdrawal Request
             Route::post('/', [WithdrawalController::class, 'store'])->name('store');
+            Route::get('/order/{order_id}', [WithdrawalController::class, 'byOrderId'])->name('by-order-id');
             Route::get('/{uuid}/status', [WithdrawalController::class, 'status'])->name('status');
         });
 

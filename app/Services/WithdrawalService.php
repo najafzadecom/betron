@@ -105,6 +105,18 @@ class WithdrawalService extends BaseService
             ->firstOrFail();
     }
 
+    public function getByOrderIdAndSiteId(string $orderId, int $siteId): Withdrawal
+    {
+        $normalizedOrderId = is_numeric($orderId) ? (string) (int) $orderId : $orderId;
+
+        return $this->repository
+            ->getModel()
+            ->query()
+            ->where('order_id', $normalizedOrderId)
+            ->where('site_id', $siteId)
+            ->firstOrFail();
+    }
+
     /**
      * Create multiple withdrawals from an amount array
      */
