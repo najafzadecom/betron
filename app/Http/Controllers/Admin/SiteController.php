@@ -6,8 +6,10 @@ use App\Http\Requests\Store\SiteRequest as StoreRequest;
 use App\Http\Requests\Update\SiteRequest as UpdateRequest;
 use App\Models\Site;
 use App\Services\SiteService as Service;
+use App\Services\StatisticsService;
 use App\Services\TransactionService;
 use App\Services\WithdrawalService;
+use App\Support\Merchant;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -19,11 +21,13 @@ class SiteController extends BaseController
     private Service $service;
     private TransactionService $transactionService;
     private WithdrawalService $withdrawalService;
+    private StatisticsService $statisticsService;
 
     public function __construct(
         Service            $service,
         TransactionService $transactionService,
-        WithdrawalService  $withdrawalService
+        WithdrawalService  $withdrawalService,
+        StatisticsService  $statisticsService,
     ) {
         $this->middleware('permission:sites-index|sites-create|sites-edit', ['only' => ['index']]);
         $this->middleware('permission:sites-create', ['only' => ['create', 'store']]);
@@ -33,6 +37,7 @@ class SiteController extends BaseController
         $this->service = $service;
         $this->transactionService = $transactionService;
         $this->withdrawalService = $withdrawalService;
+        $this->statisticsService = $statisticsService;
         $this->module = 'sites';
     }
 
@@ -234,25 +239,29 @@ class SiteController extends BaseController
 
     public function statistics()
     {
-        $site_id = 0;
+        $site_id = (int) request('site_id', 0);
 
-        if (auth()->user()->hasRole('Merchant')) {
-            $site_id = 1;
-        } elseif (request()->has('site_id')) {
-            $site_id = request()->input('site_id');
+        if ($merchantSiteId = Merchant::siteIdFor()) {
+            $site_id = $merchantSiteId;
         }
 
         $createdFrom = request('created_from', date('Y-m-d'));
         $createdTo = request('created_to', date('Y-m-d'));
 
-        $transactionAmount = $this->transactionService->sumAmount();
-        $transactionCount = $this->transactionService->paidTransactionsCount();
-        $transactionFeeAmount = $this->transactionService->sumFeeAmount();
+        $this->statisticsService->createdFrom = $createdFrom;
+        $this->statisticsService->createdTo = $createdTo;
+        $this->statisticsService->siteId = $site_id;
+        $this->statisticsService->vendorIds = [];
+        $this->statisticsService->walletIds = [];
+
+        $transactionAmount = $this->statisticsService->getAcceptedTransactionsAmount();
+        $transactionCount = $this->statisticsService->getAcceptedTransactions();
+        $transactionFeeAmount = $this->statisticsService->getAcceptedTransactionsFeeAmount();
         $transactionTotalAmount = $transactionAmount - $transactionFeeAmount;
 
-        $withdrawalAmount = $this->withdrawalService->sumAmount();
-        $withdrawalCount = $this->withdrawalService->paidWithdrawalsCount();
-        $withdrawalFeeAmount = $this->withdrawalService->sumFeeAmount();
+        $withdrawalAmount = $this->statisticsService->getAcceptedWithdrawalsAmount();
+        $withdrawalCount = $this->statisticsService->getAcceptedWithdrawals();
+        $withdrawalFeeAmount = $this->statisticsService->getAcceptedWithdrawalsFeeAmount();
         $withdrawalTotalAmount = $withdrawalAmount + $withdrawalFeeAmount;
 
         $totalAmount = $transactionTotalAmount - $withdrawalTotalAmount;

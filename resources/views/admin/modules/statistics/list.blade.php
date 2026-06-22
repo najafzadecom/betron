@@ -21,6 +21,9 @@
                                 <input type="hidden" name="created_to" value="{{ request('created_to', date('Y-m-d')) }}">
                             </div>
                         </div>
+                        @if($isMerchant ?? false)
+                            <input type="hidden" name="site_id" value="{{ $merchantSiteId }}">
+                        @else
                         <div class="col-12 col-md-6 col-lg-2">
                             <div class="mb-3">
                                 <label class="form-label">{{ __('Site') }}</label>
@@ -74,6 +77,7 @@
                                 </select>
                             </div>
                         </div>
+                        @endif
 
                         <div class="col-12 col-md-6 col-lg-2 d-flex align-items-end">
                             <div class="mb-3 w-100">
@@ -293,6 +297,7 @@
             // Initialize daterange pickers
             initializeDateRangePickers();
 
+            @if(!($isMerchant ?? false))
             // Parent vendor filter change handler
             const parentVendorFilter = document.getElementById('parent_vendor_filter');
             const vendorFilter = document.getElementById('vendor_filter');
@@ -351,6 +356,7 @@
                     }
                 @endif
             }
+            @endif
         });
     </script>
 @endpush

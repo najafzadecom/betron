@@ -6,6 +6,7 @@ use App\Services\SiteService;
 use App\Services\StatisticsService;
 use App\Services\VendorService;
 use App\Services\WalletService;
+use App\Support\Merchant;
 use Illuminate\Contracts\Support\Renderable;
 
 class StatisticsController extends BaseController
@@ -34,10 +35,19 @@ class StatisticsController extends BaseController
     {
         $createdFrom = request('created_from', date('Y-m-d'));
         $createdTo = request('created_to', date('Y-m-d'));
+        $isMerchant = Merchant::isMerchant();
+        $merchantSiteId = Merchant::siteIdFor();
         $siteID = request('site_id', 0);
         $parentVendorId = request('parent_vendor_id', 0);
         $vendorId = request('vendor_id', 0);
         $filterBy = request('filter_by', 'vendor'); // 'vendor' or 'wallet'
+
+        if ($isMerchant) {
+            $siteID = $merchantSiteId;
+            $parentVendorId = 0;
+            $vendorId = 0;
+            $filterBy = 'vendor';
+        }
 
         // If vendor_id is set but parent_vendor_id is not, find the parent vendor
         if ($vendorId && !$parentVendorId) {
@@ -149,6 +159,8 @@ class StatisticsController extends BaseController
             'createdTo' => $createdTo,
             'showAcceptedAverage' => $showAcceptedAverage,
             'acceptedTransactionsAverage' => $acceptedTransactionsAverage,
+            'isMerchant' => $isMerchant,
+            'merchantSiteId' => $merchantSiteId,
         ];
 
         return $this->render('list');

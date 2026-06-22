@@ -377,4 +377,58 @@ class StatisticsService
 
         return $query->sum('amount');
     }
+
+    public function getAcceptedTransactionsFeeAmount(): float
+    {
+        $query = $this->transactionRepository
+            ->getModel()
+            ->query()
+            ->whereNull('deleted_at')
+            ->where('accepted_at', '>=', $this->createdFrom.' 00:00:00')
+            ->where('accepted_at', '<=', $this->createdTo . ' 23:59:59')
+            ->whereRaw('paid_status IS TRUE')
+            ->whereIn('status', [
+                TransactionStatus::ManualConfirmed->value,
+                TransactionStatus::AutoConfirmed->value,
+            ]);
+
+        if ($this->siteId) {
+            $query->where('site_id', $this->siteId);
+        }
+
+        if (!empty($this->vendorIds)) {
+            $query->whereIn('vendor_id', $this->vendorIds);
+        } elseif (!empty($this->walletIds)) {
+            $query->whereIn('wallet_id', $this->walletIds);
+        }
+
+        return (float) $query->sum('fee_amount');
+    }
+
+    public function getAcceptedWithdrawalsFeeAmount(): float
+    {
+        $query = $this->withdrawalRepository
+            ->getModel()
+            ->query()
+            ->whereNull('deleted_at')
+            ->where('accepted_at', '>=', $this->createdFrom.' 00:00:00')
+            ->where('accepted_at', '<=', $this->createdTo . ' 23:59:59')
+            ->whereRaw('paid_status IS TRUE')
+            ->whereIn('status', [
+                WithdrawalStatus::ManualConfirmed->value,
+                WithdrawalStatus::AutoConfirmed->value,
+            ]);
+
+        if ($this->siteId) {
+            $query->where('site_id', $this->siteId);
+        }
+
+        if (!empty($this->vendorIds)) {
+            $query->whereIn('vendor_id', $this->vendorIds);
+        } elseif (!empty($this->walletIds)) {
+            $query->whereIn('wallet_id', $this->walletIds);
+        }
+
+        return (float) $query->sum('fee_amount');
+    }
 }
