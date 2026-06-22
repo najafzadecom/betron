@@ -107,40 +107,7 @@
                         </div>
                     </div>
 
-                    <div class="row mb-3">
-                        <label class="col-lg-3 col-form-label">{{ __('Guarantee Limit') }}:</label>
-                        <div class="col-lg-9">
-                            <input
-                                type="number"
-                                step="0.01"
-                                name="guarantee_limit"
-                                class="form-control @error('guarantee_limit') is-invalid @enderror"
-                                placeholder="{{ __('Guarantee Limit') }}"
-                                value="{{ old('guarantee_limit', $item->guarantee_limit ?? 0) }}"
-                            />
-                            <div class="form-text text-muted">{{ __('Maximum deposit volume the vendor can accept. Withdrawals can restore capacity up to this limit.') }}</div>
-                            @error('guarantee_limit')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                            @enderror
-                        </div>
-                    </div>
-
                     @if(isset($item) && $item->id)
-                    <div class="row mb-3">
-                        <label class="col-lg-3 col-form-label">{{ __('Available Deposit Capacity') }}:</label>
-                        <div class="col-lg-9">
-                            <input
-                                type="text"
-                                class="form-control"
-                                value="{{ number_format($item->available_deposit_capacity ?? 0, 2) }} ₺"
-                                readonly
-                                disabled
-                            />
-                            <div class="form-text text-muted">{{ __('Remaining deposit acceptance capacity (read-only, updated by transactions).') }}</div>
-                        </div>
-                    </div>
                     <div class="row mb-3">
                         <label class="col-lg-3 col-form-label">{{ __('Deposit Amount') }}:</label>
                         <div class="col-lg-9">

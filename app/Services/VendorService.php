@@ -14,16 +14,13 @@ class VendorService extends BaseService
 {
     public function __construct(
         protected Repository                         $repository,
-        protected VendorDepositTransactionRepository $depositTransactionRepository
+        protected VendorDepositTransactionRepository $depositTransactionRepository,
     ) {
     }
 
     public function create(array $data): object
     {
         $data['password'] = Hash::make($data['password']);
-
-        $guaranteeLimit = (float) ($data['guarantee_limit'] ?? 0);
-        $data['available_deposit_capacity'] = $guaranteeLimit;
 
         return $this->repository->create($data);
     }
@@ -36,58 +33,7 @@ class VendorService extends BaseService
             unset($data['password']);
         }
 
-        if (array_key_exists('guarantee_limit', $data)) {
-            $vendor = $this->getById($id);
-            if ($vendor) {
-                $data = $this->applyGuaranteeLimitChange($vendor, (float) $data['guarantee_limit'], $data);
-            }
-        }
-
         return $this->repository->update($id, $data);
-    }
-
-    /**
-     * Adjust available capacity when admin changes guarantee_limit.
-     */
-    private function applyGuaranteeLimitChange(object $vendor, float $newLimit, array $data): array
-    {
-        $oldLimit = (float) ($vendor->guarantee_limit ?? 0);
-        $currentCapacity = (float) ($vendor->available_deposit_capacity ?? 0);
-        $delta = $newLimit - $oldLimit;
-
-        $newCapacity = $currentCapacity + $delta;
-        $newCapacity = max(0, min($newCapacity, $newLimit));
-
-        $data['guarantee_limit'] = $newLimit;
-        $data['available_deposit_capacity'] = $newCapacity;
-
-        return $data;
-    }
-
-    /**
-     * Increase available capacity on withdrawal, capped at guarantee_limit.
-     */
-    private function increaseDepositCapacity(object $vendor, float $amount): void
-    {
-        $guaranteeLimit = (float) ($vendor->guarantee_limit ?? 0);
-        $currentCapacity = (float) ($vendor->available_deposit_capacity ?? 0);
-        $vendor->available_deposit_capacity = min($guaranteeLimit, $currentCapacity + $amount);
-    }
-
-    /**
-     * Decrease available capacity. Transaction blocks may go negative.
-     */
-    private function decreaseDepositCapacity(object $vendor, float $amount, bool $allowNegative = false): bool
-    {
-        $currentCapacity = (float) ($vendor->available_deposit_capacity ?? 0);
-
-        if (!$allowNegative && $currentCapacity < $amount) {
-            return false;
-        }
-
-        $vendor->available_deposit_capacity = $currentCapacity - $amount;
-
-        return true;
     }
 
     /**
@@ -190,6 +136,20 @@ class VendorService extends BaseService
     }
 
     /**
+     * Get all active vendors for assignment (parent and child vendors).
+     */
+    public function getAssignableVendors()
+    {
+        return $this->repository->getModel()
+            ->with('parent:id,name')
+            ->where('status', 1)
+            ->orderByRaw('COALESCE(parent_id, id)')
+            ->orderBy('parent_id')
+            ->orderBy('name')
+            ->get(['id', 'name', 'parent_id']);
+    }
+
+    /**
      * Get all accessible vendors for a parent vendor (only descendants, not parent itself)
      */
     public function getAccessibleVendorsForParent(int $parentId)
@@ -274,8 +234,6 @@ class VendorService extends BaseService
 
         $previousBalance = $vendor->deposit_amount ?? 0;
         $vendor->deposit_amount = $previousBalance + $amount;
-        $vendor->guarantee_limit = ($vendor->guarantee_limit ?? 0) + $amount;
-        $this->increaseDepositCapacity($vendor, $amount);
         $vendor->save();
 
         // Create transaction record
@@ -286,7 +244,7 @@ class VendorService extends BaseService
             'previous_balance' => $previousBalance,
             'new_balance' => $vendor->deposit_amount,
             'note' => $note,
-            'created_by' => $this->depositTransactionCreatedBy(),
+            'created_by' => $this->resolveDepositCreatedBy(),
         ]);
 
         // Log activity
@@ -318,19 +276,7 @@ class VendorService extends BaseService
             return false; // Insufficient deposit
         }
 
-        $currentGuarantee = (float) ($vendor->guarantee_limit ?? 0);
-        if ($currentGuarantee < $amount) {
-            return false;
-        }
-
-        $currentCapacity = (float) ($vendor->available_deposit_capacity ?? 0);
-        if ($currentCapacity < $amount) {
-            return false;
-        }
-
         $vendor->deposit_amount = $currentDeposit - $amount;
-        $vendor->guarantee_limit = $currentGuarantee - $amount;
-        $vendor->available_deposit_capacity = $currentCapacity - $amount;
         $vendor->save();
 
         // Create transaction record
@@ -341,7 +287,7 @@ class VendorService extends BaseService
             'previous_balance' => $currentDeposit,
             'new_balance' => $vendor->deposit_amount,
             'note' => $note,
-            'created_by' => $this->depositTransactionCreatedBy(),
+            'created_by' => $this->resolveDepositCreatedBy(),
         ]);
 
         // Log activity
@@ -356,44 +302,6 @@ class VendorService extends BaseService
             ->log('Deposit subtracted');
 
         return true;
-    }
-
-    public function calculateTransactionVendorAmount(object $vendor, float $amount): float
-    {
-        $transactionFee = (float) ($vendor->transaction_fee ?? 0);
-
-        return round($amount - ($amount * $transactionFee / 100), 2);
-    }
-
-    /**
-     * Decrease available capacity when a transaction is created (pending/processing).
-     * Wallet selection already checks capacity; allowNegative tolerates concurrent requests.
-     */
-    public function blockTransactionCapacity(int $vendorId, float $amount): void
-    {
-        $vendor = $this->getById($vendorId);
-        if (!$vendor) {
-            return;
-        }
-
-        $vendorAmount = $this->calculateTransactionVendorAmount($vendor, $amount);
-        $this->decreaseDepositCapacity($vendor, $vendorAmount, allowNegative: true);
-        $vendor->save();
-    }
-
-    /**
-     * Release blocked capacity when a pending transaction is cancelled.
-     */
-    public function releaseTransactionCapacity(int $vendorId, float $amount): void
-    {
-        $vendor = $this->getById($vendorId);
-        if (!$vendor) {
-            return;
-        }
-
-        $vendorAmount = $this->calculateTransactionVendorAmount($vendor, $amount);
-        $this->increaseDepositCapacity($vendor, $vendorAmount);
-        $vendor->save();
     }
 
     /**
@@ -419,15 +327,21 @@ class VendorService extends BaseService
             return false;
         }
 
-        // Capacity is blocked on transaction create; only operational deposit changes here.
-        $vendorAmount = $this->calculateTransactionVendorAmount($vendor, $amount);
+        // Calculate vendor fee: amount - (amount * transaction_fee / 100)
+        $transactionFee = $vendor->transaction_fee ?? 0;
+        $vendorAmount = $amount - ($amount * $transactionFee / 100);
 
         $previousBalance = $vendor->deposit_amount ?? 0;
+
+        // Check if deposit is sufficient
+        if ($previousBalance < $vendorAmount) {
+            return false; // Insufficient deposit
+        }
+
         $vendor->deposit_amount = $previousBalance - $vendorAmount;
         $vendor->save();
 
         // Create transaction record
-        // TODO: transaction_fee to transaction_id
         $this->depositTransactionRepository->create([
             'vendor_id' => $vendorId,
             'type' => VendorDepositTransactionType::TRANSACTION->value,
@@ -436,7 +350,7 @@ class VendorService extends BaseService
             'new_balance' => $vendor->deposit_amount,
             'note' => __('Transaction deposit processed'),
             'transaction_id' => $transactionId,
-            'created_by' => $this->depositTransactionCreatedBy(),
+            'created_by' => $this->resolveDepositCreatedBy(),
         ]);
 
         // Log activity
@@ -445,7 +359,7 @@ class VendorService extends BaseService
             ->withProperties([
                 'transaction_id' => $transactionId,
                 'amount' => $vendorAmount,
-                'transaction_fee' => $vendor->transaction_fee ?? 0,
+                'transaction_fee' => $transactionFee,
                 'original_amount' => $amount,
                 'previous_balance' => $previousBalance,
                 'new_balance' => $vendor->deposit_amount,
@@ -484,7 +398,6 @@ class VendorService extends BaseService
 
         $previousBalance = $vendor->deposit_amount ?? 0;
         $vendor->deposit_amount = $previousBalance + $vendorAmount;
-        $this->increaseDepositCapacity($vendor, $vendorAmount);
         $vendor->save();
 
         // Create transaction record
@@ -496,7 +409,7 @@ class VendorService extends BaseService
             'new_balance' => $vendor->deposit_amount,
             'note' => __('Withdrawal deposit processed'),
             'withdrawal_id' => $withdrawalId,
-            'created_by' => $this->depositTransactionCreatedBy(),
+            'created_by' => $this->resolveDepositCreatedBy(),
         ]);
 
         // Log activity
@@ -516,24 +429,15 @@ class VendorService extends BaseService
     }
 
     /**
-     * created_by FK references users — only admin (web guard) has a valid user id.
+     * Admin user id for vendor_deposit_transactions.created_by (FK to users).
+     * Vendor / vendor-user sessions must not use their id here.
      */
-    private function depositTransactionCreatedBy(): ?int
+    private function resolveDepositCreatedBy(): ?int
     {
-        return auth('web')->check() ? auth('web')->id() : null;
-    }
+        if (auth('web')->check()) {
+            return auth('web')->id();
+        }
 
-    /**
-     * Get all active vendors for assignment (parent and child vendors).
-     */
-    public function getAssignableVendors()
-    {
-        return $this->repository->getModel()
-            ->with('parent:id,name')
-            ->where('status', 1)
-            ->orderByRaw('COALESCE(parent_id, id)')
-            ->orderBy('parent_id')
-            ->orderBy('name')
-            ->get(['id', 'name', 'parent_id']);
+        return null;
     }
 }

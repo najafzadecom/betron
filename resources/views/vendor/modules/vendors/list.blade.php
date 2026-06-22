@@ -113,8 +113,6 @@
                             </div>
                         </th>
                         <th>{{ __('Deposit Amount') }}</th>
-                        <th>{{ __('Guarantee Limit') }}</th>
-                        <th>{{ __('Available Deposit Capacity') }}</th>
                         <th>{{ __('Transaction Fee') }}</th>
                         <th>{{ __('Withdrawal Fee') }}</th>
                         <th>{{ __('Settlement Fee') }}</th>
@@ -165,8 +163,6 @@
                                 @endif
                             </td>
                             <td>{{ number_format($item->deposit_amount ?? 0, 2) }} ₺</td>
-                            <td>{{ number_format($item->guarantee_limit ?? 0, 2) }} ₺</td>
-                            <td>{{ number_format($item->available_deposit_capacity ?? 0, 2) }} ₺</td>
                             <td>{{ $item->transaction_fee }} %</td>
                             <td>{{ $item->withdrawal_fee }} %</td>
                             <td>{{ $item->settlement_fee }} %</td>
@@ -230,7 +226,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="15" class="text-center">{{ __('Data not found') }}</td>
+                            <td colspan="13" class="text-center">{{ __('Data not found') }}</td>
                         </tr>
                     @endforelse
                     </tbody>
@@ -281,14 +277,6 @@
                     <div class="row mb-2">
                         <div class="col-5 fw-semibold text-muted">{{ __('Deposit Amount') }}:</div>
                         <div class="col-7 text-end" id="deposit_amount">-</div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col-5 fw-semibold text-muted">{{ __('Guarantee Limit') }}:</div>
-                        <div class="col-7 text-end" id="guarantee_limit">-</div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col-5 fw-semibold text-muted">{{ __('Available Deposit Capacity') }}:</div>
-                        <div class="col-7 text-end" id="available_deposit_capacity">-</div>
                     </div>
                     <div class="row mb-2">
                         <div class="col-5 fw-semibold text-muted">{{ __('Transaction Fee') }}:</div>
@@ -452,8 +440,6 @@
                         document.getElementById('name').innerText = data.name ?? '-';
                         document.getElementById('email').innerText = data.email ?? '-';
                         document.getElementById('deposit_amount').innerText = parseFloat(data.deposit_amount ?? 0).toFixed(2) + ' ₺';
-                        document.getElementById('guarantee_limit').innerText = parseFloat(data.guarantee_limit ?? 0).toFixed(2) + ' ₺';
-                        document.getElementById('available_deposit_capacity').innerText = parseFloat(data.available_deposit_capacity ?? 0).toFixed(2) + ' ₺';
                         document.getElementById('transaction_fee').innerText = (data.transaction_fee ?? 0) + ' %';
                         document.getElementById('withdrawal_fee').innerText = (data.withdrawal_fee ?? 0) + ' %';
                         document.getElementById('settlement_fee').innerText = (data.settlement_fee ?? 0) + ' %';

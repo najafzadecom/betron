@@ -15,13 +15,6 @@ class TransactionObserver
     protected string $prefix = 'transaction_';
 
     /** @var array<int, TransactionStatus> */
-    private const CANCELLED_STATUSES = [
-        TransactionStatus::Cancelled,
-        TransactionStatus::AutoCancelled,
-        TransactionStatus::ManualCancelled,
-    ];
-
-    /** @var array<int, TransactionStatus> */
     private const CONFIRMED_STATUSES = [
         TransactionStatus::AutoConfirmed,
         TransactionStatus::ManualConfirmed,
@@ -67,8 +60,6 @@ class TransactionObserver
     public function created(Model $data): void
     {
         Cache::rememberForever($this->prefix . $data->id, fn () => $data);
-
-        $this->decreaseCapacityForTransaction($data);
     }
 
     public function updating(Model $data): void
@@ -85,10 +76,6 @@ class TransactionObserver
 
         SendTransactionWebhookJob::dispatch($data->id);
 
-        if ($data->wasChanged('wallet_id') && $data->wallet_id && !$data->getOriginal('wallet_id')) {
-            $this->decreaseCapacityForTransaction($data);
-        }
-
         if ($data->wasChanged('status')) {
             $oldStatus = $data->getOriginal('status');
             $newStatus = $data->status;
@@ -101,20 +88,12 @@ class TransactionObserver
 
                 $this->processConfirmedDeposit($data);
             }
-
-            if ($this->isCancelledStatus($newStatus) && !$this->isConfirmedStatus($oldStatus)) {
-                $this->releaseCapacityForTransaction($data);
-            }
         }
     }
 
     public function deleted(Model $data): void
     {
         Cache::forget($this->prefix . $data->id);
-
-        if (!$this->isConfirmedStatus($data->status)) {
-            $this->releaseCapacityForTransaction($data);
-        }
     }
 
     public function restored(Model $data): void
@@ -125,44 +104,6 @@ class TransactionObserver
     public function forceDeleted(Model $data): void
     {
         Cache::forget($this->prefix . $data->id);
-    }
-
-    private function decreaseCapacityForTransaction(Model $transaction): void
-    {
-        if ($this->isCancelledStatus($transaction->status) || $transaction->status === TransactionStatus::Draft) {
-            return;
-        }
-
-        if (!$this->resolveVendorId($transaction)) {
-            return;
-        }
-
-        $amount = (float) ($transaction->amount ?? 0);
-        if ($amount <= 0) {
-            return;
-        }
-
-        $this->eachTransactionVendor(
-            $transaction,
-            fn (int $vendorId) => $this->vendorService->blockTransactionCapacity($vendorId, $amount)
-        );
-    }
-
-    private function releaseCapacityForTransaction(Model $transaction): void
-    {
-        if (!$this->resolveVendorId($transaction)) {
-            return;
-        }
-
-        $amount = (float) ($transaction->amount ?? 0);
-        if ($amount <= 0) {
-            return;
-        }
-
-        $this->eachTransactionVendor(
-            $transaction,
-            fn (int $vendorId) => $this->vendorService->releaseTransactionCapacity($vendorId, $amount)
-        );
     }
 
     private function processConfirmedDeposit(Model $transaction): void
@@ -231,10 +172,5 @@ class TransactionObserver
     private function isConfirmedStatus(mixed $status): bool
     {
         return in_array($status, self::CONFIRMED_STATUSES, true);
-    }
-
-    private function isCancelledStatus(mixed $status): bool
-    {
-        return in_array($status, self::CANCELLED_STATUSES, true);
     }
 }

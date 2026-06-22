@@ -33,7 +33,7 @@ return [
             'id', 'type', 'user_id', 'ip', 'reason', 'site_id', 'status', 'created_at', 'updated_at',
         ],
         'vendors' => [
-            'id', 'name', 'email', 'status', 'deposit_amount', 'guarantee_limit', 'available_deposit_capacity', 'transaction_fee', 'withdrawal_fee', 'settlement_fee', 'created_at', 'updated_at',
+            'id', 'name', 'email', 'status', 'deposit_amount', 'transaction_fee', 'withdrawal_fee', 'settlement_fee', 'created_at', 'updated_at',
         ],
         'vendor_users' => [
             'id', 'name', 'email', 'status', 'created_at', 'updated_at',

@@ -24,7 +24,6 @@ class VendorRequest extends FormRequest
             'email' => 'required|email|max:255|unique:vendors,email,' . $this->route('vendor'),
             'password' => 'nullable|string|min:6|confirmed',
             'deposit_amount' => 'nullable|numeric|min:0',
-            'guarantee_limit' => 'nullable|numeric|min:0',
             'transaction_fee' => 'nullable|numeric|min:0',
             'withdrawal_fee' => 'nullable|numeric|min:0',
             'settlement_fee' => 'nullable|numeric|min:0',
