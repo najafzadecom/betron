@@ -223,8 +223,8 @@
                         {!! sortableTableHeader('site_id', 'Site', 'transactions') !!}
                         {!! sortableTableHeader('payment_method', 'Payment Method', 'transactions') !!}
                         {!! sortableTableHeader('uuid', 'Paypap ID', 'transactions') !!}
-                        <th>{{ __('Üst Bayi') }}</th>
-                        <th>{{ __('Alt Bayi') }}</th>
+                        <th>{{ __('Parent Vendor') }}</th>
+                        <th>{{ __('Child Vendor') }}</th>
                         <th class="text-center" style="width: 20px;">
                             <i class="ph-dots-three"></i>
                         </th>

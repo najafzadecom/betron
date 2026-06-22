@@ -115,11 +115,11 @@
                     <div class="col-lg-6">
                         <div class="card">
                             <div class="card-header d-flex">
-                                <h6 class="mb-0"><i class="ph-chart-bar-horizontal"></i> Ödeme Statistik Bölümü</h6>
+                                <h6 class="mb-0"><i class="ph-chart-bar-horizontal"></i> {{ __('Payment Statistics Section') }}</h6>
                             </div>
                             <div class="card-body">
                                 <div class="row mb-3">
-                                    <label class="col-form-label col-lg-4">Toplam Tutar</label>
+                                    <label class="col-form-label col-lg-4">{{ __('Total Amount') }}</label>
                                     <div class="col-lg-8">
                                         <div class="input-group">
                                             <input type="number" disabled="disabled" class="form-control" value="{{ $totalTransactionsAmount }}">
@@ -128,8 +128,7 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label class="col-form-label col-lg-4">Toplam <span class="text-success"><strong>Onaylanan</strong></span>
-                                        Tutar</label>
+                                    <label class="col-form-label col-lg-4">{{ __('Total Approved Amount') }}</label>
                                     <div class="col-lg-8">
                                         <div class="input-group">
                                             <input type="number" disabled="disabled" class="form-control" value="{{ $acceptedTransactionsAmount }}">
@@ -139,8 +138,7 @@
                                 </div>
                                 @if($showAcceptedAverage ?? false)
                                     <div class="row mb-3">
-                                        <label class="col-form-label col-lg-4">Ortalama <span class="text-success"><strong>Onaylanan</strong></span>
-                                            Tutar</label>
+                                        <label class="col-form-label col-lg-4">{{ __('Average Approved Amount') }}</label>
                                         <div class="col-lg-8">
                                             <div class="input-group">
                                                 <input type="number" disabled="disabled" class="form-control" value="{{ $acceptedTransactionsAverage ?? 0 }}">
@@ -150,8 +148,7 @@
                                     </div>
                                 @endif
                                 <div class="row mb-3">
-                                    <label class="col-form-label col-lg-4">Toplam <span class="text-danger"><strong>Reddedilen</strong></span>
-                                        Tutar</label>
+                                    <label class="col-form-label col-lg-4">{{ __('Total Rejected Amount') }}</label>
                                     <div class="col-lg-8">
                                         <div class="input-group">
                                             <input type="number" disabled="disabled" class="form-control" value="{{ $rejectedTransactionsAmount }}">
@@ -160,8 +157,7 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label class="col-form-label col-lg-4">Toplam <span class="text-warning"><strong>Beklemede</strong></span>
-                                        Tutar</label>
+                                    <label class="col-form-label col-lg-4">{{ __('Total Pending Amount') }}</label>
                                     <div class="col-lg-8">
                                         <div class="input-group">
                                             <input type="number" disabled="disabled" class="form-control" value="{{ $pendingTransactionsAmount }}">
@@ -174,12 +170,12 @@
 
                         <div class="card">
                             <div class="card-header d-flex">
-                                <h6 class="mb-0"><i class="ph-chart-bar-horizontal"></i> Çekme Statistik Bölümü</h6>
+                                <h6 class="mb-0"><i class="ph-chart-bar-horizontal"></i> {{ __('Withdrawal Statistics Section') }}</h6>
                             </div>
 
                             <div class="card-body">
                                 <div class="row mb-3">
-                                    <label class="col-form-label col-lg-4">Toplam Tutar</label>
+                                    <label class="col-form-label col-lg-4">{{ __('Total Amount') }}</label>
                                     <div class="col-lg-8">
                                         <div class="input-group">
                                             <input type="number" disabled="disabled" class="form-control" value="{{ $totalWithdrawalsAmount }}">
@@ -188,8 +184,7 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label class="col-form-label col-lg-4">Toplam <span class="text-success"><strong>Onaylanan</strong></span>
-                                        Tutar</label>
+                                    <label class="col-form-label col-lg-4">{{ __('Total Approved Amount') }}</label>
                                     <div class="col-lg-8">
                                         <div class="input-group">
                                             <input type="number" disabled="disabled"  class="form-control" value="{{ $acceptedWithdrawalsAmount }}">
@@ -198,8 +193,7 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label class="col-form-label col-lg-4">Toplam <span class="text-danger"><strong>Reddedilen</strong></span>
-                                        Tutar</label>
+                                    <label class="col-form-label col-lg-4">{{ __('Total Rejected Amount') }}</label>
                                     <div class="col-lg-8">
                                         <div class="input-group">
                                             <input type="number" disabled="disabled"  class="form-control" value="{{ $rejectedWithdrawalsAmount }}">
@@ -208,8 +202,7 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label class="col-form-label col-lg-4">Toplam <span class="text-danger"><strong>Beklemede</strong></span>
-                                        Tutar</label>
+                                    <label class="col-form-label col-lg-4">{{ __('Total Pending Amount') }}</label>
                                     <div class="col-lg-8">
                                         <div class="input-group">
                                             <input type="number" disabled="disabled"  class="form-control" value="{{ $pendingWithdrawalsAmount }}">
@@ -223,32 +216,29 @@
                     <div class="col-lg-6">
                         <div class="card">
                             <div class="card-header d-flex">
-                                <h6 class="mb-0"><i class="ph-chart-bar-horizontal"></i> Ödeme Statistik Bölümü</h6>
+                                <h6 class="mb-0"><i class="ph-chart-bar-horizontal"></i> {{ __('Payment Statistics Section') }}</h6>
                             </div>
                             <div class="card-body">
                                 <div class="row mb-3">
-                                    <label class="col-form-label col-lg-4">Toplam İşlem Sayı</label>
+                                    <label class="col-form-label col-lg-4">{{ __('Total Transaction Count') }}</label>
                                     <div class="col-lg-8">
                                         <input type="number" disabled="disabled"  class="form-control" value="{{ $totalTransactions }}">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label class="col-form-label col-lg-4">Toplam <span class="text-success"><strong>Onaylanan</strong></span>
-                                        İşlem Sayı</label>
+                                    <label class="col-form-label col-lg-4">{{ __('Total Approved Transaction Count') }}</label>
                                     <div class="col-lg-8">
                                         <input type="number" disabled="disabled"  class="form-control" value="{{ $acceptedTransactions }}">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label class="col-form-label col-lg-4">Toplam <span class="text-danger"><strong>Reddedilen</strong></span>
-                                        İşlem Sayı</label>
+                                    <label class="col-form-label col-lg-4">{{ __('Total Rejected Transaction Count') }}</label>
                                     <div class="col-lg-8">
                                         <input type="number" disabled="disabled"  class="form-control" value="{{ $rejectedTransactions }}">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label class="col-form-label col-lg-4">Toplam <span class="text-warning"><strong>Beklemede</strong></span>
-                                        İşlem Sayı</label>
+                                    <label class="col-form-label col-lg-4">{{ __('Total Pending Transaction Count') }}</label>
                                     <div class="col-lg-8">
                                         <input type="number" disabled="disabled"  class="form-control" value="{{ $pendingTransactions }}">
                                     </div>
@@ -258,33 +248,30 @@
 
                         <div class="card">
                             <div class="card-header d-flex">
-                                <h6 class="mb-0"><i class="ph-chart-bar-horizontal"></i> Çekme Statistik Bölümü</h6>
+                                <h6 class="mb-0"><i class="ph-chart-bar-horizontal"></i> {{ __('Withdrawal Statistics Section') }}</h6>
                             </div>
 
                             <div class="card-body">
                                 <div class="row mb-3">
-                                    <label class="col-form-label col-lg-4">Toplam İşlem Sayı</label>
+                                    <label class="col-form-label col-lg-4">{{ __('Total Transaction Count') }}</label>
                                     <div class="col-lg-8">
                                         <input type="number" disabled="disabled"  class="form-control" value="{{ $totalWithdrawals }}">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label class="col-form-label col-lg-4">Toplam <span class="text-success"><strong>Onaylanan</strong></span>
-                                        İşlem Sayı</label>
+                                    <label class="col-form-label col-lg-4">{{ __('Total Approved Transaction Count') }}</label>
                                     <div class="col-lg-8">
                                         <input type="number" disabled="disabled"  class="form-control" value="{{ $acceptedWithdrawals }}">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label class="col-form-label col-lg-4">Toplam <span class="text-danger"><strong>Reddedilen</strong></span>
-                                        İşlem Sayı</label>
+                                    <label class="col-form-label col-lg-4">{{ __('Total Rejected Transaction Count') }}</label>
                                     <div class="col-lg-8">
                                         <input type="number" disabled="disabled"  class="form-control" value="{{ $rejectedWithdrawals }}">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label class="col-form-label col-lg-4">Toplam <span class="text-warning"><strong>Beklemede</strong></span>
-                                        İşlem Sayı</label>
+                                    <label class="col-form-label col-lg-4">{{ __('Total Pending Transaction Count') }}</label>
                                     <div class="col-lg-8">
                                         <input type="number" disabled="disabled"  class="form-control" value="{{ $pendingWithdrawals }}">
                                     </div>
