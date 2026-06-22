@@ -29,7 +29,7 @@ Route::prefix('auth')
         Route::get('logout', 'logout')->name('logout')->middleware('auth');
     });
 
-Route::middleware('auth')
+Route::middleware(['auth', 'merchant_locale'])
     ->group(function () {
         // Dashboard
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');

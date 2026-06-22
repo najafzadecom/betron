@@ -3,6 +3,7 @@
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\CheckApiToken;
 use App\Http\Middleware\CheckBlacklist;
+use App\Http\Middleware\SetMerchantLocale;
 use App\Http\Middleware\VendorPermission;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -39,6 +40,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'check_api_token' => CheckApiToken::class,
             'auth' => Authenticate::class,
             'check_blacklist' => CheckBlacklist::class,
+            'merchant_locale' => SetMerchantLocale::class,
             'vendor_permission' => VendorPermission::class,
         ]);
 

@@ -2,6 +2,7 @@
 @section('title', $title)
 @section('content')
     <div class="content">
+        @if(!($isMerchant ?? false))
         <div class="card">
             <div class="card-header d-flex">
                 <h5 class="mb-0">{{ $module }}</h5>
@@ -10,17 +11,19 @@
             <div class="card-body">
                 <form action="" method="GET" id="searchForm">
                     <div class="row">
+                        @if(!($isMerchant ?? false))
                         <div class="col-12 col-md-6 col-lg-2">
                             <div class="mb-3">
                                 <label class="form-label">{{ __('Date Range') }}</label>
                                 <input type="text" id="creation_date_range" name="creation_date_range"
                                        class="form-control daterange-picker"
                                        placeholder="{{ __('Select date range') }}"
-                                       value="{{ request('created_from', date('Y-m-d')) . ' - ' . request('created_to', date('Y-m-d')) }}">
-                                <input type="hidden" name="created_from" value="{{ request('created_from', date('Y-m-d')) }}">
-                                <input type="hidden" name="created_to" value="{{ request('created_to', date('Y-m-d')) }}">
+                                       value="{{ $createdFrom }} - {{ $createdTo }}">
+                                <input type="hidden" name="created_from" value="{{ $createdFrom }}">
+                                <input type="hidden" name="created_to" value="{{ $createdTo }}">
                             </div>
                         </div>
+                        @endif
                         @if($isMerchant ?? false)
                             <input type="hidden" name="site_id" value="{{ $merchantSiteId }}">
                         @else
@@ -95,9 +98,16 @@
                 </form>
             </div>
         </div>
+        @endif
         <div class="card">
             <div class="card-header d-flex">
-                <h5 class="mb-0">{{ $module }} {{ $createdFrom }} - {{ $createdTo }}</h5>
+                <h5 class="mb-0">{{ $module }}
+                    @if($isMerchant ?? false)
+                        — {{ $merchantSite?->name ?? __('All Time') }}
+                    @else
+                        {{ $createdFrom }} - {{ $createdTo }}
+                    @endif
+                </h5>
             </div>
 
             <div class="card-body">

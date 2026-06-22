@@ -2,12 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Services\SiteService;
-use App\Services\SiteStatisticService;
-use App\Services\StatisticsService;
 use App\Services\TransactionService;
 use App\Services\WithdrawalService;
-use App\Support\Merchant;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\JsonResponse;
 
@@ -15,81 +11,23 @@ class DashboardController extends BaseController
 {
     private TransactionService $transactionService;
     private WithdrawalService $withdrawalService;
-    private SiteService $siteService;
-    private SiteStatisticService $siteStatisticService;
-    private StatisticsService $statisticsService;
 
     public function __construct(
-        TransactionService   $transactionService,
-        WithdrawalService    $withdrawalService,
-        SiteService          $siteService,
-        SiteStatisticService $siteStatisticService,
-        StatisticsService    $statisticsService,
+        TransactionService $transactionService,
+        WithdrawalService  $withdrawalService,
     ) {
         $this->module = 'dashboard';
         $this->transactionService = $transactionService;
         $this->withdrawalService = $withdrawalService;
-        $this->siteService = $siteService;
-        $this->siteStatisticService = $siteStatisticService;
-        $this->statisticsService = $statisticsService;
     }
 
     public function index(): Renderable
     {
-        $transactions = $this->transactionService->last();
-
-        $withdrawals = $this->withdrawalService->last();
-
-        $merchantSiteId = Merchant::siteIdFor();
-        $siteStatistics = null;
-        $site = null;
-        $transactionsCount = $this->transactionService->paidTransactionsCount();
-        $withdrawalsCount = $this->withdrawalService->paidWithdrawalsCount();
-
-        if ($merchantSiteId) {
-            $this->statisticsService->siteId = $merchantSiteId;
-            $this->statisticsService->createdFrom = '2000-01-01';
-            $this->statisticsService->createdTo = date('Y-m-d');
-            $this->statisticsService->vendorIds = [];
-            $this->statisticsService->walletIds = [];
-
-            $payInTotal = (float) $this->statisticsService->getAcceptedTransactionsAmount();
-            $payInFeeTotal = $this->statisticsService->getAcceptedTransactionsFeeAmount();
-            $payOutTotal = (float) $this->statisticsService->getAcceptedWithdrawalsAmount();
-            $payOutFeeTotal = $this->statisticsService->getAcceptedWithdrawalsFeeAmount();
-            $total = ($payInTotal - $payInFeeTotal) - ($payOutTotal + $payOutFeeTotal);
-
-            $siteStatistics = (object) [
-                'pay_in_total' => $payInTotal,
-                'pay_in_fee_total' => $payInFeeTotal,
-                'pay_in_grand_total' => $payInTotal - $payInFeeTotal,
-                'pay_out_total' => $payOutTotal,
-                'pay_out_fee_total' => $payOutFeeTotal,
-                'pay_out_grand_total' => $payOutTotal + $payOutFeeTotal,
-                'total' => $total,
-            ];
-
-            $site = $this->siteService->getById($merchantSiteId);
-            $transactionsCount = $this->statisticsService->getAcceptedTransactions();
-            $withdrawalsCount = $this->statisticsService->getAcceptedWithdrawals();
-        } else {
-            $siteStatistics = $this->siteStatisticService->getBySiteId(1);
-            $site = $this->siteService->getById(1);
-        }
-
         $this->data = [
             'module' => __('Admin'),
             'title' => __('Dashboard'),
-            'transactions' => $transactions,
-            'withdrawals' => $withdrawals,
-            'siteStatistics' => $siteStatistics,
-            'site' => $site,
-            'transactions_total' => $this->transactionService->sumAmount(),
-            'transactions_count' => $transactionsCount,
-            'transactions_fee_total' => $this->transactionService->sumFeeAmount(),
-            'withdrawals_total' => $this->withdrawalService->sumAmount(),
-            'withdrawals_fee_total' => $this->withdrawalService->sumFeeAmount(),
-            'withdrawals_count' => $withdrawalsCount,
+            'transactions' => $this->transactionService->last(),
+            'withdrawals' => $this->withdrawalService->last(),
         ];
 
         return $this->render('index');

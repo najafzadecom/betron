@@ -245,8 +245,10 @@ class SiteController extends BaseController
             $site_id = $merchantSiteId;
         }
 
-        $createdFrom = request('created_from', date('Y-m-d'));
-        $createdTo = request('created_to', date('Y-m-d'));
+        $createdFrom = Merchant::isMerchant()
+            ? Merchant::ALL_TIME_FROM
+            : request('created_from', Merchant::defaultCreatedFrom());
+        $createdTo = request('created_to', Merchant::defaultCreatedTo());
 
         $this->statisticsService->createdFrom = $createdFrom;
         $this->statisticsService->createdTo = $createdTo;

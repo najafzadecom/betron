@@ -33,70 +33,69 @@ class StatisticsController extends BaseController
 
     public function index(): Renderable
     {
-        $createdFrom = request('created_from', date('Y-m-d'));
-        $createdTo = request('created_to', date('Y-m-d'));
         $isMerchant = Merchant::isMerchant();
         $merchantSiteId = Merchant::siteIdFor();
-        $siteID = request('site_id', 0);
-        $parentVendorId = request('parent_vendor_id', 0);
-        $vendorId = request('vendor_id', 0);
-        $filterBy = request('filter_by', 'vendor'); // 'vendor' or 'wallet'
+        $createdFrom = request('created_from', Merchant::defaultCreatedFrom());
+        $createdTo = request('created_to', Merchant::defaultCreatedTo());
 
         if ($isMerchant) {
+            $createdFrom = Merchant::ALL_TIME_FROM;
+            $createdTo = Merchant::defaultCreatedTo();
             $siteID = $merchantSiteId;
             $parentVendorId = 0;
             $vendorId = 0;
             $filterBy = 'vendor';
-        }
+            $vendorIds = [];
+            $walletIds = [];
+        } else {
+            $siteID = (int) request('site_id', 0);
+            $parentVendorId = (int) request('parent_vendor_id', 0);
+            $vendorId = (int) request('vendor_id', 0);
+            $filterBy = request('filter_by', 'vendor');
 
-        // If vendor_id is set but parent_vendor_id is not, find the parent vendor
-        if ($vendorId && !$parentVendorId) {
-            $vendor = $this->vendorService->getById($vendorId);
-            if ($vendor && $vendor->parent_id) {
-                // Find the top-level parent (parent with no parent)
-                $currentVendor = $vendor;
-                while ($currentVendor && $currentVendor->parent_id) {
-                    $currentVendor = $this->vendorService->getById($currentVendor->parent_id);
+            // If vendor_id is set but parent_vendor_id is not, find the parent vendor
+            if ($vendorId && !$parentVendorId) {
+                $vendor = $this->vendorService->getById($vendorId);
+                if ($vendor && $vendor->parent_id) {
+                    // Find the top-level parent (parent with no parent)
+                    $currentVendor = $vendor;
+                    while ($currentVendor && $currentVendor->parent_id) {
+                        $currentVendor = $this->vendorService->getById($currentVendor->parent_id);
+                    }
+                    if ($currentVendor) {
+                        $parentVendorId = $currentVendor->id;
+                    }
+                } else {
+                    // If vendor has no parent, it is the parent vendor itself
+                    $parentVendorId = $vendorId;
                 }
-                if ($currentVendor) {
-                    $parentVendorId = $currentVendor->id;
-                }
-            } else {
-                // If vendor has no parent, it is the parent vendor itself
-                $parentVendorId = $vendorId;
+            }
+
+            $vendorIds = [];
+            if ($parentVendorId) {
+                $vendorIds = array_merge([$parentVendorId], $this->vendorService->getDescendants($parentVendorId));
+            } elseif ($vendorId) {
+                $vendorIds = array_merge([$vendorId], $this->vendorService->getDescendants($vendorId));
+            }
+
+            $walletIds = [];
+            if (!empty($vendorIds)) {
+                $walletIds = $this->walletService->getWalletIdsByVendorIds($vendorIds);
             }
         }
 
-        $topLevelVendors = $this->vendorService->getTopLevelVendors();
+        $topLevelVendors = $isMerchant ? collect([]) : $this->vendorService->getTopLevelVendors();
         $childVendors = collect([]);
 
-        if ($parentVendorId) {
+        if (!$isMerchant && $parentVendorId) {
             $childVendors = $this->vendorService->getAccessibleVendorsForParent($parentVendorId);
-        }
-
-        // Get vendor IDs for filtering (parent vendor and all child vendors)
-        $vendorIds = [];
-        if ($parentVendorId) {
-            $vendorIds = array_merge([$parentVendorId], $this->vendorService->getDescendants($parentVendorId));
-        } elseif ($vendorId) {
-            // If only vendor_id is set and no parent, use that vendor and its descendants
-            $vendorIds = array_merge([$vendorId], $this->vendorService->getDescendants($vendorId));
-        }
-
-
-        // Get wallet IDs for selected vendors (parent vendor and all child vendors)
-        $walletIds = [];
-        if (!empty($vendorIds)) {
-            $walletIds = $this->walletService->getWalletIdsByVendorIds($vendorIds);
         }
 
         // Set filter type: if filter_by is 'wallet', use walletIds; otherwise use vendorIds
         if ($filterBy === 'wallet') {
-            // Filter by wallet: use walletIds, clear vendorIds
             $this->statisticsService->vendorIds = [];
             $this->statisticsService->walletIds = $walletIds;
         } else {
-            // Filter by vendor: use vendorIds, clear walletIds
             $this->statisticsService->vendorIds = $vendorIds;
             $this->statisticsService->walletIds = [];
         }
@@ -104,6 +103,8 @@ class StatisticsController extends BaseController
         $this->statisticsService->createdFrom = $createdFrom;
         $this->statisticsService->createdTo = $createdTo;
         $this->statisticsService->siteId = $siteID;
+
+        $merchantSite = $isMerchant ? $this->siteService->getById($merchantSiteId) : null;
 
         $totalTransactions = $this->statisticsService->getTotalTransactions();
         $acceptedTransactions = $this->statisticsService->getAcceptedTransactions();
@@ -125,7 +126,7 @@ class StatisticsController extends BaseController
         $rejectedWithdrawalsAmount = $this->statisticsService->getRejectedWithdrawalsAmount();
         $pendingWithdrawalsAmount = $this->statisticsService->getPendingWithdrawalsAmount();
 
-        $showAcceptedAverage = config('statistics.show_admin_accepted_average');
+        $showAcceptedAverage = !$isMerchant && config('statistics.show_admin_accepted_average');
         $acceptedTransactionsAverage = $showAcceptedAverage && $acceptedTransactions > 0
             ? round($acceptedTransactionsAmount / $acceptedTransactions, 2)
             : null;
@@ -133,7 +134,7 @@ class StatisticsController extends BaseController
         $this->data = [
             'module' => __('Statistics'),
             'title' => __('List'),
-            'sites' => $this->siteService->getAll(),
+            'sites' => $isMerchant ? collect([]) : $this->siteService->getAll(),
             'topLevelVendors' => $topLevelVendors,
             'childVendors' => $childVendors,
             'parentVendorId' => $parentVendorId,
@@ -161,6 +162,7 @@ class StatisticsController extends BaseController
             'acceptedTransactionsAverage' => $acceptedTransactionsAverage,
             'isMerchant' => $isMerchant,
             'merchantSiteId' => $merchantSiteId,
+            'merchantSite' => $merchantSite,
         ];
 
         return $this->render('list');

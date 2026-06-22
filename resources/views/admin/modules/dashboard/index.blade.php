@@ -63,110 +63,6 @@
                 </div>
             </div>
         </div>
-
-        @if(auth()->user()->hasRole('Merchant'))
-        <!-- Statistics -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card card-body">
-                    <div class="row text-center">
-                        <div class="col-3 mb-3">
-                            <p><i class="ph-arrow-down bg-success bg-opacity-10 text-success lh-1 rounded-pill p-2"></i>
-                            </p>
-                            <h5 class="mb-0">{{ $transactions_count ?? 0 }}</h5>
-                            <span class="text-muted fs-sm">{{ __('Incoming Transactions') }}</span>
-                        </div>
-
-                        <div class="col-3 mb-3">
-                            <p><i class="ph-arrow-up bg-danger bg-opacity-10 text-danger lh-1 rounded-pill p-2"></i></p>
-                            <h5 class="mb-0">{{ $withdrawals_count ?? 0 }}</h5>
-                            <span class="text-muted fs-sm">{{ __('Outgoing Transactions') }}</span>
-                        </div>
-
-                        <div class="col-3 mb-3">
-                            <p>
-                                <i class="ph-currency-circle-dollar bg-primary bg-opacity-10 text-primary lh-1 rounded-pill p-2"></i>
-                            </p>
-                            <h5 class="mb-0">₺{{ number_format($siteStatistics?->pay_in_total ?? 0, 2) }}</h5>
-                            <span class="text-muted fs-sm">{{ __('Incoming Amount') }}</span>
-                        </div>
-
-                        <div class="col-3 mb-3">
-                            <p>
-                                <i class="ph-currency-circle-dollar bg-primary bg-opacity-10 text-primary lh-1 rounded-pill p-2"></i>
-                            </p>
-                            <h5 class="mb-0">₺{{ number_format($siteStatistics?->pay_in_fee_total ?? 0, 2) }}</h5>
-                            <span class="text-muted fs-sm">{{ __('Incoming Fee Amount') }}</span>
-                        </div>
-
-                        <div class="col-3 mb-3">
-                            <p>
-                                <i class="ph-currency-circle-dollar bg-primary bg-opacity-10 text-primary lh-1 rounded-pill p-2"></i>
-                            </p>
-                            <h5 class="mb-0">₺{{ number_format($siteStatistics?->pay_in_grand_total ?? 0, 2) }}</h5>
-                            <span class="text-muted fs-sm">{{ __('Incoming Grand Total Amount') }}</span>
-                        </div>
-
-                        <div class="col-3 mb-3">
-                            <p>
-                                <i class="ph-currency-circle-dollar bg-warning bg-opacity-10 text-warning lh-1 rounded-pill p-2"></i>
-                            </p>
-                            <h5 class="mb-0">₺{{ number_format($siteStatistics?->pay_out_total ?? 0, 2) }}</h5>
-                            <span class="text-muted fs-sm">{{ __('Outgoing Amount') }}</span>
-                        </div>
-
-                        <div class="col-3 mb-3">
-                            <p>
-                                <i class="ph-currency-circle-dollar bg-warning bg-opacity-10 text-warning lh-1 rounded-pill p-2"></i>
-                            </p>
-                            <h5 class="mb-0">₺{{ number_format($siteStatistics?->pay_out_fee_total ?? 0, 2) }}</h5>
-                            <span class="text-muted fs-sm">{{ __('Outgoing Fee Amount') }}</span>
-                        </div>
-
-                        <div class="col-3 mb-3">
-                            <p>
-                                <i class="ph-currency-circle-dollar bg-warning bg-opacity-10 text-warning lh-1 rounded-pill p-2"></i>
-                            </p>
-                            <h5 class="mb-0">₺{{ number_format($siteStatistics?->pay_out_grand_total ?? 0, 2) }}</h5>
-                            <span class="text-muted fs-sm">{{ __('Outgoing Grand Total Amount') }}</span>
-                        </div>
-
-                        <div class="col-3 mb-3">
-                            <p>
-                                <i class="ph-currency-circle-dollar bg-warning bg-opacity-10 text-warning lh-1 rounded-pill p-2"></i>
-                            </p>
-                            <h5 class="mb-0">₺{{ number_format($siteStatistics?->total ?? 0, 2) }}</h5>
-                            <span class="text-muted fs-sm">{{ __('Total Amount') }}</span>
-                        </div>
-
-                        <div class="col-3 mb-3">
-                            <p>
-                                <i class="ph-percent bg-warning bg-opacity-10 text-warning lh-1 rounded-pill p-2"></i>
-                            </p>
-                            <h5 class="mb-0">{{ number_format($site?->settlement_fee ?? 0, 2) }} %</h5>
-                            <span class="text-muted fs-sm">{{ __('Settlement Fee') }}</span>
-                        </div>
-
-                        <div class="col-3 mb-3">
-                            <p>
-                                <i class="ph-currency-circle-dollar bg-warning bg-opacity-10 text-warning lh-1 rounded-pill p-2"></i>
-                            </p>
-                            <h5 class="mb-0">₺{{ number_format((($siteStatistics?->total ?? 0) * ($site?->settlement_fee ?? 0) / 100), 2) }}</h5>
-                            <span class="text-muted fs-sm">{{ __('Settlement Fee Amount') }}</span>
-                        </div>
-
-                        <div class="col-3 mb-3">
-                            <p>
-                                <i class="ph-currency-circle-dollar bg-warning bg-opacity-10 text-warning lh-1 rounded-pill p-2"></i>
-                            </p>
-                            <h5 class="mb-0">₺{{ number_format(($siteStatistics?->total ?? 0) + (($siteStatistics?->total ?? 0) * ($site?->settlement_fee ?? 0) / 100), 2) }}</h5>
-                            <span class="text-muted fs-sm">{{ __('Total with Settlement Fee Amount') }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        @endif
     </div>
 @endsection
 
@@ -175,7 +71,7 @@
         const DashboardDataTables = (function () {
             function _setup() {
                 if (typeof $.fn.DataTable === 'undefined') {
-                    console.warn('Xəbərdarlıq - datatables.min.js yüklənməyib.');
+                    console.warn('{{ __('Warning') }} - datatables.min.js is not loaded.');
                     return;
                 }
 
@@ -183,12 +79,12 @@
                     autoWidth: false,
                     dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
                     language: {
-                        search: '<span class="me-3">Axtar:</span> <div class="form-control-feedback form-control-feedback-end flex-fill">_INPUT_<div class="form-control-feedback-icon"><i class="ph-magnifying-glass opacity-50"></i></div></div>',
-                        searchPlaceholder: 'Filter üçün yazın...',
-                        lengthMenu: '<span class="me-3">Göstər:</span> _MENU_',
+                        search: '<span class="me-3">{{ __('Search') }}:</span> <div class="form-control-feedback form-control-feedback-end flex-fill">_INPUT_<div class="form-control-feedback-icon"><i class="ph-magnifying-glass opacity-50"></i></div></div>',
+                        searchPlaceholder: '{{ __('Search in all fields...') }}',
+                        lengthMenu: '<span class="me-3">{{ __('Show') }}:</span> _MENU_',
                         paginate: {
-                            'first': 'İlk',
-                            'last': 'Son',
+                            'first': '{{ __('First') }}',
+                            'last': '{{ __('Last') }}',
                             'next': document.dir === "rtl" ? '&larr;' : '&rarr;',
                             'previous': document.dir === "rtl" ? '&rarr;' : '&larr;'
                         }
