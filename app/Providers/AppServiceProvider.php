@@ -33,6 +33,7 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -71,6 +72,8 @@ class AppServiceProvider extends ServiceProvider
     {
         // Register custom auth providers
         $this->registerAuthProviders();
+
+        URL::forceScheme('https');
 
         // Set Carbon locale based on app locale
         Carbon::setLocale(config('app.locale'));
