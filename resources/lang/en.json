@@ -503,5 +503,10 @@
     "Failed to fetch Paypap status": "Failed to fetch Paypap status",
     "This transaction does not have a deposit ID": "This transaction does not have a deposit ID",
     "This transaction is not a Paypap transaction": "This transaction is not a Paypap transaction",
-    "Vendor not found": "Vendor not found"
+    "Vendor not found": "Vendor not found",
+    "Upload Receipt": "Upload Receipt",
+    "Receipt uploaded successfully": "Receipt uploaded successfully",
+    "Receipt already uploaded": "Receipt already uploaded",
+    "Receipt can only be uploaded for approved withdrawals": "Receipt can only be uploaded for approved withdrawals",
+    "Please select a receipt file": "Please select a receipt file"
 }

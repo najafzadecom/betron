@@ -181,6 +181,52 @@ class WithdrawalController extends BaseController
         return response()->json(['message' => $message], $code);
     }
 
+    public function uploadReceipt(Request $request, string $id): JsonResponse
+    {
+        if (!$this->authorizeWithdrawal($id)) {
+            return response()->json(['error' => __('Unauthorized')], 403);
+        }
+
+        $request->validate(WithdrawalReceiptService::requiredValidationRules());
+
+        $code = 500;
+        $message = __('Unknown error');
+
+        try {
+            $withdrawal = $this->service->getById($id);
+
+            if (!$withdrawal) {
+                return response()->json(['message' => __('Withdrawal not found')], 404);
+            }
+
+            if ($withdrawal->receipt_path) {
+                return response()->json(['message' => __('Receipt already uploaded')], 422);
+            }
+
+            if (!in_array($withdrawal->status, [WithdrawalStatus::AutoConfirmed, WithdrawalStatus::ManualConfirmed], true)) {
+                return response()->json(['message' => __('Receipt can only be uploaded for approved withdrawals')], 422);
+            }
+
+            $this->receiptService->assertStorageReady($request->file('receipt'));
+
+            $stored = $this->receiptService->store($withdrawal, $request->file('receipt'));
+
+            $this->service->update($id, [
+                'receipt_path' => $stored['path'],
+                'receipt_original_name' => $stored['original_name'],
+                'receipt_mime' => $stored['mime'],
+                'receipt_uploaded_at' => now(),
+            ]);
+
+            $code = 200;
+            $message = __('Receipt uploaded successfully');
+        } catch (\Exception $e) {
+            $message = $e->getMessage();
+        }
+
+        return response()->json(['message' => $message], $code);
+    }
+
     public function cancel(string $id): JsonResponse
     {
         if (!$this->authorizeWithdrawal($id)) {

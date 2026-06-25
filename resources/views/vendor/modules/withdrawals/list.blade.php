@@ -263,9 +263,23 @@
                             <td>{{ $item->order_id }}</td>
                             <td>
                                 @if($item->receipt_path)
-                                    <span class="badge bg-info bg-opacity-10 text-info" title="{{ $item->receipt_original_name }}">
-                                        <i class="ph-receipt me-1"></i>{{ __('Receipt') }}
-                                    </span>
+                                    @if($item->receipt_url)
+                                        <a href="{{ $item->receipt_url }}" target="_blank" rel="noopener"
+                                           class="badge bg-info bg-opacity-10 text-info text-decoration-none"
+                                           title="{{ $item->receipt_original_name }}">
+                                            <i class="ph-receipt me-1"></i>{{ __('Receipt') }}
+                                        </a>
+                                    @else
+                                        <span class="badge bg-info bg-opacity-10 text-info" title="{{ $item->receipt_original_name }}">
+                                            <i class="ph-receipt me-1"></i>{{ __('Receipt') }}
+                                        </span>
+                                    @endif
+                                @elseif(in_array($item->status, [\App\Enums\WithdrawalStatus::AutoConfirmed, \App\Enums\WithdrawalStatus::ManualConfirmed], true))
+                                    <button type="button"
+                                            class="btn btn-outline-primary btn-sm open-upload-receipt-modal"
+                                            data-id="{{ $item->id }}">
+                                        <i class="ph-upload-simple me-1"></i>{{ __('Upload Receipt') }}
+                                    </button>
                                 @endif
                             </td>
                             <td>
@@ -425,6 +439,32 @@
                     <button type="button" class="btn btn-link" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
                     <button type="button" class="btn btn-success" id="approve_withdrawal_submit">
                         <i class="ph-check me-1"></i>{{ __('Approve') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="upload_receipt_modal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ __('Upload Receipt') }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="upload_receipt_withdrawal_id" value="">
+                    <div class="mb-0">
+                        <label for="upload_receipt_file" class="form-label">{{ __('Payment Receipt') }} <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" id="upload_receipt_file"
+                               accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.jpg,.jpeg,.png,.gif,.webp,.bmp,.heic,.heif,image/*">
+                        <small class="text-muted">{{ __('PDF, Office documents, or images. Max :size MB.', ['size' => (int) (config('bunny.receipt_max_kb', 10240) / 1024)]) }}</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-link" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
+                    <button type="button" class="btn btn-primary" id="upload_receipt_submit">
+                        <i class="ph-upload-simple me-1"></i>{{ __('Upload Receipt') }}
                     </button>
                 </div>
             </div>
@@ -691,6 +731,63 @@
 
             const approveModalEl = document.getElementById('approve_withdrawal_modal');
             const approveModal = approveModalEl ? bootstrap.Modal.getOrCreateInstance(approveModalEl) : null;
+
+            const uploadReceiptModalEl = document.getElementById('upload_receipt_modal');
+            const uploadReceiptModal = uploadReceiptModalEl ? bootstrap.Modal.getOrCreateInstance(uploadReceiptModalEl) : null;
+
+            document.querySelectorAll('.open-upload-receipt-modal').forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    document.getElementById('upload_receipt_withdrawal_id').value = this.getAttribute('data-id') || '';
+                    document.getElementById('upload_receipt_file').value = '';
+                    uploadReceiptModal?.show();
+                });
+            });
+
+            const uploadReceiptSubmitBtn = document.getElementById('upload_receipt_submit');
+            if (uploadReceiptSubmitBtn) {
+                uploadReceiptSubmitBtn.addEventListener('click', function () {
+                    const id = document.getElementById('upload_receipt_withdrawal_id').value;
+                    const fileInput = document.getElementById('upload_receipt_file');
+
+                    if (!id) {
+                        return;
+                    }
+
+                    if (!fileInput?.files?.length) {
+                        alert('{{ __("Please select a receipt file") }}');
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append('_token', '{{ csrf_token() }}');
+                    formData.append('receipt', fileInput.files[0]);
+
+                    uploadReceiptSubmitBtn.disabled = true;
+
+                    fetch(`{{ url('vendor/withdrawals') }}/${id}/upload-receipt`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                        },
+                        body: formData,
+                    })
+                        .then(response => response.json().then(data => ({ ok: response.ok, data })))
+                        .then(({ ok, data }) => {
+                            if (ok && data.message) {
+                                alert(data.message);
+                                location.reload();
+                                return;
+                            }
+                            const errors = data.errors?.receipt;
+                            alert(errors?.[0] || data.message || data.error || '{{ __("An error occurred") }}');
+                        })
+                        .catch(() => alert('{{ __("An error occurred") }}'))
+                        .finally(() => { uploadReceiptSubmitBtn.disabled = false; });
+                });
+            }
 
             document.querySelectorAll('.open-approve-withdrawal-modal').forEach(button => {
                 button.addEventListener('click', function (e) {

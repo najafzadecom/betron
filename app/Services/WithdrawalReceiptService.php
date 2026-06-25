@@ -53,6 +53,18 @@ class WithdrawalReceiptService
         ];
     }
 
+    public static function requiredValidationRules(): array
+    {
+        return [
+            'receipt' => [
+                'required',
+                'file',
+                'max:' . config('bunny.receipt_max_kb', 10240),
+                'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,rtf,jpg,jpeg,png,gif,webp,bmp,heic,heif',
+            ],
+        ];
+    }
+
     public function assertStorageReady(?UploadedFile $file): void
     {
         if (!$file) {

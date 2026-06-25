@@ -65,6 +65,7 @@ Route::middleware('auth:vendor')
         Route::get('withdrawals/export', [WithdrawalController::class, 'export'])->name('withdrawals.export');
         Route::get('withdrawals/{transaction}', [WithdrawalController::class, 'show'])->name('withdrawals.show');
         Route::post('withdrawals/{id}/approve', [WithdrawalController::class, 'approve'])->name('withdrawals.approve');
+        Route::post('withdrawals/{id}/upload-receipt', [WithdrawalController::class, 'uploadReceipt'])->name('withdrawals.upload-receipt');
         Route::post('withdrawals/{id}/cancel', [WithdrawalController::class, 'cancel'])->name('withdrawals.cancel');
         Route::post('withdrawals/{id}/assign-vendor', [WithdrawalController::class, 'assignVendor'])->name('withdrawals.assign-vendor');
         Route::post('withdrawals/bulk-assign-vendor', [WithdrawalController::class, 'bulkAssignVendor'])->name('withdrawals.bulk-assign-vendor');

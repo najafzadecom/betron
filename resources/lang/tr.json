@@ -825,5 +825,10 @@
     "Resend callback": "Callback'i yeniden gönder",
     "Resend the transaction callback to the site URL?": "Yatırım callback'i site URL'sine yeniden gönderilsin mi?",
     "Paypap": "Paypap",
-    "Manual": "Manuel"
+    "Manual": "Manuel",
+    "Upload Receipt": "Dekont Yükle",
+    "Receipt uploaded successfully": "Dekont başarıyla yüklendi",
+    "Receipt already uploaded": "Dekont zaten yüklenmiş",
+    "Receipt can only be uploaded for approved withdrawals": "Dekont yalnızca onaylanmış çekimler için yüklenebilir",
+    "Please select a receipt file": "Lütfen bir dekont dosyası seçin"
 }
