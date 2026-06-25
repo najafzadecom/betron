@@ -75,6 +75,18 @@ class WithdrawalScope implements Scope
             $builder->where('paid_status', $request->get('paid_status'));
         }
 
+        // Receipt (dekont) filter
+        if ($request->filled('receipt_status')) {
+            $receiptStatus = $request->get('receipt_status');
+            if ($receiptStatus === 'uploaded') {
+                $builder->whereNotNull('receipt_path')->where('receipt_path', '!=', '');
+            } elseif ($receiptStatus === 'missing') {
+                $builder->where(function ($q) {
+                    $q->whereNull('receipt_path')->orWhere('receipt_path', '');
+                });
+            }
+        }
+
         // Vendor assignment filter (admin / export)
         if ($request->filled('vendor_assignment')) {
             $assignment = $request->get('vendor_assignment');

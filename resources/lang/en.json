@@ -508,5 +508,8 @@
     "Receipt uploaded successfully": "Receipt uploaded successfully",
     "Receipt already uploaded": "Receipt already uploaded",
     "Receipt can only be uploaded for approved withdrawals": "Receipt can only be uploaded for approved withdrawals",
-    "Please select a receipt file": "Please select a receipt file"
+    "Please select a receipt file": "Please select a receipt file",
+    "Receipt Status": "Receipt Status",
+    "Receipt uploaded": "Receipt uploaded",
+    "Receipt not uploaded": "Receipt not uploaded"
 }

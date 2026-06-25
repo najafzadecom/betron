@@ -99,6 +99,17 @@
 
                         <div class="col-12 col-md-6 col-lg-2">
                             <div class="mb-3">
+                                <label class="form-label">{{ __('Receipt Status') }}</label>
+                                <select name="receipt_status" class="form-select">
+                                    <option value="">{{ __('All') }}</option>
+                                    <option value="uploaded" {{ request('receipt_status') === 'uploaded' ? ' selected' : '' }}>{{ __('Receipt uploaded') }}</option>
+                                    <option value="missing" {{ request('receipt_status') === 'missing' ? ' selected' : '' }}>{{ __('Receipt not uploaded') }}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-2">
+                            <div class="mb-3">
                                 <label class="form-label">{{ __('Vendor assignment') }}</label>
                                 <select name="vendor_assignment" class="form-select">
                                     <option value="">{{ __('All') }}</option>

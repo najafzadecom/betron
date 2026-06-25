@@ -830,5 +830,8 @@
     "Receipt uploaded successfully": "Dekont başarıyla yüklendi",
     "Receipt already uploaded": "Dekont zaten yüklenmiş",
     "Receipt can only be uploaded for approved withdrawals": "Dekont yalnızca onaylanmış çekimler için yüklenebilir",
-    "Please select a receipt file": "Lütfen bir dekont dosyası seçin"
+    "Please select a receipt file": "Lütfen bir dekont dosyası seçin",
+    "Receipt Status": "Dekont Durumu",
+    "Receipt uploaded": "Dekont yüklü",
+    "Receipt not uploaded": "Dekont yüklenmemiş"
 }
