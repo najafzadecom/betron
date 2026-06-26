@@ -348,7 +348,9 @@
             </div>
         </div>
     </div>
+@endsection
 
+@push('modals')
     <div id="show_modal" class="modal fade" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -577,7 +579,7 @@
         </div>
     </div>
     @endif
-@endsection
+@endpush
 
 @push('scripts')
     <script>
