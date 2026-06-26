@@ -182,7 +182,7 @@ class TransactionController extends BaseController
             return $this->response([], false, 400, 'User has a pending or processing transaction');
         }
 
-        $wallet = $this->walletService->rand($data['bank_id'], $data['amount']);
+        $wallet = $this->walletService->rand($data['bank_id'], $data['amount'], (int) $data['site_id']);
 
         if (!$wallet) {
             return $this->response([], false, 404, 'Doesn\'t exist bank');

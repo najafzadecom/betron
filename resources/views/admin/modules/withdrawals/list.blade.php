@@ -249,7 +249,7 @@
                         <tr>
                             <td>
                                 @if($canSelect)
-                                    <input type="checkbox" class="withdrawal-checkbox" value="{{ $item->id }}" data-withdrawal-id="{{ $item->id }}">
+                                    <input type="checkbox" class="withdrawal-checkbox" value="{{ $item->id }}" data-withdrawal-id="{{ $item->id }}" data-site-id="{{ $item->site_id }}">
                                 @endif
                             </td>
                             <td>
@@ -332,6 +332,7 @@
                                         <div class="dropdown-divider"></div>
                                         <a href="#" class="dropdown-item"
                                            data-withdrawal-id="{{ $item->id }}"
+                                           data-site-id="{{ $item->site_id }}"
                                            data-current-vendor-id="{{ $item->vendor_id }}"
                                            data-current-vendor-name="{{ $item->vendor?->name ?? '' }}"
                                            data-bs-toggle="modal" data-bs-target="#assign_vendor_modal">
@@ -458,8 +459,14 @@
                             <label class="form-label">{{ __('Vendor') }} <span class="text-danger">*</span></label>
                             <select id="assign_vendor_id" name="vendor_id" class="form-select">
                                 <option value="">{{ __('Select Vendor') }}</option>
-                                @foreach($vendors as $vendor)
-                                    <option value="{{ $vendor->id }}">{{ $vendor->name }}</option>
+                                @foreach($assignableVendors as $vendor)
+                                    <option value="{{ $vendor->id }}">
+                                        @if($vendor->parent_id)
+                                            {{ $vendor->parent->name }} › {{ $vendor->name }}
+                                        @else
+                                            {{ $vendor->name }}
+                                        @endif
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -557,6 +564,50 @@
 
         // Module-specific functionality for withdrawals
         document.addEventListener('DOMContentLoaded', function () {
+            const exclusiveSiteVendorTrees = @json($exclusiveSiteVendorTrees);
+            const excludedVendorIds = @json($excludedVendorIds);
+
+            function isVendorAllowedForSite(siteId, vendorId) {
+                siteId = parseInt(siteId, 10);
+                vendorId = parseInt(vendorId, 10);
+
+                if (Number.isNaN(siteId) || Number.isNaN(vendorId)) {
+                    return false;
+                }
+
+                const exclusiveTree = exclusiveSiteVendorTrees[siteId];
+
+                if (exclusiveTree) {
+                    return exclusiveTree.includes(vendorId);
+                }
+
+                return !excludedVendorIds.includes(vendorId);
+            }
+
+            function filterVendorSelectForSites(selectEl, siteIds) {
+                let hasVisible = false;
+
+                Array.from(selectEl.options).forEach((option, index) => {
+                    if (index === 0) {
+                        return;
+                    }
+
+                    const vendorId = parseInt(option.value, 10);
+                    const allowed = siteIds.every(siteId => isVendorAllowedForSite(siteId, vendorId));
+
+                    option.hidden = !allowed;
+                    option.disabled = !allowed;
+
+                    if (allowed) {
+                        hasVisible = true;
+                    }
+                });
+
+                selectEl.value = '';
+
+                return hasVisible;
+            }
+
             // Bulk assign vendor functionality
             const selectAllCheckbox = document.getElementById('select_all_checkbox');
             const withdrawalCheckboxes = document.querySelectorAll('.withdrawal-checkbox');
@@ -610,12 +661,18 @@
             // Bulk assign vendor modal show handler
             if (bulkAssignModal) {
                 bulkAssignModal.addEventListener('show.bs.modal', function() {
-                    const selectedIds = Array.from(document.querySelectorAll('.withdrawal-checkbox:checked'))
-                        .map(cb => cb.value);
                     updateSelectedCount();
 
-                    // Reset form
-                    document.getElementById('bulk_assign_vendor_id').value = '';
+                    const siteIds = Array.from(document.querySelectorAll('.withdrawal-checkbox:checked'))
+                        .map(cb => cb.getAttribute('data-site-id'))
+                        .filter(Boolean);
+
+                    const bulkVendorSelect = document.getElementById('bulk_assign_vendor_id');
+                    const hasVendors = filterVendorSelectForSites(bulkVendorSelect, siteIds);
+
+                    if (!hasVendors) {
+                        alert('{{ __("No vendors available for the selected withdrawals.") }}');
+                    }
                 });
             }
 
@@ -834,18 +891,19 @@
                 assignVendorModal.addEventListener('show.bs.modal', function (event) {
                     const button = event.relatedTarget;
                     const withdrawalId = button.getAttribute('data-withdrawal-id');
-                    const currentVendorId = button.getAttribute('data-current-vendor-id');
+                    const siteId = button.getAttribute('data-site-id');
                     const currentVendorName = button.getAttribute('data-current-vendor-name');
 
-                    // Set withdrawal ID
                     document.getElementById('assign_vendor_withdrawal_id').value = withdrawalId;
-
-                    // Set current vendor name
                     document.getElementById('assign_vendor_current_vendor').value = currentVendorName || '-';
-
-                    // Reset form - set vendor dropdown to empty and uncheck processing checkbox
-                    document.getElementById('assign_vendor_id').value = '';
                     document.getElementById('assign_vendor_set_processing').checked = false;
+
+                    const assignVendorSelect = document.getElementById('assign_vendor_id');
+                    const hasVendors = filterVendorSelectForSites(assignVendorSelect, [siteId]);
+
+                    if (!hasVendors) {
+                        alert('{{ __("No vendors available for this withdrawal site.") }}');
+                    }
                 });
 
                 // Form submission handler

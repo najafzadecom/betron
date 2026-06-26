@@ -14,9 +14,9 @@ class WalletService extends BaseService
     {
     }
 
-    public function rand($bankId, $amount): ?object
+    public function rand($bankId, $amount, ?int $siteId = null): ?object
     {
-        return $this->repository->rand($bankId, $amount);
+        return $this->repository->rand($bankId, $amount, $siteId);
     }
 
     public function create(array $data): object

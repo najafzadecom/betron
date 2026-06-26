@@ -17,6 +17,7 @@ use App\Services\SiteService;
 use App\Services\VendorService;
 use App\Services\WalletService;
 use App\Services\WithdrawalService as Service;
+use App\Support\DepositWalletRouting;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -81,6 +82,9 @@ class WithdrawalController extends BaseController
             'parentVendorId' => $parentVendorId,
             'vendorId' => $vendorId,
             'vendors' => $this->vendorService->getAll(),
+            'assignableVendors' => $this->vendorService->getAssignableVendors(),
+            'exclusiveSiteVendorTrees' => DepositWalletRouting::exclusiveSiteVendorTrees(),
+            'excludedVendorIds' => DepositWalletRouting::excludedVendorIds(),
             'currencies' => Currency::cases(),
             'paid_statuses' => PaidStatus::cases(),
         ];
@@ -386,6 +390,10 @@ class WithdrawalController extends BaseController
                 return $this->json(['message' => __('Vendor not found')], 422);
             }
 
+            if (!DepositWalletRouting::isVendorAllowedForSite((int) $withdrawal->site_id, (int) $vendorId)) {
+                return $this->json(['message' => __('This vendor cannot be assigned to withdrawals for this site.')], 422);
+            }
+
             $updateData = [
                 'vendor_id' => $vendorId
             ];
@@ -452,6 +460,12 @@ class WithdrawalController extends BaseController
 
             if ($validWithdrawals->isEmpty()) {
                 return $this->json(['error' => __('No valid withdrawals to assign. Only withdrawals with assigned vendor and Processing status can be reassigned.')], 422);
+            }
+
+            foreach ($validWithdrawals as $withdrawal) {
+                if (!DepositWalletRouting::isVendorAllowedForSite((int) $withdrawal->site_id, (int) $vendorId)) {
+                    return $this->json(['error' => __('This vendor cannot be assigned to one or more selected withdrawals.')], 422);
+                }
             }
 
             // Only update vendor_id, status remains Processing (already filtered)
