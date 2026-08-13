@@ -15,98 +15,98 @@ class PermissionSeeder extends Seeder
         // Sistem controllerlərində istifadə olunan bütün permissionlar
         $permissions = [
 
-            // User permissions
-//            'users-index',
-//            'users-create',
-//            'users-edit',
-//            'users-delete',
-//            'users-show',
-//            'users-profile',
-//
-//            // Role permissions
-//            'roles-index',
-//            'roles-create',
-//            'roles-edit',
-//            'roles-delete',
-//            'roles-show',
-//
-//            // Permission permissions
-//            'permissions-index',
-//            'permissions-create',
-//            'permissions-edit',
-//            'permissions-delete',
-//            'permissions-show',
-//
-//            // Merchant permissions
-//            'merchants-index',
-//            'merchants-create',
-//            'merchants-edit',
-//            'merchants-delete',
-//            'merchants-show',
-//
-//            // Wallet permissions
-//            'wallets-index',
-//            'wallets-create',
-//            'wallets-edit',
-//            'wallets-delete',
-//            'wallets-show',
-//
-//            // Transaction permissions
-//            'transactions-index',
-//            'transactions-create',
-//            'transactions-edit',
-//            'transactions-delete',
-//            'transactions-show',
-//
-//            // Provider permissions
-//            'providers-index',
-//            'providers-create',
-//            'providers-edit',
-//            'providers-delete',
-//            'providers-show',
-//
-//            // Bank permissions
-//            'banks-index',
-//            'banks-create',
-//            'banks-edit',
-//            'banks-delete',
-//            'banks-show',
-//
-//            // Withdrawal permissions
-//            'withdrawals-index',
-//            'withdrawals-create',
-//            'withdrawals-edit',
-//            'withdrawals-delete',
-//            'withdrawals-show',
-//            'withdrawals-send',
-//
-//            // Activity Log permissions (yalnız index)
-//            'activity-logs-index',
-//            'activity-logs-show',
-//
-//            'banks-index',
-//            'banks-create',
-//            'banks-edit',
-//            'banks-delete',
-//            'banks-show',
-//
-//            'blacklists-index',
-//            'blacklists-create',
-//            'blacklists-edit',
-//            'blacklists-delete',
-//            'blacklists-show',
-//
-//            'sites-index',
-//            'sites-create',
-//            'sites-edit',
-//            'sites-delete',
-//            'sites-show',
-//
-//            // Statistics permissions
-//            'statistics-index',
-//
-//            // Settings permissions
-//            'settings-index',
+             //User permissions
+            'users-index',
+            'users-create',
+            'users-edit',
+            'users-delete',
+            'users-show',
+            'users-profile',
+
+            // Role permissions
+            'roles-index',
+            'roles-create',
+            'roles-edit',
+            'roles-delete',
+            'roles-show',
+
+            // Permission permissions
+            'permissions-index',
+            'permissions-create',
+            'permissions-edit',
+            'permissions-delete',
+            'permissions-show',
+
+            // Merchant permissions
+            'merchants-index',
+            'merchants-create',
+            'merchants-edit',
+            'merchants-delete',
+            'merchants-show',
+
+            // Wallet permissions
+            'wallets-index',
+            'wallets-create',
+            'wallets-edit',
+            'wallets-delete',
+            'wallets-show',
+
+            // Transaction permissions
+            'transactions-index',
+            'transactions-create',
+            'transactions-edit',
+            'transactions-delete',
+            'transactions-show',
+
+            // Provider permissions
+            'providers-index',
+            'providers-create',
+            'providers-edit',
+            'providers-delete',
+            'providers-show',
+
+            // Bank permissions
+            'banks-index',
+            'banks-create',
+            'banks-edit',
+            'banks-delete',
+            'banks-show',
+
+            // Withdrawal permissions
+            'withdrawals-index',
+            'withdrawals-create',
+            'withdrawals-edit',
+            'withdrawals-delete',
+            'withdrawals-show',
+            'withdrawals-send',
+
+            // Activity Log permissions (yalnız index)
+            'activity-logs-index',
+            'activity-logs-show',
+
+            'banks-index',
+            'banks-create',
+            'banks-edit',
+            'banks-delete',
+            'banks-show',
+
+            'blacklists-index',
+            'blacklists-create',
+            'blacklists-edit',
+            'blacklists-delete',
+            'blacklists-show',
+
+            'sites-index',
+            'sites-create',
+            'sites-edit',
+            'sites-delete',
+            'sites-show',
+
+            // Statistics permissions
+            'statistics-index',
+
+            // Settings permissions
+            'settings-index',
 
             // Vendors permissions (Admin panel)
             'vendors-index',
