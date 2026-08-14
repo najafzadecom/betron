@@ -32,6 +32,7 @@ class Blacklist extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'user_id' => 'string',
     ];
 
     /**
