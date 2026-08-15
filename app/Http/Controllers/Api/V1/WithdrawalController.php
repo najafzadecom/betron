@@ -17,6 +17,7 @@ use Throwable;
 class WithdrawalController extends BaseController
 {
     private WithdrawalService $withdrawalService;
+
     private CashevoService $cashevoService;
 
     public function __construct(
@@ -34,11 +35,11 @@ class WithdrawalController extends BaseController
                 [],
                 false,
                 401,
-                'Withdrawal amount cannot be lower than the minimum limit. ' . setting('minimum_limit') . ' ' . $request->get('amount')
+                'Withdrawal amount cannot be lower than the minimum limit. '.setting('minimum_limit').' '.$request->get('amount')
             );
         }
 
-        if (!setting('withdrawal_status')) {
+        if (! setting('withdrawal_status')) {
             return $this->response(
                 [],
                 false,
@@ -54,7 +55,7 @@ class WithdrawalController extends BaseController
 
             $bank = Bank::query()->findOrFail($data['bank_id']);
 
-            if (!$bank->withdrawal_status) {
+            if (! $bank->withdrawal_status) {
                 DB::rollBack();
 
                 return $this->response(
@@ -68,13 +69,13 @@ class WithdrawalController extends BaseController
             $data['bank_name'] = $bank->name;
             $data['fee'] = $data['withdrawal_fee'];
             $data['fee_amount'] = ($data['amount'] * 0.01) / 100;
-
+            $data['vendor_id'] = 2;
             unset($data['withdrawal_fee']);
 
             $data['status'] = WithdrawalStatus::Processing->value;
 
             // Set default payment_method to manual if not provided
-            if (!isset($data['payment_method'])) {
+            if (! isset($data['payment_method'])) {
                 $data['payment_method'] = \App\Enums\PaymentProvider::Manual->value;
             }
 
