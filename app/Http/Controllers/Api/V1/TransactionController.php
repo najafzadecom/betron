@@ -23,12 +23,11 @@ class TransactionController extends BaseController
         private CashevoService $cashevoService,
         private WalletService $walletService,
         private Paypap $paypap,
-    ) {
-    }
+    ) {}
 
-    public function store(TransactionRequest $request)
+    public function store(TransactionRequest $request): ?JsonResponse
     {
-        if (!$this->isTransactionEnabled()) {
+        if (! $this->isTransactionEnabled()) {
             return $this->response([], false, 403, 'Transaction not enabled');
         }
 
@@ -60,16 +59,15 @@ class TransactionController extends BaseController
             //         throw new RuntimeException($deposit['message'] ?? 'Cashevo deposit failed');
             //     }
 
-
             //     $response = $this->response([
             //         'transaction_uuid' => $transaction->uuid,
             //         'receiver_iban' => $banka['iban'],
             //         'receiver_name' => $banka['account_name'],
             //     ], true, 200, 'Transaction created');
             // } else {
-                $response = $this->isManualTransaction($data['amount'])
-                    ? $this->handleManualTransaction($data)
-                    : $this->handlePaypapTransaction($data, $request);
+            $response = $this->isManualTransaction($data['amount'])
+                ? $this->handleManualTransaction($data)
+                : $this->handlePaypapTransaction($data, $request);
             // }
 
             Log::info('Response', [
@@ -77,10 +75,10 @@ class TransactionController extends BaseController
             ]);
 
             $vendorId = $response->getData()->data ? (
-                        is_array($response->getData()->data)
-                            ? $response->getData()->data['vendor_id']
-                            : $response->getData()->data->vendor_id
-                    )
+                is_array($response->getData()->data)
+                    ? $response->getData()->data['vendor_id']
+                    : $response->getData()->data->vendor_id
+            )
                     : null;
 
             if ($vendorId == 1 && $this->cashevoService->enabled()) {
@@ -88,7 +86,7 @@ class TransactionController extends BaseController
                 // $transaction = $this->transactionService->create($data);
                 $cashevoResult = $this->cashevoService->createDepositBank((float) $data['amount']);
 
-                if (!$cashevoResult['success']) {
+                if (! $cashevoResult['success']) {
                     Log::error('Cashevo transaction failed', [
                         'message' => $cashevoResult['message'],
                         'trace' => $cashevoResult['trace'],
@@ -117,7 +115,7 @@ class TransactionController extends BaseController
 
                 $deposit = $this->cashevoService->createDeposit($transaction, $banka['id']);
 
-                if (!$deposit['success']) {
+                if (! $deposit['success']) {
                     Log::error('Cashevo deposit failed', [
                         'message' => $deposit['message'],
                         'trace' => $deposit['trace'],
@@ -184,7 +182,7 @@ class TransactionController extends BaseController
 
         $wallet = $this->walletService->rand($data['bank_id'], $data['amount'], (int) $data['site_id']);
 
-        if (!$wallet) {
+        if (! $wallet) {
             return $this->response([], false, 404, 'Doesn\'t exist bank');
         }
 
@@ -215,13 +213,13 @@ class TransactionController extends BaseController
         $paypapResult = $this->paypap->createBankDeposit([
             'type' => 'direct',
             'transactionId' => $transaction->uuid,
-            'fullName' => $data['first_name'] . ' ' . $data['last_name'],
+            'fullName' => $data['first_name'].' '.$data['last_name'],
             'currency' => 'TRY',
             'amount' => $data['amount'],
             'user' => [
                 'userId' => $data['user_id'],
-                'username' => mb_strtolower($data['first_name'] . '_' . $data['last_name']),
-                'fullName' => $data['first_name'] . ' ' . $data['last_name'],
+                'username' => mb_strtolower($data['first_name'].'_'.$data['last_name']),
+                'fullName' => $data['first_name'].' '.$data['last_name'],
             ],
         ]);
 
@@ -266,7 +264,7 @@ class TransactionController extends BaseController
             'paid_status' => $transaction->paid_status,
             'client_ip' => $transaction->client_ip,
             'created_at' => $transaction->created_at,
-            'updated_at' => $transaction->updated_at
+            'updated_at' => $transaction->updated_at,
         ];
 
         return $this->response(
@@ -301,7 +299,7 @@ class TransactionController extends BaseController
             'paid_status' => $transaction->paid_status,
             'client_ip' => $transaction->client_ip,
             'created_at' => $transaction->created_at,
-            'updated_at' => $transaction->updated_at
+            'updated_at' => $transaction->updated_at,
         ];
 
         return $this->response(

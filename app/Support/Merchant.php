@@ -6,7 +6,7 @@ use App\Models\User;
 
 class Merchant
 {
-    public const DEFAULT_SITE_ID = 4;
+    public const DEFAULT_SITE_ID = 1;
     public const ALL_TIME_FROM = '2000-01-01';
 
     public static function isMerchant(?User $user = null): bool
