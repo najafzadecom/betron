@@ -11,7 +11,6 @@ use App\Services\VendorService;
 use App\Services\WalletService;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -209,5 +208,38 @@ class TransactionController extends BaseController
         }
 
         return response()->json(['message' => $message], $code);
+    }
+
+    public function addToBlacklist(string $id): JsonResponse
+    {
+        if (! $this->authorizeTransaction($id)) {
+            return response()->json(['error' => __('Unauthorized')], 403);
+        }
+
+        $transaction = $this->transactionService->getById($id);
+
+        if (! $transaction) {
+            return response()->json(['message' => __('Transaction not found')], 404);
+        }
+
+        if (! filled($transaction->user_id) && empty($transaction->client_ip)) {
+            return response()->json(['message' => __('Transaction has no user ID or IP to blacklist')], 422);
+        }
+
+        $result = $this->transactionService->addToBlacklist((int) $id);
+
+        if (! $result || (empty($result->user_blacklist) && empty($result->ip_blacklist))) {
+            return response()->json(['message' => __('Unable to add to blacklist')], 422);
+        }
+
+        if (! empty($result->user_blacklist) && ! empty($result->ip_blacklist)) {
+            $message = __('User ID and IP added to blacklist successfully');
+        } elseif (! empty($result->user_blacklist)) {
+            $message = __('User ID added to blacklist successfully');
+        } else {
+            $message = __('IP added to blacklist successfully');
+        }
+
+        return response()->json(['message' => $message], 200);
     }
 }

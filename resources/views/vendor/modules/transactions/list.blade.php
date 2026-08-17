@@ -187,6 +187,13 @@
                                             <i class="ph-eye me-2"></i>
                                             {{ __('Show transaction') }}
                                         </a>
+                                        @if(filled($item->user_id) || filled($item->client_ip))
+                                            <a href="#" class="dropdown-item text-danger add-to-blacklist-btn"
+                                               data-url="{{ route('vendor.transactions.add-to-blacklist', $item->id) }}">
+                                                <i class="ph-prohibit me-2"></i>
+                                                {{ __('Add to blacklist') }}
+                                            </a>
+                                        @endif
                                     </div>
                                 </div>
                             </td>
@@ -362,6 +369,42 @@
                             });
                         }
                     });
+                });
+            });
+
+            document.querySelectorAll('.add-to-blacklist-btn').forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const url = this.getAttribute('data-url');
+                    if (!url) {
+                        return;
+                    }
+                    if (!confirm(@json(__('Are you sure you want to blacklist this transaction\'s user ID and IP?')))) {
+                        return;
+                    }
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    })
+                        .then(response => response.json().then(data => ({ ok: response.ok, data })))
+                        .then(({ ok, data }) => {
+                            if (data.message) {
+                                alert(data.message);
+                            } else if (data.error) {
+                                alert(data.error);
+                            }
+                            if (ok) {
+                                location.reload();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('{{ __("An error occurred") }}');
+                        });
                 });
             });
 

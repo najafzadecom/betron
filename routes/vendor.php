@@ -59,6 +59,7 @@ Route::middleware('auth:vendor')
         Route::get('transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
         Route::post('transactions/{id}/approve', [TransactionController::class, 'approve'])->name('transactions.approve');
         Route::post('transactions/{id}/cancel', [TransactionController::class, 'cancel'])->name('transactions.cancel');
+        Route::post('transactions/{id}/add-to-blacklist', [TransactionController::class, 'addToBlacklist'])->name('transactions.add-to-blacklist');
 
         // Withdrawals (read-only)
         Route::get('withdrawals', [WithdrawalController::class, 'index'])->name('withdrawals.index');
