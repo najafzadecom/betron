@@ -53,6 +53,7 @@ class TransactionController extends BaseController
         $this->middleware('permission:transactions-create', ['only' => ['create', 'store']]);
         $this->middleware('permission:transactions-edit', ['only' => ['edit', 'update', 'resendCallback', 'assignVendor', 'bulkAssignVendor']]);
         $this->middleware('permission:transactions-delete', ['only' => ['destroy']]);
+        $this->middleware('permission:blacklists-create', ['only' => ['addToBlacklist']]);
 
         $this->service = $service;
         $this->walletService = $walletService;
@@ -339,6 +340,39 @@ class TransactionController extends BaseController
 
         $this->data = [
             'message' => __('Callback has been queued for delivery.'),
+        ];
+
+        return $this->json($this->data, 200);
+    }
+
+    public function addToBlacklist(string $id): JsonResponse
+    {
+        $transaction = $this->service->getById($id);
+
+        if (! $transaction) {
+            return $this->json(['message' => __('Transaction not found')], 404);
+        }
+
+        if (! filled($transaction->user_id) && empty($transaction->client_ip)) {
+            return $this->json(['message' => __('Transaction has no user ID or IP to blacklist')], 422);
+        }
+
+        $result = $this->service->addToBlacklist((int) $id);
+
+        if (! $result || (empty($result->user_blacklist) && empty($result->ip_blacklist))) {
+            return $this->json(['message' => __('Unable to add to blacklist')], 422);
+        }
+
+        if (! empty($result->user_blacklist) && ! empty($result->ip_blacklist)) {
+            $message = __('User ID and IP added to blacklist successfully');
+        } elseif (! empty($result->user_blacklist)) {
+            $message = __('User ID added to blacklist successfully');
+        } else {
+            $message = __('IP added to blacklist successfully');
+        }
+
+        $this->data = [
+            'message' => $message,
         ];
 
         return $this->json($this->data, 200);

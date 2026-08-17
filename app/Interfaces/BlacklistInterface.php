@@ -21,12 +21,12 @@ interface BlacklistInterface extends BaseRepositoryInterface
     /**
      * Add user to blacklist
      */
-    public function addUserToBlacklist(string|int $userId, ?string $reason = null): Blacklist;
+    public function addUserToBlacklist(string|int $userId, ?string $reason = null, ?int $siteId = null): Blacklist;
 
     /**
      * Add IP to blacklist
      */
-    public function addIpToBlacklist(string $ipAddress, ?string $reason = null): Blacklist;
+    public function addIpToBlacklist(string $ipAddress, ?string $reason = null, ?int $siteId = null): Blacklist;
 
     /**
      * Get active blacklists

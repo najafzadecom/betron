@@ -17,7 +17,7 @@ class BlacklistController extends BaseController
     private SiteService $siteService;
 
     public function __construct(
-        Service     $service,
+        Service $service,
         SiteService $siteService
     ) {
         $this->middleware('permission:blacklists-index|blacklists-create|blacklists-edit', ['only' => ['index']]);
@@ -39,7 +39,7 @@ class BlacklistController extends BaseController
             'module' => __('Blacklists'),
             'title' => __('List'),
             'items' => $this->service->paginate(),
-            'sites' => $this->siteService->getAll()
+            'sites' => $this->siteService->getAll(),
         ];
 
         return $this->render('list');
@@ -54,8 +54,8 @@ class BlacklistController extends BaseController
             'title' => __('Create'),
             'module' => __('Blacklists'),
             'method' => 'POST',
-            'action' => route('admin.' . $this->module . '.store'),
-            'sites' => $this->siteService->getAll()
+            'action' => route('admin.'.$this->module.'.store'),
+            'sites' => $this->siteService->getAll(),
         ];
 
         return $this->render('form');
@@ -93,8 +93,8 @@ class BlacklistController extends BaseController
             'module' => __('Blacklists'),
             'item' => $this->service->getById($id),
             'method' => 'PUT',
-            'action' => route('admin.' . $this->module . '.update', $id),
-            'sites' => $this->siteService->getAll()
+            'action' => route('admin.'.$this->module.'.update', $id),
+            'sites' => $this->siteService->getAll(),
         ];
 
         return $this->render('form');
@@ -116,7 +116,7 @@ class BlacklistController extends BaseController
     public function destroy(int $id): JsonResponse
     {
         // Check if delete confirmation was received
-        if (!request()->has('confirmed')) {
+        if (! request()->has('confirmed')) {
             $this->data = [
                 'message' => __('Delete confirmation required'),
                 'confirmed' => false,
@@ -148,7 +148,7 @@ class BlacklistController extends BaseController
         try {
             $toggled = $this->service->toggleStatus($id);
 
-            if (!$toggled) {
+            if (! $toggled) {
                 return redirect()->back()
                     ->with('error', 'Blacklist tapılmadı.');
             }
@@ -157,7 +157,7 @@ class BlacklistController extends BaseController
                 ->with('success', 'Blacklist statusu dəyişdirildi.');
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Xəta baş verdi: ' . $e->getMessage());
+                ->with('error', 'Xəta baş verdi: '.$e->getMessage());
         }
     }
 }

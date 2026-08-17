@@ -280,7 +280,7 @@
                                 @endif
                             </td>
                             <td>
-                                @canany(['transactions-show', 'transactions-edit', 'transactions-delete'])
+                                @canany(['transactions-show', 'transactions-edit', 'transactions-delete', 'blacklists-create'])
                                     <div class="dropdown">
                                         <a href="#" class="text-body" data-bs-toggle="dropdown" data-bs-boundary="viewport">
                                             <i class="ph-list"></i>
@@ -337,6 +337,15 @@
                                                     <i class="ph-arrow-clockwise me-2"></i>
                                                     {{ __('Resend callback') }}
                                                 </a>
+                                            @endcan
+                                            @can('blacklists-create')
+                                                @if(filled($item->user_id) || filled($item->client_ip))
+                                                    <a href="#" class="dropdown-item text-danger add-to-blacklist-btn"
+                                                       data-url="{{ route('admin.transactions.add-to-blacklist', $item->id) }}">
+                                                        <i class="ph-prohibit me-2"></i>
+                                                        {{ __('Add to blacklist') }}
+                                                    </a>
+                                                @endif
                                             @endcan
                                         </div>
                                     </div>
@@ -777,6 +786,40 @@
                         return;
                     }
                     if (!confirm('{{ __("Resend the transaction callback to the site URL?") }}')) {
+                        return;
+                    }
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    })
+                        .then(response => response.json().then(data => ({ ok: response.ok, status: response.status, data })))
+                        .then(({ ok, data }) => {
+                            if (data.message) {
+                                alert(data.message);
+                            }
+                            if (ok) {
+                                location.reload();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('{{ __("An error occurred") }}');
+                        });
+                });
+            });
+
+            document.querySelectorAll('.add-to-blacklist-btn').forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const url = this.getAttribute('data-url');
+                    if (!url) {
+                        return;
+                    }
+                    if (!confirm(@json(__('Are you sure you want to blacklist this transaction\'s user ID and IP?')))) {
                         return;
                     }
                     fetch(url, {

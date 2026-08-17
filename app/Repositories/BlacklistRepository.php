@@ -39,7 +39,7 @@ class BlacklistRepository extends BaseRepository implements BlacklistInterface
     /**
      * Add user to blacklist
      */
-    public function addUserToBlacklist(string|int $userId, ?string $reason = null): Model
+    public function addUserToBlacklist(string|int $userId, ?string $reason = null, ?int $siteId = null): Model
     {
         $userId = (string) $userId;
 
@@ -48,48 +48,56 @@ class BlacklistRepository extends BaseRepository implements BlacklistInterface
             ->where('type', 'user_id')
             ->first();
 
+        $payload = [
+            'is_active' => true,
+            'reason' => $reason,
+        ];
+
+        if ($siteId !== null) {
+            $payload['site_id'] = $siteId;
+        }
+
         if ($existing) {
-            $existing->update([
-                'is_active' => true,
-                'reason' => $reason,
-            ]);
+            $existing->update($payload);
 
             return $existing;
         }
 
-        return $this->create([
+        return $this->create(array_merge($payload, [
             'user_id' => $userId,
             'type' => 'user_id',
-            'reason' => $reason,
-            'is_active' => true,
-        ]);
+        ]));
     }
 
     /**
      * Add IP to blacklist
      */
-    public function addIpToBlacklist(string $ipAddress, ?string $reason = null): Model
+    public function addIpToBlacklist(string $ipAddress, ?string $reason = null, ?int $siteId = null): Model
     {
         // Check if already exists
         $existing = $this->model->where('ip_address', $ipAddress)
             ->where('type', 'ip_address')
             ->first();
 
+        $payload = [
+            'is_active' => true,
+            'reason' => $reason,
+        ];
+
+        if ($siteId !== null) {
+            $payload['site_id'] = $siteId;
+        }
+
         if ($existing) {
-            $existing->update([
-                'is_active' => true,
-                'reason' => $reason,
-            ]);
+            $existing->update($payload);
 
             return $existing;
         }
 
-        return $this->create([
+        return $this->create(array_merge($payload, [
             'ip_address' => $ipAddress,
             'type' => 'ip_address',
-            'reason' => $reason,
-            'is_active' => true,
-        ]);
+        ]));
     }
 
     /**

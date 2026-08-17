@@ -69,7 +69,7 @@ class WithdrawalController extends BaseController
             $data['bank_name'] = $bank->name;
             $data['fee'] = $data['withdrawal_fee'];
             $data['fee_amount'] = ($data['amount'] * 0.01) / 100;
-            $data['vendor_id'] = 2;
+            $data['vendor_id'] = 1;
             unset($data['withdrawal_fee']);
 
             $data['status'] = WithdrawalStatus::Processing->value;

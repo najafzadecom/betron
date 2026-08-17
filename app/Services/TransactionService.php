@@ -95,11 +95,14 @@ class TransactionService extends BaseService
 
         $result = [];
 
+        $siteId = $transaction->site_id ? (int) $transaction->site_id : null;
+
         // Add user_id to blacklist when present
         if (filled($transaction->user_id)) {
             $result['user_blacklist'] = $this->blacklistService->addUserToBlacklist(
                 $transaction->user_id,
-                $reason
+                $reason,
+                $siteId
             );
         }
 
@@ -107,7 +110,8 @@ class TransactionService extends BaseService
         if ($transaction->client_ip) {
             $result['ip_blacklist'] = $this->blacklistService->addIpToBlacklist(
                 $transaction->client_ip,
-                $reason
+                $reason,
+                $siteId
             );
         }
 

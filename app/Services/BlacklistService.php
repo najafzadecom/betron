@@ -32,17 +32,17 @@ class BlacklistService extends BaseService
     /**
      * Add user to blacklist
      */
-    public function addUserToBlacklist(string|int $userId, ?string $reason = null): Blacklist
+    public function addUserToBlacklist(string|int $userId, ?string $reason = null, ?int $siteId = null): Blacklist
     {
-        return $this->repository->addUserToBlacklist($userId, $reason);
+        return $this->repository->addUserToBlacklist($userId, $reason, $siteId);
     }
 
     /**
      * Add IP to blacklist
      */
-    public function addIpToBlacklist(string $ipAddress, ?string $reason = null): Blacklist
+    public function addIpToBlacklist(string $ipAddress, ?string $reason = null, ?int $siteId = null): Blacklist
     {
-        return $this->repository->addIpToBlacklist($ipAddress, $reason);
+        return $this->repository->addIpToBlacklist($ipAddress, $reason, $siteId);
     }
 
     /**
